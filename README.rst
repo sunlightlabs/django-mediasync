@@ -55,23 +55,23 @@ Add to INSTALLED_APPS:
 
 Additionally, replace the existing MEDIA_URL setting with:
 
-	if DEBUG:
-	    MEDIA_URL = '/media/'
-	else:
-	    MEDIA_URL = 'http://url.to.s3.media/'
+	if DEBUG:  
+	    MEDIA_URL = '/media/'  
+	else:  
+	    MEDIA_URL = 'http://url.to.s3.media/'  
 
 The following settings must also be added:
 
-	import os
-	PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+	import os  
+	PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))  
    
-	MEDIASYNC_AWS_KEY = "s3_key"
-	MEDIASYNC_AWS_SECRET = "s3_secret"
-	MEDIASYNC_AWS_BUCKET = "bucket_name"
+	MEDIASYNC_AWS_KEY = "s3_key"  
+	MEDIASYNC_AWS_SECRET = "s3_secret"  
+	MEDIASYNC_AWS_BUCKET = "bucket_name"  
 	
 Optionally you may specify a key prefix:
 
-	MEDIASYNC_AWS_PREFIX = "key_prefix"
+	MEDIASYNC_AWS_PREFIX = "key_prefix"  
 
 Assuming a correct DNS CNAME entry, setting MEDIASYNC_AWS_BUCKET to ``assets.sunlightlabs.com`` and MEDIASYNC_AWS_PREFIX to ``myproject/media`` would sync the media directory to http://assets.sunlightlabs.com/myproject/media/.
 
@@ -81,11 +81,10 @@ urls.py
 
 A static media URL needs to be setup in urls.py that enables access to the media directory ONLY IN DEBUG MODE.
 
-	if (settings.DEBUG):
-		urlpatterns += patterns(,
-			url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
-			#url(r'^(?P<filename>.*)\.(?P<extension>css|js)$', 'sunlightcore.views.static'),
-		)
+	if (settings.DEBUG):  
+		urlpatterns += patterns(,  
+			url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),  
+		)  
 
 
 Directory structure
@@ -127,8 +126,8 @@ css
 
 Renders a <link> tag to include the stylesheet. It takes an optional second parameter for the media attribute; the default media is "screen, projector".
 
-	{% css "myfile.css" %}
-	{% css "myfile.css" "screen" %}
+	{% css "myfile.css" %}  
+	{% css "myfile.css" "screen" %}  
 
 
 css_print
@@ -148,9 +147,9 @@ css_ie, css_ie6, css_ie7
 
 <link> elements with conditional statements.
 
-	{% css_ie "myfile.css" %}
-	{% css_ie6 "myfile.css" %}
-	{% css_ie7 "myfile.css" %}
+	{% css_ie "myfile.css" %}  
+	{% css_ie6 "myfile.css" %}  
+	{% css_ie7 "myfile.css" %}  
 
 
 Writing Style Sheets
