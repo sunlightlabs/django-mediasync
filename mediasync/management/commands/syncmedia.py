@@ -30,6 +30,15 @@ def compress(data):
     zfile.close()
     return zbuf.getvalue()
 
+def listdir_recursive(dir):
+    for root, dirs, files in os.walk(dir):
+        for file in files:
+            fname = os.path.join(root, file).replace(dir, '')
+            if fname.startswith('/'):
+                fname = fname[1:]
+            yield fname
+
+
 class Command(BaseCommand):
     
     help = "Sync local media with S3"
@@ -39,7 +48,6 @@ class Command(BaseCommand):
     
     def handle(self, bucket=None, prefix=None, *args, **options):
 
-        import new
         import S3
 
         assert hasattr(settings, "PROJECT_ROOT")
@@ -75,11 +83,11 @@ class Command(BaseCommand):
             s3dirpath = ("%s/%s" % (s3root, dirname)).strip('/')
             
             if os.path.exists(dirpath):
-                
-                for filename in os.listdir(dirpath):
+               
+                for filename in listdir_recursive(dirpath):
                     
-                    filepath = "%s/%s" % (dirpath, filename)
-                    s3filepath = "%s/%s" % (s3dirpath, filename)
+                    filepath = os.path.join(dirpath, filename)
+                    s3filepath = os.path.join(s3dirpath, filename)
                     
                     if filename.startswith('.') or not os.path.isfile(filepath):
                         continue
