@@ -22,6 +22,8 @@ TYPES_TO_COMPRESS = (
 DIRS_TO_SYNC = ['images','scripts','styles']
 
 MEDIA_URL_RE = re.compile(r"/media/(images|styles|scripts)/")
+
+EXPIRATION_DAYS = getattr(settings, "MEDIASYNC_EXPIRATION_DAYS", 365)
     
 def compress(data):
     zbuf = cStringIO.StringIO()
@@ -63,7 +65,7 @@ class Command(BaseCommand):
             prefix = getattr(settings, "MEDIASYNC_AWS_PREFIX", None)
 
         now = datetime.datetime.utcnow()
-        then = now + datetime.timedelta(365)
+        then = now + datetime.timedelta(EXPIRATION_DAYS)
         expires = then.strftime("%a, %d %b %Y %H:%M:%S UTC")
         
         media_url = "http://%s" % bucket

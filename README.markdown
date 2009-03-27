@@ -47,7 +47,7 @@ Add to INSTALLED_APPS:
 
 	'mediasync'
 
-Additionally, replace the existing MEDIA_URL setting with:
+Additionally, replace the existing __MEDIA_URL__ setting with:
 
 	if DEBUG:  
 	    MEDIA_URL = '/media/'  
@@ -67,7 +67,11 @@ Optionally you may specify a key prefix:
 
 	MEDIASYNC_AWS_PREFIX = "key_prefix"  
 
-Assuming a correct DNS CNAME entry, setting MEDIASYNC_AWS_BUCKET to __assets.sunlightlabs.com__ and MEDIASYNC_AWS_PREFIX to __myproject/media__ would sync the media directory to http://assets.sunlightlabs.com/myproject/media/.
+Assuming a correct DNS CNAME entry, setting __MEDIASYNC_AWS_BUCKET__ to __assets.sunlightlabs.com__ and __MEDIASYNC_AWS_PREFIX__ to __myproject/media__ would sync the media directory to http://assets.sunlightlabs.com/myproject/media/.
+
+By default, all files are given an expires header of 365 days after the file was synced to S3. You may override this value by adding __MEDIASYNC_EXPIRATION_DAYS__ to settings.py.
+
+    MEDIASYNC_EXPIRATION_DAYS = 365 * 10    # expire in 10 years
 
 
 ### urls.py
