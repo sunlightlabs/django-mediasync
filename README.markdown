@@ -1,6 +1,4 @@
-================
-django-mediasync
-================
+# django-mediasync
 
 One of the more significant development roadblocks we have relates to local vs. deployed media. Ideally all media (graphics, css, scripts) development would occur locally and not use S3. Then, when ready to deploy, the media should be pushed to S3. That way there can be significant changes to media without disturbing the production web site.
 
@@ -24,34 +22,30 @@ All code is under a BSD-style license, see LICENSE for details.
 Source: http://github.com/sunlightlabs/django-mediasync/
 
 
-Requirements
-============
+## Requirements
 
 python >= 2.4
 
 django >= 1.0
 
 
-Installation
-============
+## Installation
 
 To install run
 
-    ``python setup.py install``
+    python setup.py install
 
 which will install the application into python's site-packages directory.
 
 
-Quick Setup
-===========
+## Quick Setup
 
 
-settings.py
------------
+### settings.py
 
 Add to INSTALLED_APPS:
 
-	``mediasync``
+	'mediasync'
 
 Additionally, replace the existing MEDIA_URL setting with:
 
@@ -73,11 +67,10 @@ Optionally you may specify a key prefix:
 
 	MEDIASYNC_AWS_PREFIX = "key_prefix"  
 
-Assuming a correct DNS CNAME entry, setting MEDIASYNC_AWS_BUCKET to ``assets.sunlightlabs.com`` and MEDIASYNC_AWS_PREFIX to ``myproject/media`` would sync the media directory to http://assets.sunlightlabs.com/myproject/media/.
+Assuming a correct DNS CNAME entry, setting MEDIASYNC_AWS_BUCKET to __assets.sunlightlabs.com__ and MEDIASYNC_AWS_PREFIX to __myproject/media__ would sync the media directory to http://assets.sunlightlabs.com/myproject/media/.
 
 
-urls.py
--------
+### urls.py
 
 A static media URL needs to be setup in urls.py that enables access to the media directory ONLY IN DEBUG MODE.
 
@@ -87,42 +80,36 @@ A static media URL needs to be setup in urls.py that enables access to the media
 		)  
 
 
-Directory structure
--------------------
+### Directory structure
 
-Create a ``media`` directory under the root of the project. Create ``images``, ``scripts``, and ``styles`` directories beneath ``media``.
-
-
-Quick Setup
-===========
+Create a __media__ directory under the root of the project. Create __images__, __scripts__, and __styles__ directories beneath __media__.
 
 
-Template Tags
--------------
+## Quick Setup
+
+
+### Template Tags
 
 When referring to media in HTML templates you can use custom template tags. These tags can by accessed by loading the media template tag collection.
 
 	{% load media %}
 
 
-media_url
-.........
+#### media_url
 
 Renders the MEDIA_URL from settings.py with trailing slashes removed.
 
 	<img src="{% media_url %}/images/stuff.png">
 
 
-js
-..
+#### js
 
-Renders a <script> tag with the correct include.
+Renders a script tag with the correct include.
 
 	{% js "myfile.js" %}
 
 
-css
-...
+#### css
 
 Renders a <link> tag to include the stylesheet. It takes an optional second parameter for the media attribute; the default media is "screen, projector".
 
@@ -130,8 +117,7 @@ Renders a <link> tag to include the stylesheet. It takes an optional second para
 	{% css "myfile.css" "screen" %}  
 
 
-css_print
-.........
+#### css_print
 
 Shortcut to render as a print stylesheet.
 
@@ -142,30 +128,27 @@ which is equivalent to
 	{% css "myfile.css" "print" %}
 
 
-css_ie, css_ie6, css_ie7
-........................
+#### css_ie, css_ie6, css_ie7
 
-<link> elements with conditional statements.
+link elements with conditional statements.
 
 	{% css_ie "myfile.css" %}  
 	{% css_ie6 "myfile.css" %}  
 	{% css_ie7 "myfile.css" %}  
 
 
-Writing Style Sheets
---------------------
+### Writing Style Sheets
 
 Unfortunately, style sheets cannot be dynamic so it is important to use a relative local media URL when writing them.
 
 	background: url(/media/images/arrow_left.png);
 
-When pushed to S3, the local URL is rewritten as the MEDIA_URL from settings.py. If the MEDIA_URL is ``http://assets.mysite.com/`` then the CSS rule will be rewritten as:
+When pushed to S3, the local URL is rewritten as the MEDIA_URL from settings.py. If the MEDIA_URL is __http://assets.mysite.com/__ then the CSS rule will be rewritten as:
 
 	background: url(http://assets.mysite.com/images/arrow_left.png);
 
 
-Running MEDIASYNC
-=================
+## Running MEDIASYNC
 
 
 	./manage.py mediasync
