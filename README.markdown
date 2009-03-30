@@ -28,7 +28,7 @@ python >= 2.4
 
 django >= 1.0
 
-S3.py 
+S3.py  
 http://developer.amazonwebservices.com/connect/entry.jspa?externalID=134
 
 ## Installation
