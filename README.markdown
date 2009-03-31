@@ -51,10 +51,9 @@ Add to INSTALLED_APPS:
 
 Additionally, replace the existing __MEDIA_URL__ setting with:
 
-	if DEBUG:  
-	    MEDIA_URL = '/media/'  
-	else:  
-	    MEDIA_URL = 'http://url.to.s3.media/'  
+	MEDIA_URL = '/media/'
+	
+__MEDIA_URL__ is the URL that will be used in debug mode. Otherwise, the __MEDIA_URL__ will be inferred from the settings listed below.
 
 The following settings must also be added:
 

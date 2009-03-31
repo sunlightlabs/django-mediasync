@@ -10,8 +10,13 @@ register = template.Library()
 
 @register.simple_tag
 def media_url():
-    media_url = settings.MEDIA_URL.rstrip('/')
-    return media_url
+    if settings.DEBUG:
+        media_url = settings.MEDIA_URL
+    else:
+        media_url = "http://%s" % settings.MEDIASYNC_AWS_BUCKET
+        if hasattr(settings, "MEDIASYNC_AWS_PREFIX"):
+            media_url = "%s/%s" % (media_url, settings.MEDIASYNC_AWS_PREFIX)
+    return media_url.rstrip('/')
 
 #
 # CSS related tags
