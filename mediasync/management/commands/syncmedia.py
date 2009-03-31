@@ -22,6 +22,8 @@ TYPES_TO_COMPRESS = (
 DIRS_TO_SYNC = ['images','scripts','styles']
 
 MEDIA_URL_RE = re.compile(r"/media/(images|styles|scripts)/")
+
+EXPIRATION_DAYS = getattr(settings, "MEDIASYNC_EXPIRATION_DAYS", 365)
     
 def compress(data):
     zbuf = cStringIO.StringIO()
@@ -29,6 +31,15 @@ def compress(data):
     zfile.write(data)
     zfile.close()
     return zbuf.getvalue()
+
+def listdir_recursive(dir):
+    for root, dirs, files in os.walk(dir):
+        for file in files:
+            fname = os.path.join(root, file).replace(dir, '')
+            if fname.startswith('/'):
+                fname = fname[1:]
+            yield fname
+
 
 class Command(BaseCommand):
     
@@ -39,7 +50,6 @@ class Command(BaseCommand):
     
     def handle(self, bucket=None, prefix=None, *args, **options):
 
-        import new
         import S3
 
         assert hasattr(settings, "PROJECT_ROOT")
@@ -55,7 +65,7 @@ class Command(BaseCommand):
             prefix = getattr(settings, "MEDIASYNC_AWS_PREFIX", None)
 
         now = datetime.datetime.utcnow()
-        then = now + datetime.timedelta(365)
+        then = now + datetime.timedelta(EXPIRATION_DAYS)
         expires = then.strftime("%a, %d %b %Y %H:%M:%S UTC")
         
         media_url = "http://%s" % bucket
@@ -75,11 +85,11 @@ class Command(BaseCommand):
             s3dirpath = ("%s/%s" % (s3root, dirname)).strip('/')
             
             if os.path.exists(dirpath):
-                
-                for filename in os.listdir(dirpath):
+               
+                for filename in listdir_recursive(dirpath):
                     
-                    filepath = "%s/%s" % (dirpath, filename)
-                    s3filepath = "%s/%s" % (s3dirpath, filename)
+                    filepath = os.path.join(dirpath, filename)
+                    s3filepath = os.path.join(s3dirpath, filename)
                     
                     if filename.startswith('.') or not os.path.isfile(filepath):
                         continue
