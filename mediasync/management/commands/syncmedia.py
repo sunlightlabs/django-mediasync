@@ -68,7 +68,12 @@ class Command(BaseCommand):
         then = now + datetime.timedelta(EXPIRATION_DAYS)
         expires = then.strftime("%a, %d %b %Y %H:%M:%S UTC")
         
-        media_url = "http://%s" % bucket
+        # construct media url
+        
+        bucket_cname = getattr(settings, "MEDIASYNC_BUCKET_CNAME", False)
+        
+        media_url = (bucket_cname and "http://%s" or "http://%s.s3.amazonaws.com") % bucket
+    
         if prefix:
             media_url = "%s/%s" % (media_url, prefix.strip('/'))
             

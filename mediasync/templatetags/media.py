@@ -8,15 +8,23 @@ register = template.Library()
 # media stuff
 #
 
+assert hasattr(settings, "MEDIASYNC_AWS_BUCKET")
+
+BUCKET_CNAME = getattr(settings, "MEDIASYNC_BUCKET_CNAME", False)
+AWS_PREFIX = getattr(settings, "MEDIASYNC_AWS_PREFIX", None)
+
+if settings.DEBUG:
+    mu = settings.MEDIA_URL
+else:
+    mu = (BUCKET_CNAME and "http://%s" or "http://%s.s3.amazonaws.com") % settings.MEDIASYNC_AWS_BUCKET
+    if AWS_PREFIX:
+        mu = "%s/%s" % (mu, AWS_PREFIX)
+
+MEDIA_URL = mu.rstrip('/')
+
 @register.simple_tag
 def media_url():
-    if settings.DEBUG:
-        media_url = settings.MEDIA_URL
-    else:
-        media_url = "http://%s" % settings.MEDIASYNC_AWS_BUCKET
-        if hasattr(settings, "MEDIASYNC_AWS_PREFIX"):
-            media_url = "%s/%s" % (media_url, settings.MEDIASYNC_AWS_PREFIX)
-    return media_url.rstrip('/')
+    return MEDIA_URL
 
 #
 # CSS related tags

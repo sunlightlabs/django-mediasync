@@ -74,6 +74,10 @@ By default, all files are given an expires header of 365 days after the file was
 
     MEDIASYNC_EXPIRATION_DAYS = 365 * 10    # expire in 10 years
 
+Amazon allows users to create DNS CNAME entries to map custom domain names to an AWS bucket. MEDIASYNC can be configured to use the bucket as the media URL by setting __MEDIASYNC_BUCKET_CNAME__ to *True*.
+
+	MEDIASYNC_BUCKET_CNAME = True
+
 
 ### urls.py
 
