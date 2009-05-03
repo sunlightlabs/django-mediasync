@@ -35,10 +35,11 @@ def compress(data):
 def listdir_recursive(dir):
     for root, dirs, files in os.walk(dir):
         for file in files:
-            fname = os.path.join(root, file).replace(dir, '')
-            if fname.startswith('/'):
-                fname = fname[1:]
-            yield fname
+            if not "/." in root:
+                fname = os.path.join(root, file).replace(dir, '')
+                if fname.startswith('/'):
+                    fname = fname[1:]
+                yield fname
 
 
 class Command(BaseCommand):
