@@ -1,12 +1,12 @@
 from distutils.core import setup
 
-long_description = open('README.rst').read()
+long_description = open('README.markdown').read()
 
 setup(
     name='django-mediasync',
     version="0.1",
     package_dir={'mediasync': 'mediasync'},
-    packages=['mediasync'],
+    packages=['mediasync','mediasync.management','mediasync.management.commands','mediasync.templatetags','mediasync.utils'],
     description='Django static media development and distribution tools',
     author='Jeremy Carbaugh',
     author_email='jcarbaugh@sunlightfoundation.com',
