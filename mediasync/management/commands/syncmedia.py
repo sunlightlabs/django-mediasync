@@ -24,6 +24,7 @@ DIRS_TO_SYNC = ['images','scripts','styles']
 MEDIA_URL_RE = re.compile(r"/media/(images|styles|scripts)/")
 
 EXPIRATION_DAYS = getattr(settings, "MEDIASYNC_EXPIRATION_DAYS", 365)
+REWRITE_CSS = getattr(settings, "MEDIASYNC_REWRITE_CSS", False)
     
 def compress(data):
     zbuf = cStringIO.StringIO()
@@ -106,8 +107,9 @@ class Command(BaseCommand):
                     if not content_type:
                         content_type = "text/plain"
                     
-                    if content_type == "text/css" or filename.endswith('.htc'):
-                        filedata = MEDIA_URL_RE.sub(r'%s/\1/' % media_url, filedata)
+                    if REWRITE_CSS: # rewrite CSS if the user chooses
+                        if content_type == "text/css" or filename.endswith('.htc'):
+                            filedata = MEDIA_URL_RE.sub(r'%s/\1/' % media_url, filedata)
                     
                     if content_type == "text/css":
                         filedata = cssmin.cssmin(filedata)

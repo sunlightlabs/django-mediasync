@@ -49,11 +49,11 @@ Add to INSTALLED_APPS:
 
 	'mediasync'
 
-Additionally, replace the existing __MEDIA_URL__ setting with:
+Additionally, replace the existing __MEDIA\_URL__ setting with:
 
 	MEDIA_URL = '/media/'
 	
-__MEDIA_URL__ is the URL that will be used in debug mode. Otherwise, the __MEDIA_URL__ will be inferred from the settings listed below.
+__MEDIA\_URL__ is the URL that will be used in debug mode. Otherwise, the __MEDIA\_URL__ will be inferred from the settings listed below.
 
 The following settings must also be added:
 
@@ -68,16 +68,19 @@ Optionally you may specify a key prefix:
 
 	MEDIASYNC_AWS_PREFIX = "key_prefix"  
 
-Assuming a correct DNS CNAME entry, setting __MEDIASYNC_AWS_BUCKET__ to __assets.sunlightlabs.com__ and __MEDIASYNC_AWS_PREFIX__ to __myproject/media__ would sync the media directory to http://assets.sunlightlabs.com/myproject/media/.
+Assuming a correct DNS CNAME entry, setting __MEDIASYNC\_AWS\_BUCKET__ to __assets.sunlightlabs.com__ and __MEDIASYNC\_AWS\_PREFIX__ to __myproject/media__ would sync the media directory to http://assets.sunlightlabs.com/myproject/media/.
 
-By default, all files are given an expires header of 365 days after the file was synced to S3. You may override this value by adding __MEDIASYNC_EXPIRATION_DAYS__ to settings.py.
+By default, all files are given an expires header of 365 days after the file was synced to S3. You may override this value by adding __MEDIASYNC\_EXPIRATION\_DAYS__ to settings.py.
 
     MEDIASYNC_EXPIRATION_DAYS = 365 * 10    # expire in 10 years
 
-Amazon allows users to create DNS CNAME entries to map custom domain names to an AWS bucket. MEDIASYNC can be configured to use the bucket as the media URL by setting __MEDIASYNC_BUCKET_CNAME__ to *True*.
+Amazon allows users to create DNS CNAME entries to map custom domain names to an AWS bucket. MEDIASYNC can be configured to use the bucket as the media URL by setting __MEDIASYNC\_BUCKET\_CNAME__ to *True*.
 
 	MEDIASYNC_BUCKET_CNAME = True
 
+Previous versions of mediasync rewrote URLs in CSS files to use the correct __MEDIA\_URL__. Now users are encouraged to use relative paths in their CSS so that URL rewriting is not necessary. URL rewriting can be enabled by setting __MEDIASYNC\_REWRITE\_CSS__ to *True*.
+
+	MEDIASYNC_REWRITE_CSS = True
 
 ### urls.py
 
@@ -148,11 +151,17 @@ link elements with conditional statements.
 
 ### Writing Style Sheets
 
-Unfortunately, style sheets cannot be dynamic so it is important to use a relative local media URL when writing them.
+Users are encouraged to write stylesheets using relative URLS. The media directory is synced with S3 as is, so relative local paths will still work when pushed remotely.
+
+	background: url(../images/arrow_left.png);
+	
+#### Deprecated URL rewriting
+
+Previous versions of mediasync rewrote absolute paths to use the correct __MEDIA\_URL__. If you would prefer to use this old method, write URLs using absolute paths and set __MEDIASYNC\_REWRITE\_CSS__ = *True* in settings.py.
 
 	background: url(/media/images/arrow_left.png);
 
-When pushed to S3, the local URL is rewritten as the MEDIA_URL from settings.py. If the MEDIA_URL is __http://assets.mysite.com/__ then the CSS rule will be rewritten as:
+When pushed to S3, the local URL is rewritten as the MEDIA\_URL from settings.py. If the MEDIA_URL is __http://assets.mysite.com/__ then the CSS rule will be rewritten as:
 
 	background: url(http://assets.mysite.com/images/arrow_left.png);
 
