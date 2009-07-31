@@ -1,3 +1,4 @@
+import os
 import re
 
 DIRS_TO_SYNC = ['images','scripts','styles']
@@ -22,7 +23,6 @@ def sync(bucket=None, prefix=''):
     from django.conf import settings
     from mediasync import s3
     import cStringIO
-    import os
     
     assert hasattr(settings, "PROJECT_ROOT")
     assert hasattr(settings, "MEDIASYNC_AWS_KEY")
@@ -78,9 +78,9 @@ def sync(bucket=None, prefix=''):
         filedata = buffer.getvalue()
         buffer.close()
         
-        s3dirpath = ("%s/%s/%s" % (prefix, dirname, destfile))
+        s3filepath = ("%s/%s/%s" % (prefix, dirname, destfile))
         
-        _sync_file(client, destfile, s3path, filedata)
+        _sync_file(client, destfile, s3filepath, filedata)
         
     #
     # sync static media
@@ -89,7 +89,6 @@ def sync(bucket=None, prefix=''):
     for dirname in DIRS_TO_SYNC:
         
         dirpath = "%s/media/%s" % (settings.PROJECT_ROOT, dirname)
-        s3dirpath = ("%s/%s" % (prefix, dirname))
         
         if os.path.exists(dirpath):
            
@@ -97,12 +96,12 @@ def sync(bucket=None, prefix=''):
                 
                 # calculate local and remote paths
                 filepath = os.path.join(dirpath, filename)
-                s3filepath = os.path.join(s3dirpath, filename)
+                s3filepath = "%s/%s/%s" % (prefix, dirname, filename)
                 
                 if filename.startswith('.') or not os.path.isfile(filepath):
                     continue # hidden file or directory, do not upload
                 
-                _sync_file(client, filepath, s3path)
+                _sync_file(client, filepath, s3filepath)
                 
 
 def _sync_file(client, filepath, remote_path, filedata=None):
@@ -126,6 +125,6 @@ def _sync_file(client, filepath, remote_path, filedata=None):
         if content_type == "text/css" or filename.endswith('.htc'):
             filedata = MEDIA_URL_RE.sub(r'%s/\1/' % media_url, filedata)
     
-    client.put(filedata, content_type, remote_path)
-    
+    if client.put(filedata, content_type, remote_path):
+        print "[%s] %s" % (content_type, remote_path)
     
