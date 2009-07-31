@@ -10,8 +10,6 @@ To make this easier, I wrote some additions to the sunlightcore module that hand
 
 - add expires headers to everything
 
-- rewrite the css files to use settings.MEDIA_URL instead of /media/
-
 One flaw is that the MD5 of a compressed file changes each time it is compressed. This will cause css and js files to be reuploaded each time. Images and other files that are not compressed will only be uploaded when they are created or if they have changed. 
 
 django-mediasync is a project of Sunlight Foundation (c) 2009.
