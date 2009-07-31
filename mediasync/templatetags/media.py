@@ -14,6 +14,8 @@ SERVE_REMOTE = getattr(settings, "MEDIASYNC_SERVE_REMOTE", not settings.DEBUG)
 BUCKET_CNAME = getattr(settings, "MEDIASYNC_BUCKET_CNAME", False)
 AWS_PREFIX = getattr(settings, "MEDIASYNC_AWS_PREFIX", None)
 
+JOINED = getattr(settings, "MEDIASYNC_JOINED", {})
+
 if SERVE_REMOTE:
     mu = (BUCKET_CNAME and "http://%s" or "http://%s.s3.amazonaws.com") % settings.MEDIASYNC_AWS_BUCKET
     if AWS_PREFIX:
@@ -31,11 +33,17 @@ def media_url():
 # CSS related tags
 #
 
+def linktag(url, path, filename, media):
+    return """<link rel="stylesheet" href="%s%s/%s" type="text/css" media="%s" />""" % (url, path, filename, media)
+    
 @register.simple_tag
 def css(filename, media="screen, projection"):
     css_path = getattr(settings, "MEDIA_CSS_PATH", "/styles").rstrip('/')
-    html = """<link rel="stylesheet" href="%s%s/%s" type="text/css" media="%s" />""" % (media_url(), css_path, filename, media)
-    return html
+    if SERVE_REMOTE and filename in JOINED:
+        return linktag(MEDIA_URL, css_path, filename, media)
+    else:
+        filenames = JOINED.get(filename, (filename,))
+        return ' '.join((linktag(MEDIA_URL, css_path, fn, media) for fn in filenames))
 
 @register.simple_tag
 def css_print(filename):
@@ -57,11 +65,17 @@ def css_ie7(filename):
 # JavaScript related tags
 #
 
+def scripttag(url, path, filename):
+    return """<script type="text/javascript" charset="utf-8" src="%s%s/%s"></script>""" % (url, path, filename)
+    
 @register.simple_tag
 def js(filename):
     js_path = getattr(settings, "MEDIA_JS_PATH", "/scripts").rstrip('/')
-    html = """<script type="text/javascript" charset="utf-8" src="%s%s/%s"></script>""" % (media_url(), js_path, filename)
-    return html
+    if SERVE_REMOTE and filename in JOINED:
+        return scripttag(MEDIA_URL, js_path, filename)
+    else:
+        filenames = JOINED.get(filename, (filename,))
+        return ' '.join((scripttag(MEDIA_URL, js_path, fn) for fn in filenames))
 
 #
 # conditional tags
