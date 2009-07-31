@@ -10,15 +10,16 @@ register = template.Library()
 
 assert hasattr(settings, "MEDIASYNC_AWS_BUCKET")
 
+SERVE_REMOTE = getattr(settings, "MEDIASYNC_SERVE_REMOTE", not settings.DEBUG)
 BUCKET_CNAME = getattr(settings, "MEDIASYNC_BUCKET_CNAME", False)
 AWS_PREFIX = getattr(settings, "MEDIASYNC_AWS_PREFIX", None)
 
-if settings.DEBUG:
-    mu = settings.MEDIA_URL
-else:
+if SERVE_REMOTE:
     mu = (BUCKET_CNAME and "http://%s" or "http://%s.s3.amazonaws.com") % settings.MEDIASYNC_AWS_BUCKET
     if AWS_PREFIX:
         mu = "%s/%s" % (mu, AWS_PREFIX)
+else:
+    mu = settings.MEDIA_URL
 
 MEDIA_URL = mu.rstrip('/')
 

@@ -52,7 +52,7 @@ Add to INSTALLED_APPS:
 Additionally, replace the existing __MEDIA\_URL__ setting with:
 
 	MEDIA_URL = '/media/'
-	
+
 __MEDIA\_URL__ is the URL that will be used in debug mode. Otherwise, the __MEDIA\_URL__ will be inferred from the settings listed below.
 
 The following settings must also be added:
@@ -81,6 +81,10 @@ Amazon allows users to create DNS CNAME entries to map custom domain names to an
 Previous versions of mediasync rewrote URLs in CSS files to use the correct __MEDIA\_URL__. Now users are encouraged to use relative paths in their CSS so that URL rewriting is not necessary. URL rewriting can be enabled by setting __MEDIASYNC\_REWRITE\_CSS__ to *True*.
 
 	MEDIASYNC_REWRITE_CSS = True
+
+The media URL is selected based on the __DEBUG__ attribute in settings.py. When *True*, media will be served locally instead of from S3. Sometimes it is necessary to serve media from S3 even when __DEBUG__ is *True*. To force remote serving of media, set __MEDIASYNC\_SERVE\_REMOTE__ to *True*.
+
+	MEDIASYNC_SERVE_REMOTE = True
 
 ### urls.py
 
@@ -169,4 +173,4 @@ When pushed to S3, the local URL is rewritten as the MEDIA\_URL from settings.py
 ## Running MEDIASYNC
 
 
-	./manage.py mediasync
+	./manage.py syncmedia
