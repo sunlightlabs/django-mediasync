@@ -98,7 +98,7 @@ A static media URL needs to be setup in urls.py that enables access to the media
 Create a __media__ directory under the root of the project. Create __images__, __scripts__, and __styles__ directories beneath __media__.
 
 
-## Quick Setup
+## Features
 
 
 ### Template Tags
@@ -167,7 +167,33 @@ When pushed to S3, the local URL is rewritten as the MEDIA\_URL from settings.py
 	background: url(http://assets.mysite.com/images/arrow_left.png);
 
 
-## Running MEDIASYNC
+### Joined files
 
+When serving media in production, it is beneficial to combine JavaScript and CSS into single files. This reduces the number of connections the browser needs to make to the web server. Fewer connections can dramatically decrease page load times and reduce the server-side load.
+
+Joined files are specified in settings.py using the __MEDIASYNC\_JOINED__. This is a dict that maps individual media to an alias for the joined files. 
+
+	MEDIASYNC_JOINED = {
+		'joined.css': ['reset.css','text.css'],
+		'joined.js': ['jquery.js','mediasync.js','processing.js'],
+	}
+
+Files listed in __MEDIASYNC\_JOINED__ will be combined and pushed to S3 with the name of the alias. The individual CSS files will also be pushed to S3. Aliases must end in either .css or .js; mediasync will look for the source files in the appropriate directories based on the alias extension.
+
+The existing template tags may be used to refer to the joined media. Simply use the joined alias as the argument:
+
+	{% css_print "joined.css" %}
+
+When served locally, template tags will render an HTML tag for each of the files that make up the joined file:
+
+	<link rel="stylesheet" href="/media/styles/reset.css" type="text/css" media="screen, projection" />
+	<link rel="stylesheet" href="/media/styles/text.css" type="text/css" media="screen, projection" />
+
+When served remotely, one HTML tag will be rendered with the name of the joined file:
+
+	<link rel="stylesheet" href="http://bucket.s3.amazonaws.com/styles/joined.css" type="text/css" media="screen, projection" />
+
+
+## Running MEDIASYNC
 
 	./manage.py syncmedia
