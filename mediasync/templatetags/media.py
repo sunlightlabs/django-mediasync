@@ -1,29 +1,16 @@
 from django import template
 from django.conf import settings
 from django.template.defaultfilters import stringfilter
+from mediasync import MEDIA_URL
+
+JOINED = getattr(settings, "MEDIASYNC_JOINED", {})
+SERVE_REMOTE = getattr(settings, "MEDIASYNC_SERVE_REMOTE", not settings.DEBUG)
 
 register = template.Library()
 
 #
 # media stuff
 #
-
-assert hasattr(settings, "MEDIASYNC_AWS_BUCKET")
-
-SERVE_REMOTE = getattr(settings, "MEDIASYNC_SERVE_REMOTE", not settings.DEBUG)
-BUCKET_CNAME = getattr(settings, "MEDIASYNC_BUCKET_CNAME", False)
-AWS_PREFIX = getattr(settings, "MEDIASYNC_AWS_PREFIX", None)
-
-JOINED = getattr(settings, "MEDIASYNC_JOINED", {})
-
-if SERVE_REMOTE:
-    mu = (BUCKET_CNAME and "http://%s" or "http://%s.s3.amazonaws.com") % settings.MEDIASYNC_AWS_BUCKET
-    if AWS_PREFIX:
-        mu = "%s/%s" % (mu, AWS_PREFIX)
-else:
-    mu = settings.MEDIA_URL
-
-MEDIA_URL = mu.rstrip('/')
 
 @register.simple_tag
 def media_url():

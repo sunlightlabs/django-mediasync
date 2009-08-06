@@ -1,8 +1,23 @@
+from django.conf import settings
 import os
 import re
 
 DIRS_TO_SYNC = ['images','scripts','styles']
 MEDIA_URL_RE = re.compile(r"/media/(images|styles|scripts)/")
+
+SERVE_REMOTE = getattr(settings, "MEDIASYNC_SERVE_REMOTE", not settings.DEBUG)
+BUCKET_CNAME = getattr(settings, "MEDIASYNC_BUCKET_CNAME", False)
+AWS_PREFIX = getattr(settings, "MEDIASYNC_AWS_PREFIX", None)
+
+if SERVE_REMOTE:
+    assert hasattr(settings, "MEDIASYNC_AWS_BUCKET")
+    mu = (BUCKET_CNAME and "http://%s" or "http://%s.s3.amazonaws.com") % settings.MEDIASYNC_AWS_BUCKET
+    if AWS_PREFIX:
+        mu = "%s/%s" % (mu, AWS_PREFIX)
+else:
+    mu = settings.MEDIA_URL
+
+MEDIA_URL = mu.rstrip('/')
 
 def listdir_recursive(dir):
     for root, dirs, files in os.walk(dir):
@@ -122,9 +137,10 @@ def _sync_file(client, filepath, remote_path, filedata=None):
     
     # rewrite CSS if the user chooses
     if REWRITE_CSS: 
-        if content_type == "text/css" or filename.endswith('.htc'):
+        if content_type == "text/css" or filepath.endswith('.htc'):
             filedata = MEDIA_URL_RE.sub(r'%s/\1/' % media_url, filedata)
     
     if client.put(filedata, content_type, remote_path):
         print "[%s] %s" % (content_type, remote_path)
-    
+
+__all__ = ['DIRS_TO_SYNC','MEDIA_URL','sync']
