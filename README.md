@@ -83,6 +83,28 @@ The media URL is selected based on the __DEBUG__ attribute in settings.py. When 
 
 	MEDIASYNC_SERVE_REMOTE = True
 
+link and script tags are written using XHTML syntax. The rendering can be overridden by using the __MEDIASYNC\_DOCTYPE__ setting. Allowed values are *'html4'*, *'html5'*, or *'xhtml'*.
+
+	MEDIASYNC_DOCTYPE = 'xhtml'
+
+For each doctype, the tags are rendered:
+
+__MEDIASYNC_DOCTYPE__ = "html4"
+
+    <link rel="stylesheet" href="..." type="text/css" media="...">
+    <script type="text/javascript" charset="utf-8" src="..."></script>
+
+__MEDIASYNC_DOCTYPE__ = "html5"
+
+    <link rel="stylesheet" href="..." type="text/css" media="...">
+    <script src="..."></script>
+
+__MEDIASYNC_DOCTYPE__ = "xhtml"
+
+    <link rel="stylesheet" href="..." type="text/css" media="..." />
+    <script type="text/javascript" charset="utf-8" src="..."></script>
+
+
 ### urls.py
 
 A static media URL needs to be setup in urls.py that enables access to the media directory ONLY IN DEBUG MODE.

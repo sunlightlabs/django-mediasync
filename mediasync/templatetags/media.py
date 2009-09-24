@@ -5,6 +5,7 @@ from mediasync import MEDIA_URL
 
 JOINED = getattr(settings, "MEDIASYNC_JOINED", {})
 SERVE_REMOTE = getattr(settings, "MEDIASYNC_SERVE_REMOTE", not settings.DEBUG)
+DOCTYPE = getattr(settings, "MEDIASYNC_DOCTYPE", 'xhtml')
 
 register = template.Library()
 
@@ -20,8 +21,11 @@ def media_url():
 # CSS related tags
 #
 
+LINK_ENDER = ' />' if DOCTYPE == 'xhtml' else '>'
+
 def linktag(url, path, filename, media):
-    return """<link rel="stylesheet" href="%s%s/%s" type="text/css" media="%s" />""" % (url, path, filename, media)
+    params = (url, path, filename, media, LINK_ENDER)
+    return """<link rel="stylesheet" href="%s%s/%s" type="text/css" media="%s"%s""" % params
     
 @register.simple_tag
 def css(filename, media="screen, projection"):
@@ -53,7 +57,11 @@ def css_ie7(filename):
 #
 
 def scripttag(url, path, filename):
-    return """<script type="text/javascript" charset="utf-8" src="%s%s/%s"></script>""" % (url, path, filename)
+    if DOCTYPE == 'html5':
+        markup = """<script src="%s%s/%s"></script>"""
+    else:
+        markup = """<script type="text/javascript" charset="utf-8" src="%s%s/%s"></script>"""
+    return markup % (url, path, filename)
     
 @register.simple_tag
 def js(filename):
