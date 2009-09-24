@@ -2,6 +2,7 @@ from django import template
 from django.conf import settings
 from django.template.defaultfilters import stringfilter
 from mediasync import MEDIA_URL
+import warnings
 
 JOINED = getattr(settings, "MEDIASYNC_JOINED", {})
 SERVE_REMOTE = getattr(settings, "MEDIASYNC_SERVE_REMOTE", not settings.DEBUG)
@@ -42,14 +43,17 @@ def css_print(filename):
 
 @register.simple_tag
 def css_ie(filename):
+    warnings.warn("mediasync css_ie template tag has been deprecated", DeprecationWarning)
     return """<!--[if IE]>%s<![endif]-->""" % css(filename)
 
 @register.simple_tag
 def css_ie6(filename):
+    warnings.warn("mediasync css_ie6 template tag has been deprecated", DeprecationWarning)
     return """<!--[if IE 6]>%s<![endif]-->""" % css(filename)
 
 @register.simple_tag
 def css_ie7(filename):
+    warnings.warn("mediasync css_ie7 template tag has been deprecated", DeprecationWarning)
     return """<!--[if IE 7]>%s<![endif]-->""" % css(filename)
 
 #
@@ -91,8 +95,10 @@ def ie7(parser, token):
     condition_format = """<!--[if IE 7]>%s<![endif]-->"""
     return conditional(parser, token, condition_format, "endie7")
 
-def conditional(parser, token, condition_format, endtag):    
-    newline = 'newline' in token.split_contents()
+def conditional(parser, token, condition_format, endtag):
+    contents = token.split_contents()
+    warnings.warn("mediasync %s template tag has been deprecated" % contents[0], DeprecationWarning)
+    newline = 'newline' in contents
     nodelist = parser.parse((endtag,))
     parser.delete_first_token()
     return ConditionalNode(nodelist, condition_format, newline)
