@@ -165,11 +165,7 @@ which is equivalent to
 
 #### css_ie, css_ie6, css_ie7
 
-link elements with conditional statements.
-
-	{% css_ie "myfile.css" %}  
-	{% css_ie6 "myfile.css" %}  
-	{% css_ie7 "myfile.css" %}  
+**Deprecated** and will be removed before a 1.0 release.
 
 
 ### Writing Style Sheets
