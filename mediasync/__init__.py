@@ -3,7 +3,6 @@ import os
 import re
 
 DIRS_TO_SYNC = ['images','scripts','styles']
-MEDIA_URL_RE = re.compile(r"/media/(images|styles|scripts)/")
 
 SERVE_REMOTE = getattr(settings, "MEDIASYNC_SERVE_REMOTE", not settings.DEBUG)
 BUCKET_CNAME = getattr(settings, "MEDIASYNC_BUCKET_CNAME", False)
@@ -39,9 +38,12 @@ def sync(bucket=None, prefix=''):
     from mediasync import s3
     import cStringIO
     
-    assert hasattr(settings, "PROJECT_ROOT")
+    assert hasattr(settings, "MEDIA_ROOT")
     assert hasattr(settings, "MEDIASYNC_AWS_KEY")
     assert hasattr(settings, "MEDIASYNC_AWS_SECRET")
+    
+    CSS_PATH = getattr(settings, "MEDIASYNC_CSS_PATH", "scripts").strip('/')
+    JS_PATH = getattr(settings, "MEDIASYNC_JS_PATH", "scripts").strip('/')
         
     # check for bucket and prefix parameters
     
@@ -73,9 +75,9 @@ def sync(bucket=None, prefix=''):
         destfile = destfile.strip('/')
         
         if destfile.endswith('.css'):
-            dirname = 'styles'
+            dirname = CSS_PATH
         elif destfile.endswith('.js'):
-            dirname = 'scripts'
+            dirname = JS_PATH
         else:
             continue # bypass this file since we only join css and js
         
@@ -83,7 +85,7 @@ def sync(bucket=None, prefix=''):
         
         for sourcefile in sourcefiles:
             
-            sourcepath = os.path.join(settings.PROJECT_ROOT, 'media', dirname, sourcefile)
+            sourcepath = os.path.join(settings.MEDIA_ROOT, dirname, sourcefile)
             if os.path.isfile(sourcepath):
                 f = open(sourcepath)
                 buffer.write(f.read())
@@ -93,7 +95,10 @@ def sync(bucket=None, prefix=''):
         filedata = buffer.getvalue()
         buffer.close()
         
-        s3filepath = ("%s/%s/%s" % (prefix, dirname, destfile))
+        s3filepath = prefix
+        if dirname:
+            s3filepath = "%s/%s" % (s3filepath, dirname)
+        s3filepath = "%s/%s" % (s3filepath, destfile)
         
         _sync_file(client, destfile, s3filepath, filedata)
         
@@ -101,11 +106,15 @@ def sync(bucket=None, prefix=''):
     # sync static media
     #
 
-    for dirname in DIRS_TO_SYNC:
+    #for dirname in DIRS_TO_SYNC:
+    for dirname in os.listdir(settings.MEDIA_ROOT):
         
-        dirpath = "%s/media/%s" % (settings.PROJECT_ROOT, dirname)
+        if dirname.startswith('.') or dirname.startswith('_'):
+            continue # ignore hidden or directories that are not meant to be synced
         
-        if os.path.exists(dirpath):
+        dirpath = os.path.join(settings.MEDIA_ROOT, dirname)
+        
+        if os.path.isdir(dirpath):
            
             for filename in listdir_recursive(dirpath):
                 
@@ -123,8 +132,6 @@ def _sync_file(client, filepath, remote_path, filedata=None):
     
     from django.conf import settings
     import mimetypes
-    
-    REWRITE_CSS = getattr(settings, "MEDIASYNC_REWRITE_CSS", False)
                 
     # load file data from local path
     if not filedata:
@@ -136,11 +143,12 @@ def _sync_file(client, filepath, remote_path, filedata=None):
         content_type = "text/plain"
     
     # rewrite CSS if the user chooses
-    if REWRITE_CSS: 
+    if getattr(settings, "MEDIASYNC_REWRITE_CSS", False): 
         if content_type == "text/css" or filepath.endswith('.htc'):
+            MEDIA_URL_RE = re.compile(r"/media/\w+/")
             filedata = MEDIA_URL_RE.sub(r'%s/\1/' % media_url, filedata)
     
     if client.put(filedata, content_type, remote_path):
         print "[%s] %s" % (content_type, remote_path)
 
-__all__ = ['DIRS_TO_SYNC','MEDIA_URL','sync']
+__all__ = ['MEDIA_URL','sync']

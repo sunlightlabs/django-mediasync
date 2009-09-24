@@ -46,16 +46,21 @@ Add to INSTALLED_APPS:
 
 	'mediasync'
 
+Add the proper __MEDIA\_ROOT__ setting:
+
+    MEDIA_ROOT = '/path/to/media'
+
 Additionally, replace the existing __MEDIA\_URL__ setting with:
 
 	MEDIA_URL = '/media/'
 
+And change the __ADMIN\_MEDIA\_PREFIX__ to something other than *'media'*:
+
+    ADMIN_MEDIA_PREFIX = '/media/admin/'
+
 __MEDIA\_URL__ is the URL that will be used in debug mode. Otherwise, the __MEDIA\_URL__ will be inferred from the settings listed below.
 
-The following settings must also be added:
-
-	import os  
-	PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))  
+The following settings must also be added: 
    
 	MEDIASYNC_AWS_KEY = "s3_key"  
 	MEDIASYNC_AWS_SECRET = "s3_secret"  
@@ -109,18 +114,28 @@ __MEDIASYNC_DOCTYPE__ = "xhtml"
 
 A static media URL needs to be setup in urls.py that enables access to the media directory ONLY IN DEBUG MODE.
 
+    import settings
 	if (settings.DEBUG):  
-		urlpatterns += patterns(,  
+		urlpatterns += patterns('',  
 			url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),  
 		)  
 
 
 ### Directory structure
 
-Create a __media__ directory under the root of the project. Create __images__, __scripts__, and __styles__ directories beneath __media__.
+mediasync assumes a __MEDIA\_ROOT__ structure in which CSS files will be located under *styles* and JavaScript files will be located under *scripts*. Images and other media can be located anywhere under __MEDIA\_ROOT__. If you would prefer to have your CSS and JavaScript in different directories you can override the defaults in settings.py:
+
+    MEDIASYNC_CSS_PATH = 'styles'
+    MEDIASYNC_JS_PATH = 'scripts'
+
+If the CSS and JavaScript files live in the same directory, you can set __MEDIASYNC\_CSS\_PATH__ and __MEDIASYNC\_JS\_PATH__ to the same path.
 
 
 ## Features
+
+### Ignored Directories
+
+Any directory in __MEDIA\_ROOT__ that is hidden or starts with an underscore will be ignored during syncing.
 
 
 ### Template Tags
@@ -210,6 +225,25 @@ When served locally, template tags will render an HTML tag for each of the files
 When served remotely, one HTML tag will be rendered with the name of the joined file:
 
 	<link rel="stylesheet" href="http://bucket.s3.amazonaws.com/styles/joined.css" type="text/css" media="screen, projection" />
+
+
+### Custom Media Directory Structure
+
+On the off chance you have a really weird directory structure that does not align with mediasync's expectations, you can default all paths to __MEDIA\_ROOT__ by setting the CSS and JS paths to an empty string.
+
+    MEDIASYNC_CSS_PATH = ''
+    MEDIASYNC_JS_PATH = ''
+
+This means that no path assumptions are being made and all paths must be relative from __MEDIA\_ROOT__. All template tags and MEDIASYNC_JOINED settings must contain the entire path.
+
+    {% css 'css_external/reset.css' %}
+    {% css 'css_internal/mysite.css' %}
+
+And when __MEDIASYNC\_JOINED__ is used:
+
+    MEDIASYNC_JOINED = {
+	    'css/joined.css': ['css_external/reset.css','css_internal/mysite.css'],
+    }
 
 
 ## Running MEDIASYNC

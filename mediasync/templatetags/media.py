@@ -25,12 +25,14 @@ def media_url():
 LINK_ENDER = ' />' if DOCTYPE == 'xhtml' else '>'
 
 def linktag(url, path, filename, media):
-    params = (url, path, filename, media, LINK_ENDER)
-    return """<link rel="stylesheet" href="%s%s/%s" type="text/css" media="%s"%s""" % params
+    if path:
+        url = "%s/%s" % (url, path)
+    params = (url, filename, media, LINK_ENDER)
+    return """<link rel="stylesheet" href="%s/%s" type="text/css" media="%s"%s""" % params
     
 @register.simple_tag
 def css(filename, media="screen, projection"):
-    css_path = getattr(settings, "MEDIA_CSS_PATH", "/styles").rstrip('/')
+    css_path = getattr(settings, "MEDIASYNC_CSS_PATH", "styles").strip('/')
     if SERVE_REMOTE and filename in JOINED:
         return linktag(MEDIA_URL, css_path, filename, media)
     else:
@@ -61,15 +63,17 @@ def css_ie7(filename):
 #
 
 def scripttag(url, path, filename):
+    if path:
+        url = "%s/%s" % (url, path)
     if DOCTYPE == 'html5':
-        markup = """<script src="%s%s/%s"></script>"""
+        markup = """<script src="%s/%s"></script>"""
     else:
         markup = """<script type="text/javascript" charset="utf-8" src="%s%s/%s"></script>"""
-    return markup % (url, path, filename)
+    return markup % (url, filename)
     
 @register.simple_tag
 def js(filename):
-    js_path = getattr(settings, "MEDIA_JS_PATH", "/scripts").rstrip('/')
+    js_path = getattr(settings, "MEDIASYNC_JS_PATH", "scripts").strip('/')
     if SERVE_REMOTE and filename in JOINED:
         return scripttag(MEDIA_URL, js_path, filename)
     else:
