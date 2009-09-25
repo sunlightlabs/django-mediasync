@@ -52,11 +52,7 @@ Add the proper __MEDIA\_ROOT__ setting:
 
 Additionally, replace the existing __MEDIA\_URL__ setting with:
 
-	MEDIA_URL = '/media/'
-
-And change the __ADMIN\_MEDIA\_PREFIX__ to something other than *'media'*:
-
-    ADMIN_MEDIA_PREFIX = '/media/admin/'
+	MEDIA_URL = '/devmedia/'
 
 __MEDIA\_URL__ is the URL that will be used in debug mode. Otherwise, the __MEDIA\_URL__ will be inferred from the settings listed below.
 
@@ -117,7 +113,7 @@ A static media URL needs to be setup in urls.py that enables access to the media
     import settings
 	if (settings.DEBUG):  
 		urlpatterns += patterns('',  
-			url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),  
+			url(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),  
 		)  
 
 
