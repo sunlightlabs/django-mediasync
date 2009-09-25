@@ -32,7 +32,7 @@ def linktag(url, path, filename, media):
     
 @register.simple_tag
 def css(filename, media="screen, projection"):
-    css_path = getattr(settings, "MEDIASYNC_CSS_PATH", "styles").strip('/')
+    css_path = getattr(settings, "MEDIASYNC_CSS_PATH", "").strip('/')
     if SERVE_REMOTE and filename in JOINED:
         return linktag(MEDIA_URL, css_path, filename, media)
     else:
@@ -73,7 +73,7 @@ def scripttag(url, path, filename):
     
 @register.simple_tag
 def js(filename):
-    js_path = getattr(settings, "MEDIASYNC_JS_PATH", "scripts").strip('/')
+    js_path = getattr(settings, "MEDIASYNC_JS_PATH", "").strip('/')
     if SERVE_REMOTE and filename in JOINED:
         return scripttag(MEDIA_URL, js_path, filename)
     else:

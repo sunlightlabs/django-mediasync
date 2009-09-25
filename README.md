@@ -121,16 +121,6 @@ A static media URL needs to be setup in urls.py that enables access to the media
 		)  
 
 
-### Directory structure
-
-mediasync assumes a __MEDIA\_ROOT__ structure in which CSS files will be located under *styles* and JavaScript files will be located under *scripts*. Images and other media can be located anywhere under __MEDIA\_ROOT__. If you would prefer to have your CSS and JavaScript in different directories you can override the defaults in settings.py:
-
-    MEDIASYNC_CSS_PATH = 'styles'
-    MEDIASYNC_JS_PATH = 'scripts'
-
-If the CSS and JavaScript files live in the same directory, you can set __MEDIASYNC\_CSS\_PATH__ and __MEDIASYNC\_JS\_PATH__ to the same path.
-
-
 ## Features
 
 ### Ignored Directories
@@ -227,22 +217,22 @@ When served remotely, one HTML tag will be rendered with the name of the joined 
 	<link rel="stylesheet" href="http://bucket.s3.amazonaws.com/styles/joined.css" type="text/css" media="screen, projection" />
 
 
-### Custom Media Directory Structure
+### Media Path Shortcuts
 
-On the off chance you have a really weird directory structure that does not align with mediasync's expectations, you can default all paths to __MEDIA\_ROOT__ by setting the CSS and JS paths to an empty string.
+In some cases, all CSS and JS files will be in their own directory. It can be a pain to write full paths from __MEDIA\_ROOT__ when they can be inferred from the type of media being used. Shortcuts can be used in template tags and the joined files configuration if the default paths to JS and CSS files are set.
 
-    MEDIASYNC_CSS_PATH = ''
-    MEDIASYNC_JS_PATH = ''
+    MEDIASYNC_CSS_PATH = 'styles'
+    MEDIASYNC_JS_PATH = 'scripts'
 
-This means that no path assumptions are being made and all paths must be relative from __MEDIA\_ROOT__. All template tags and MEDIASYNC_JOINED settings must contain the entire path.
+When these paths are set, you can leave them off of the media paths in template tags. Using the above path settings, _styles/reset.css_ and _scripts/jquery.js_ can be referred to using: 
 
-    {% css 'css_external/reset.css' %}
-    {% css 'css_internal/mysite.css' %}
+    {% css 'reset.css' %}
+    {% js 'jquery.js' %}
 
-And when __MEDIASYNC\_JOINED__ is used:
+The shortcut paths are also used on joined files.
 
     MEDIASYNC_JOINED = {
-	    'css/joined.css': ['css_external/reset.css','css_internal/mysite.css'],
+	    'joined.css': ['reset.css','mysite.css'],
     }
 
 

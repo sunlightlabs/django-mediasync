@@ -42,8 +42,8 @@ def sync(bucket=None, prefix=''):
     assert hasattr(settings, "MEDIASYNC_AWS_KEY")
     assert hasattr(settings, "MEDIASYNC_AWS_SECRET")
     
-    CSS_PATH = getattr(settings, "MEDIASYNC_CSS_PATH", "scripts").strip('/')
-    JS_PATH = getattr(settings, "MEDIASYNC_JS_PATH", "scripts").strip('/')
+    CSS_PATH = getattr(settings, "MEDIASYNC_CSS_PATH", "").strip('/')
+    JS_PATH = getattr(settings, "MEDIASYNC_JS_PATH", "").strip('/')
         
     # check for bucket and prefix parameters
     
