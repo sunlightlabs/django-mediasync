@@ -142,26 +142,26 @@ Renders the MEDIA_URL from settings.py with trailing slashes removed.
 
 Renders a script tag with the correct include.
 
-	{% js "myfile.js" %}
+	{% js "scripts/myfile.js" %}
 
 
 #### css
 
 Renders a <link> tag to include the stylesheet. It takes an optional second parameter for the media attribute; the default media is "screen, projector".
 
-	{% css "myfile.css" %}  
-	{% css "myfile.css" "screen" %}  
+	{% css "styles/myfile.css" %}  
+	{% css "styles/myfile.css" "screen" %}  
 
 
 #### css_print
 
 Shortcut to render as a print stylesheet.
 
-	{% css_print "myfile.css" %}
+	{% css_print "styles/myfile.css" %}
 
 which is equivalent to
 
-	{% css "myfile.css" "print" %}
+	{% css "styles/myfile.css" "print" %}
 
 
 #### css_ie, css_ie6, css_ie7
@@ -193,15 +193,15 @@ When serving media in production, it is beneficial to combine JavaScript and CSS
 Joined files are specified in settings.py using the __MEDIASYNC\_JOINED__. This is a dict that maps individual media to an alias for the joined files. 
 
 	MEDIASYNC_JOINED = {
-		'joined.css': ['reset.css','text.css'],
-		'joined.js': ['jquery.js','mediasync.js','processing.js'],
+		'styles/joined.css': ['styles/reset.css','styles/text.css'],
+		'scripts/joined.js': ['scripts/jquery.js','scripts/mediasync.js','scripts/processing.js'],
 	}
 
 Files listed in __MEDIASYNC\_JOINED__ will be combined and pushed to S3 with the name of the alias. The individual CSS files will also be pushed to S3. Aliases must end in either .css or .js; mediasync will look for the source files in the appropriate directories based on the alias extension.
 
 The existing template tags may be used to refer to the joined media. Simply use the joined alias as the argument:
 
-	{% css_print "joined.css" %}
+	{% css_print "styles/joined.css" %}
 
 When served locally, template tags will render an HTML tag for each of the files that make up the joined file:
 
