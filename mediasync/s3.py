@@ -1,7 +1,7 @@
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from django.conf import settings
-from mediasync.utils import cssmin, jsmin
+from mediasync.utils import compress, cssmin, jsmin
 import base64
 import cStringIO
 import datetime
@@ -18,15 +18,6 @@ TYPES_TO_COMPRESS = (
 )
 
 EXPIRATION_DAYS = getattr(settings, "MEDIASYNC_EXPIRATION_DAYS", 365)
-
-def compress(data):
-    zbuf = cStringIO.StringIO()
-    zfile = gzip.GzipFile(mode='wb', compresslevel=6, fileobj=zbuf)
-    zfile.write(data)
-    zfile.close()
-    gzdata = zbuf.getvalue()
-    zbuf.close()
-    return gzdata
 
 class Client(object):
     
