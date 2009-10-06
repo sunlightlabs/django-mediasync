@@ -10,6 +10,11 @@ DOCTYPE = getattr(settings, "MEDIASYNC_DOCTYPE", 'xhtml')
 
 register = template.Library()
 
+def mkpath(url, path, filename):
+    if path:
+        url = "%s/%s" % (url, path)
+    return "%s/%s" % (url, filename)
+
 #
 # media stuff
 #
@@ -25,10 +30,8 @@ def media_url():
 LINK_ENDER = ' />' if DOCTYPE == 'xhtml' else '>'
 
 def linktag(url, path, filename, media):
-    if path:
-        url = "%s/%s" % (url, path)
-    params = (url, filename, media, LINK_ENDER)
-    return """<link rel="stylesheet" href="%s/%s" type="text/css" media="%s"%s""" % params
+    params = (mkpath(url, path, filename), media, LINK_ENDER)
+    return """<link rel="stylesheet" href="%s" type="text/css" media="%s"%s""" % params
     
 @register.simple_tag
 def css(filename, media="screen, projection"):
@@ -63,13 +66,11 @@ def css_ie7(filename):
 #
 
 def scripttag(url, path, filename):
-    if path:
-        url = "%s/%s" % (url, path)
     if DOCTYPE == 'html5':
-        markup = """<script src="%s/%s"></script>"""
+        markup = """<script src="%s"></script>"""
     else:
-        markup = """<script type="text/javascript" charset="utf-8" src="%s%s/%s"></script>"""
-    return markup % (url, filename)
+        markup = """<script type="text/javascript" charset="utf-8" src="%s"></script>"""
+    return markup % mkpath(url, path, filename)
     
 @register.simple_tag
 def js(filename):
