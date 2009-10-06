@@ -164,11 +164,6 @@ which is equivalent to
 	{% css "myfile.css" "print" %}
 
 
-#### css_ie, css_ie6, css_ie7
-
-**Deprecated** and will be removed before a 1.0 release.
-
-
 ### Writing Style Sheets
 
 Users are encouraged to write stylesheets using relative URLS. The media directory is synced with S3 as is, so relative local paths will still work when pushed remotely.

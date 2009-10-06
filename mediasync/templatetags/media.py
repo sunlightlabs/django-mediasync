@@ -46,21 +46,6 @@ def css(filename, media="screen, projection"):
 def css_print(filename):
     return css(filename, media="print")
 
-@register.simple_tag
-def css_ie(filename):
-    warnings.warn("mediasync css_ie template tag has been deprecated", DeprecationWarning)
-    return """<!--[if IE]>%s<![endif]-->""" % css(filename)
-
-@register.simple_tag
-def css_ie6(filename):
-    warnings.warn("mediasync css_ie6 template tag has been deprecated", DeprecationWarning)
-    return """<!--[if IE 6]>%s<![endif]-->""" % css(filename)
-
-@register.simple_tag
-def css_ie7(filename):
-    warnings.warn("mediasync css_ie7 template tag has been deprecated", DeprecationWarning)
-    return """<!--[if IE 7]>%s<![endif]-->""" % css(filename)
-
 #
 # JavaScript related tags
 #
@@ -80,43 +65,3 @@ def js(filename):
     else:
         filenames = JOINED.get(filename, (filename,))
         return ' '.join((scripttag(MEDIA_URL, js_path, fn) for fn in filenames))
-
-#
-# conditional tags
-#
-
-@register.tag
-def ie(parser, token):
-    condition_format = """<!--[if IE]>%s<![endif]-->"""
-    return conditional(parser, token, condition_format, "endie")
-    
-@register.tag
-def ie6(parser, token):
-    condition_format = """<!--[if IE 6]>%s<![endif]-->"""
-    return conditional(parser, token, condition_format, "endie6")
-    
-@register.tag
-def ie7(parser, token):
-    condition_format = """<!--[if IE 7]>%s<![endif]-->"""
-    return conditional(parser, token, condition_format, "endie7")
-
-def conditional(parser, token, condition_format, endtag):
-    contents = token.split_contents()
-    warnings.warn("mediasync %s template tag has been deprecated" % contents[0], DeprecationWarning)
-    newline = 'newline' in contents
-    nodelist = parser.parse((endtag,))
-    parser.delete_first_token()
-    return ConditionalNode(nodelist, condition_format, newline)
-
-class ConditionalNode(template.Node):
-    
-    def __init__(self, nodelist, condition_format, newline=False):
-        self.nodelist = nodelist
-        self.condition_format = condition_format
-        self.newline = newline
-
-    def render(self, context):
-        inner = self.nodelist.render(context)
-        if self.newline:
-            inner = "\n%s\n" % inner
-        return self.condition_format % inner
