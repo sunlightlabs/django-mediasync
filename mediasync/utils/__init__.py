@@ -1,3 +1,5 @@
+import cStringIO
+import gzip
 
 def compress(data, level=6):
     zbuf = cStringIO.StringIO()

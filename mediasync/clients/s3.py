@@ -3,9 +3,7 @@ from boto.s3.key import Key
 from django.conf import settings
 from mediasync.utils import compress, cssmin, jsmin
 import base64
-import cStringIO
 import datetime
-import gzip
 import hashlib
 
 TYPES_TO_COMPRESS = (
