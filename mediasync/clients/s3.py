@@ -1,7 +1,7 @@
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from django.conf import settings
-from mediasync.utils import compress, cssmin, jsmin
+from mediasync.utils import cssmin, jsmin
 import base64
 import datetime
 import hashlib
