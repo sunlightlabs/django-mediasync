@@ -7,13 +7,15 @@ import warnings
 JOINED = getattr(settings, "MEDIASYNC_JOINED", {})
 SERVE_REMOTE = getattr(settings, "MEDIASYNC_SERVE_REMOTE", not settings.DEBUG)
 DOCTYPE = getattr(settings, "MEDIASYNC_DOCTYPE", 'xhtml')
+URL_PROCESSOR = getattr(settings, "MEDIASYNC_URL_PROCESSOR", lambda x: x)
 
 register = template.Library()
 
 def mkpath(url, path, filename):
     if path:
-        url = "%s/%s" % (url, path)
-    return "%s/%s" % (url, filename)
+        url = "%s/%s" % (url.rstrip('/'), path.strip('/'))
+    url = "%s/%s" % (url, filename.lstrip('/'))
+    return URL_PROCESSOR(url)
 
 #
 # media stuff
@@ -27,15 +29,16 @@ def media_url():
 # CSS related tags
 #
 
-LINK_ENDER = ' />' if DOCTYPE == 'xhtml' else '>'
-
 def linktag(url, path, filename, media):
-    params = (mkpath(url, path, filename), media, LINK_ENDER)
-    return """<link rel="stylesheet" href="%s" type="text/css" media="%s"%s""" % params
+    if DOCTYPE == 'xhtml':
+        markup = """<link rel="stylesheet" href="%s" type="text/css" media="%s" />"""
+    else:
+        markup = """<link rel="stylesheet" href="%s" type="text/css" media="%s">"""
+    return  markup % (mkpath(url, path, filename), media)
     
 @register.simple_tag
 def css(filename, media="screen, projection"):
-    css_path = getattr(settings, "MEDIASYNC_CSS_PATH", "").strip('/')
+    css_path = getattr(settings, "MEDIASYNC_CSS_PATH", "")
     if SERVE_REMOTE and filename in JOINED:
         return linktag(MEDIA_URL, css_path, filename, media)
     else:
@@ -59,7 +62,7 @@ def scripttag(url, path, filename):
     
 @register.simple_tag
 def js(filename):
-    js_path = getattr(settings, "MEDIASYNC_JS_PATH", "").strip('/')
+    js_path = getattr(settings, "MEDIASYNC_JS_PATH", "")
     if SERVE_REMOTE and filename in JOINED:
         return scripttag(MEDIA_URL, js_path, filename)
     else:
