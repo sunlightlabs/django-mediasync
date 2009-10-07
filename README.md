@@ -4,13 +4,11 @@ One of the more significant development roadblocks we have relates to local vs. 
 
 To make this easier, I wrote some additions to the sunlightcore module that handles a lot of media tasks. The goal is to develop locally and then flip a switch in production that makes all the media URLs point to S3 instead of the local media directory. Specifically, MEDIASYNC executes the following tasks:
 
-- run gzip+jsmin on javascript files
+- run deflate+jsmin on javascript files
 
-- run gzip+cssmin on css files
+- run deflate+cssmin on css files
 
 - add expires headers to everything
-
-One flaw is that the MD5 of a compressed file changes each time it is compressed. This will cause css and js files to be reuploaded each time. Images and other files that are not compressed will only be uploaded when they are created or if they have changed. 
 
 django-mediasync is a project of Sunlight Foundation (c) 2009.
 Writen by Jeremy Carbaugh <jcarbaugh@sunlightfoundation.com>
@@ -22,7 +20,7 @@ Source: http://github.com/sunlightlabs/django-mediasync/
 
 ## Requirements
 
-python >= 2.4
+python >= 2.4 (with zlib)
 
 django >= 1.0
 

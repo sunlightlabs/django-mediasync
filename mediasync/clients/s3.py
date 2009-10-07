@@ -5,6 +5,7 @@ from mediasync.utils import compress, cssmin, jsmin
 import base64
 import datetime
 import hashlib
+import zlib
 
 TYPES_TO_COMPRESS = (
     "application/javascript",
@@ -49,8 +50,8 @@ class Client(object):
         
         # check to see if file should be gzipped based on content_type
         if content_type in TYPES_TO_COMPRESS:
-            filedata = compress(filedata)
-            headers["Content-Encoding"] = "gzip"  
+            filedata = zlib.compress(filedata)
+            headers["Content-Encoding"] = "deflate"  
         
         # calculate md5 digest of filedata
         checksum = hashlib.md5(filedata)

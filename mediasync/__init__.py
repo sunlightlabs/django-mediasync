@@ -70,13 +70,13 @@ def sync(bucket=None, prefix=''):
     
     joined = getattr(settings, "MEDIASYNC_JOINED", {})
     
-    for destfile, sourcefiles in joined.iteritems():
+    for joinfile, sourcefiles in joined.iteritems():
         
-        destfile = destfile.strip('/')
+        joinfile = joinfile.strip('/')
         
-        if destfile.endswith('.css'):
+        if joinfile.endswith('.css'):
             dirname = CSS_PATH
-        elif destfile.endswith('.js'):
+        elif joinfile.endswith('.js'):
             dirname = JS_PATH
         else:
             continue # bypass this file since we only join css and js
@@ -98,15 +98,14 @@ def sync(bucket=None, prefix=''):
         s3filepath = prefix
         if dirname:
             s3filepath = "%s/%s" % (s3filepath, dirname)
-        s3filepath = "%s/%s" % (s3filepath, destfile)
+        s3filepath = "%s/%s" % (s3filepath, joinfile)
         
-        _sync_file(client, destfile, s3filepath, filedata)
+        _sync_file(client, joinfile, s3filepath, filedata)
         
     #
     # sync static media
     #
 
-    #for dirname in DIRS_TO_SYNC:
     for dirname in os.listdir(settings.MEDIA_ROOT):
         
         if dirname.startswith('.') or dirname.startswith('_'):
