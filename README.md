@@ -70,6 +70,12 @@ By default, all files are given an expires header of 365 days after the file was
 
     MEDIASYNC_EXPIRATION_DAYS = 365 * 10    # expire in 10 years
 
+Since files are given a far future expires header, one needs a way to do "cache busting" when you want the browser to fetch new files before the expire date arrives.  One of the best and easiest ways to accomplish this is to alter the path to the media files with some sort of version string using the key prefix setting:
+
+    MEDIASYNC_AWS_PREFIX = "myproject/media/v20001201"
+
+Given that and the above DNS CNAME example, the media directory URL would end up being http://assets.sunlightlabs.com/myproject/media/v20001201/.  Whenever you need to update the media files, simply update the key prefix with a new versioned string.
+
 Amazon allows users to create DNS CNAME entries to map custom domain names to an AWS bucket. MEDIASYNC can be configured to use the bucket as the media URL by setting __MEDIASYNC\_BUCKET\_CNAME__ to *True*.
 
 	MEDIASYNC_BUCKET_CNAME = True
