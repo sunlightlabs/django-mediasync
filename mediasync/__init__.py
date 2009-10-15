@@ -111,7 +111,7 @@ def sync(bucket=None, prefix=''):
         if dirname.startswith('.') or dirname.startswith('_'):
             continue # ignore hidden or directories that are not meant to be synced
         
-        dirpath = os.path.join(settings.MEDIA_ROOT, dirname)
+        dirpath = os.path.abspath(os.path.join(settings.MEDIA_ROOT, dirname))
         
         if os.path.isdir(dirpath):
            
