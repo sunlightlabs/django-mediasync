@@ -20,12 +20,15 @@ MEDIA_URL = mu.rstrip('/')
 
 def listdir_recursive(dir):
     for root, dirs, files in os.walk(dir):
-        for file in files:
-            if not "/." in root:
-                fname = os.path.join(root, file).replace(dir, '')
+        basename = os.path.basename(root)
+        if not (basename.startswith('.') or basename.startswith('_')):
+            for file in files:
+                fname = os.path.join(root, file).replace(dir, '', 1)
                 if fname.startswith('/'):
                     fname = fname[1:]
                 yield fname
+        else:
+             pass # "Skipping directory %s" % root
 
 def sync(bucket=None, prefix=''):
     """ Let's face it... pushing this stuff to S3 is messy.
@@ -107,9 +110,6 @@ def sync(bucket=None, prefix=''):
     #
 
     for dirname in os.listdir(settings.MEDIA_ROOT):
-        
-        if dirname.startswith('.') or dirname.startswith('_'):
-            continue # ignore hidden or directories that are not meant to be synced
         
         dirpath = os.path.abspath(os.path.join(settings.MEDIA_ROOT, dirname))
         
