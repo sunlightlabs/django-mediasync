@@ -10,9 +10,6 @@ To make this easier, I wrote some additions to the sunlightcore module that hand
 
 - add expires headers to everything
 
-django-mediasync is a project of Sunlight Foundation (c) 2009.
-Writen by Jeremy Carbaugh <jcarbaugh@sunlightfoundation.com>
-
 All code is under a BSD-style license, see LICENSE for details.
 
 Source: http://github.com/sunlightlabs/django-mediasync/
