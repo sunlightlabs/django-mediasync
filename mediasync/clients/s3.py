@@ -50,7 +50,7 @@ class Client(object):
         
         # check to see if file should be gzipped based on content_type
         if content_type in TYPES_TO_COMPRESS:
-            filedata = zlib.compress(filedata)
+            filedata = zlib.compress(filedata)[2:-4] # strip zlib header and checksum
             headers["Content-Encoding"] = "deflate"  
         
         # calculate md5 digest of filedata
