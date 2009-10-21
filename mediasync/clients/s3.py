@@ -33,7 +33,7 @@ class Client(object):
         
         now = datetime.datetime.utcnow()
         then = now + datetime.timedelta(EXPIRATION_DAYS)
-        expires = then.strftime("%a, %d %b %Y %H:%M:%S UTC")
+        expires = then.strftime("%a, %d %b %Y %H:%M:%S GMT")
         
         # check to see if cssmin or jsmin should be run
         if content_type == "text/css":
