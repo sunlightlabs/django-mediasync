@@ -49,7 +49,8 @@ class Client(object):
         }
         
         # check to see if file should be gzipped based on content_type
-        if content_type in TYPES_TO_COMPRESS:
+        # also check to see if filesize is greater than 1kb
+        if content_type in TYPES_TO_COMPRESS and len(filedata) > 1024:
             filedata = zlib.compress(filedata)[2:-4] # strip zlib header and checksum
             headers["Content-Encoding"] = "deflate"  
         
