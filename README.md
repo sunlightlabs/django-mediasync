@@ -111,7 +111,7 @@ __MEDIASYNC_DOCTYPE__ = "xhtml"
 
 A static media URL needs to be setup in urls.py that enables access to the media directory ONLY IN DEBUG MODE.
 
-    import settings
+    from django.conf import settings
 	if (settings.DEBUG):  
 		urlpatterns += patterns('',  
 			url(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),  
