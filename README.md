@@ -10,9 +10,6 @@ To make this easier, I wrote some additions to the sunlightcore module that hand
 
 - add expires headers to everything
 
-django-mediasync is a project of Sunlight Foundation (c) 2009.
-Writen by Jeremy Carbaugh <jcarbaugh@sunlightfoundation.com>
-
 All code is under a BSD-style license, see LICENSE for details.
 
 Source: http://github.com/sunlightlabs/django-mediasync/
@@ -114,7 +111,7 @@ __MEDIASYNC_DOCTYPE__ = "xhtml"
 
 A static media URL needs to be setup in urls.py that enables access to the media directory ONLY IN DEBUG MODE.
 
-    import settings
+    from django.conf import settings
 	if (settings.DEBUG):  
 		urlpatterns += patterns('',  
 			url(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),  

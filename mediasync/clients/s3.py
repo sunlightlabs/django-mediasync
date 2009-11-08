@@ -33,7 +33,7 @@ class Client(object):
         
         now = datetime.datetime.utcnow()
         then = now + datetime.timedelta(EXPIRATION_DAYS)
-        expires = then.strftime("%a, %d %b %Y %H:%M:%S UTC")
+        expires = then.strftime("%a, %d %b %Y %H:%M:%S GMT")
         
         # check to see if cssmin or jsmin should be run
         if content_type == "text/css":
@@ -46,11 +46,13 @@ class Client(object):
             "x-amz-acl": "public-read",
             "Content-Type": content_type,
             "Expires": expires,
+            "Cache-Control": 'max-age %d' % (EXPIRATION_DAYS * 24 * 3600),
         }
         
         # check to see if file should be gzipped based on content_type
-        if content_type in TYPES_TO_COMPRESS:
-            filedata = zlib.compress(filedata)
+        # also check to see if filesize is greater than 1kb
+        if content_type in TYPES_TO_COMPRESS and len(filedata) > 1024:
+            filedata = zlib.compress(filedata)[2:-4] # strip zlib header and checksum
             headers["Content-Encoding"] = "deflate"  
         
         # calculate md5 digest of filedata
