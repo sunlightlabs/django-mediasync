@@ -13,6 +13,7 @@ TYPES_TO_COMPRESS = (
     "application/xml",
     "text/css",
     "text/html",
+    "text/javascript",
     "text/plain",
 )
 
@@ -38,7 +39,9 @@ class Client(object):
         # check to see if cssmin or jsmin should be run
         if content_type == "text/css":
             filedata = cssmin.cssmin(filedata)
-        elif content_type == "text/javascript":    
+        elif content_type in ["text/javascript",
+                              "application/javascript",
+                              "application/x-javascript"]:
             filedata = jsmin.jsmin(filedata)
         
         # create initial set of headers
