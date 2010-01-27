@@ -7,15 +7,20 @@ import datetime
 import hashlib
 import zlib
 
-TYPES_TO_COMPRESS = (
+JS_MIMETYPES = (
     "application/javascript",
-    "application/x-javascript",
-    "application/xml",
-    "text/css",
-    "text/html",
-    "text/javascript",
-    "text/plain",
+    "text/javascript", # obsolete, see RFC 4329
 )
+CSS_MIMETYPES = (
+    "text/css",
+)
+TYPES_TO_COMPRESS = (
+    "application/json",
+    "application/xml",
+    "text/html",
+    "text/plain",
+    "text/xml",
+) + JS_MIMETYPES + CSS_MIMETYPES
 
 EXPIRATION_DAYS = getattr(settings, "MEDIASYNC_EXPIRATION_DAYS", 365)
 
@@ -37,11 +42,9 @@ class Client(object):
         expires = then.strftime("%a, %d %b %Y %H:%M:%S GMT")
         
         # check to see if cssmin or jsmin should be run
-        if content_type == "text/css":
+        if content_type in CSS_MIMETYPES:
             filedata = cssmin.cssmin(filedata)
-        elif content_type in ["text/javascript",
-                              "application/javascript",
-                              "application/x-javascript"]:
+        elif content_type in JS_MIMETYPES:
             filedata = jsmin.jsmin(filedata)
         
         # create initial set of headers
@@ -56,7 +59,7 @@ class Client(object):
         # also check to see if filesize is greater than 1kb
         if content_type in TYPES_TO_COMPRESS and len(filedata) > 1024:
             filedata = zlib.compress(filedata)[2:-4] # strip zlib header and checksum
-            headers["Content-Encoding"] = "deflate"  
+            headers["Content-Encoding"] = "deflate"
         
         # calculate md5 digest of filedata
         checksum = hashlib.md5(filedata)
