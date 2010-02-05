@@ -1,22 +1,11 @@
 from django.conf import settings
+from mediasync.utils import load_backend
 import os
 import re
 
-DIRS_TO_SYNC = ['images','scripts','styles']
-
-SERVE_REMOTE = getattr(settings, "MEDIASYNC_SERVE_REMOTE", not settings.DEBUG)
-BUCKET_CNAME = getattr(settings, "MEDIASYNC_BUCKET_CNAME", False)
-AWS_PREFIX = getattr(settings, "MEDIASYNC_AWS_PREFIX", None)
-
-if SERVE_REMOTE:
-    assert hasattr(settings, "MEDIASYNC_AWS_BUCKET")
-    mu = (BUCKET_CNAME and "http://%s" or "http://%s.s3.amazonaws.com") % settings.MEDIASYNC_AWS_BUCKET
-    if AWS_PREFIX:
-        mu = "%s/%s" % (mu, AWS_PREFIX)
-else:
-    mu = settings.MEDIA_URL
-
-MEDIA_URL = mu.rstrip('/')
+def client():
+    backend_name = getattr(settings, "MEDIASYNC", {}).get("BACKEND", None)
+    return load_backend(backend_name)
 
 def listdir_recursive(dir):
     for root, dirs, files in os.walk(dir):
@@ -42,8 +31,6 @@ def sync(bucket=None, prefix=''):
     import cStringIO
     
     assert hasattr(settings, "MEDIA_ROOT")
-    assert hasattr(settings, "MEDIASYNC_AWS_KEY")
-    assert hasattr(settings, "MEDIASYNC_AWS_SECRET")
     
     CSS_PATH = getattr(settings, "MEDIASYNC_CSS_PATH", "").strip('/')
     JS_PATH = getattr(settings, "MEDIASYNC_JS_PATH", "").strip('/')

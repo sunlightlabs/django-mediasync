@@ -1,13 +1,21 @@
 from django import template
 from django.conf import settings
 from django.template.defaultfilters import stringfilter
-from mediasync import MEDIA_URL
+from mediasync import backends
 import warnings
 
-JOINED = getattr(settings, "MEDIASYNC_JOINED", {})
-SERVE_REMOTE = getattr(settings, "MEDIASYNC_SERVE_REMOTE", not settings.DEBUG)
-DOCTYPE = getattr(settings, "MEDIASYNC_DOCTYPE", 'xhtml')
-URL_PROCESSOR = getattr(settings, "MEDIASYNC_URL_PROCESSOR", lambda x: x)
+mediasync_settings = getattr(settings, 'MEDIASYNC', {})
+
+client = backends.client()
+
+DOCTYPE = mediasync_settings.get("DOCTYPE", "xhtml")
+JOINED = mediasync_settings.get("JOINED", {})
+MEDIA_URL = client.media_url()
+SERVE_REMOTE = client.serve_remote or not settings.DEBUG
+URL_PROCESSOR = mediasync_settings.get("URL_PROCESSOR", lambda x: x)
+
+CSS_PATH = mediasync_settings.get("CSS_PATH", "")
+JS_PATH = mediasync_settings.get("JS_PATH", "")
 
 register = template.Library()
 
@@ -38,12 +46,11 @@ def linktag(url, path, filename, media):
     
 @register.simple_tag
 def css(filename, media="screen, projection"):
-    css_path = getattr(settings, "MEDIASYNC_CSS_PATH", "")
     if SERVE_REMOTE and filename in JOINED:
-        return linktag(MEDIA_URL, css_path, filename, media)
+        return linktag(MEDIA_URL, CSS_PATH, filename, media)
     else:
         filenames = JOINED.get(filename, (filename,))
-        return ' '.join((linktag(MEDIA_URL, css_path, fn, media) for fn in filenames))
+        return ' '.join((linktag(MEDIA_URL, CSS_PATH, fn, media) for fn in filenames))
 
 @register.simple_tag
 def css_print(filename):
@@ -62,9 +69,8 @@ def scripttag(url, path, filename):
     
 @register.simple_tag
 def js(filename):
-    js_path = getattr(settings, "MEDIASYNC_JS_PATH", "")
     if SERVE_REMOTE and filename in JOINED:
-        return scripttag(MEDIA_URL, js_path, filename)
+        return scripttag(MEDIA_URL, JS_PATH, filename)
     else:
         filenames = JOINED.get(filename, (filename,))
-        return ' '.join((scripttag(MEDIA_URL, js_path, fn) for fn in filenames))
+        return ' '.join((scripttag(MEDIA_URL, JS_PATH, fn) for fn in filenames))
