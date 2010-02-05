@@ -6,7 +6,7 @@ setup(
     name='django-mediasync',
     version="1.0",
     package_dir={'mediasync': 'mediasync'},
-    packages=['mediasync','mediasync.clients','mediasync.management',
+    packages=['mediasync','mediasync.backends','mediasync.management',
               'mediasync.management.commands','mediasync.templatetags',
               'mediasync.utils'],
     description='Django static media development and distribution tools',
