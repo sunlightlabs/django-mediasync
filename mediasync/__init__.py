@@ -38,7 +38,7 @@ def sync(bucket=None, prefix=''):
     """
     
     from django.conf import settings
-    from mediasync.clients import s3
+    from mediasync.backends import s3
     import cStringIO
     
     assert hasattr(settings, "MEDIA_ROOT")
