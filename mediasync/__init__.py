@@ -10,7 +10,10 @@ AWS_PREFIX = getattr(settings, "MEDIASYNC_AWS_PREFIX", None)
 
 if SERVE_REMOTE:
     assert hasattr(settings, "MEDIASYNC_AWS_BUCKET")
-    mu = (BUCKET_CNAME and "http://%s" or "http://%s.s3.amazonaws.com") % settings.MEDIASYNC_AWS_BUCKET
+    scheme = 'http' \
+        if not getattr(settings, 'MEDIASYNC_USE_SSL', False) else 'https'
+    mu = (BUCKET_CNAME and "%s://%s" or "%s://%s.s3.amazonaws.com") % \
+                                        (scheme, settings.MEDIASYNC_AWS_BUCKET)
     if AWS_PREFIX:
         mu = "%s/%s" % (mu, AWS_PREFIX)
 else:
