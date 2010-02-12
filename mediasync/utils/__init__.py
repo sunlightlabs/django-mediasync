@@ -3,7 +3,6 @@ from django.utils.importlib import import_module
 
 def load_backend(backend_name):
     try:
-        ()
         backend = import_module(backend_name)
         return backend.Client()
     except ImportError, e:

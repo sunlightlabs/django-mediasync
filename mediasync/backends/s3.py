@@ -13,16 +13,24 @@ class Client(BaseClient):
     def __init__(self, *args, **kwargs):
         super(Client, self).__init__(*args, **kwargs)
         
-        self.aws_key = self._settings.get("AWS_KEY", None)
-        self.aws_secret = self._settings.get("AWS_SECRET", None)        
         self.aws_bucket = self._settings.get('AWS_BUCKET', None)
         self.aws_prefix = self._settings.get('AWS_PREFIX', '').strip('/')
-        self.bucket_cname = self._settings.get('BUCKET_CNAME', False)
+        self.aws_bucket_cname = self._settings.get('AWS_BUCKET_CNAME', False)
         
         assert self.aws_bucket
+        
+        key = self._settings.get("AWS_KEY", None)
+        secret = self._settings.get("AWS_SECRET", None)
+        
+        self._conn = S3Connection(key, secret)
+        self._bucket = self._conn.create_bucket(self.aws_bucket)
+
+        self._entries = { }
+        for entry in self._bucket.list(self.aws_prefix):
+            self._entries[entry.key] = entry.etag.strip('"')
     
     def remote_media_url(self):
-        url = (self.bucket_cname and "http://%s" or "http://%s.s3.amazonaws.com") % self.aws_bucket
+        url = (self.aws_bucket_cname and "http://%s" or "http://%s.s3.amazonaws.com") % self.aws_bucket
         if self.aws_prefix:
             url = "%s/%s" % (url, self.aws_prefix)
         return url        
@@ -30,15 +38,18 @@ class Client(BaseClient):
     def put(self, filedata, content_type, remote_path, force=False):
 
         now = datetime.datetime.utcnow()
-        then = now + datetime.timedelta(EXPIRATION_DAYS)
+        then = now + datetime.timedelta(self.expiration_days)
         expires = then.strftime("%a, %d %b %Y %H:%M:%S GMT")
+        
+        if self.aws_prefix:
+            remote_path = "%s/%s" % (self.aws_prefix, remote_path)
 
         # create initial set of headers
         headers = {
             "x-amz-acl": "public-read",
             "Content-Type": content_type,
             "Expires": expires,
-            "Cache-Control": 'max-age %d' % (EXPIRATION_DAYS * 24 * 3600),
+            "Cache-Control": 'max-age %d' % (self.expiration_days * 24 * 3600),
         }
 
         # check to see if file should be gzipped based on content_type

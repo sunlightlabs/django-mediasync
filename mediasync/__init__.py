@@ -1,5 +1,4 @@
 from django.conf import settings
-from mediasync.utils import load_backend, cssmin, jsmin
 import os
 import re
 
@@ -17,10 +16,6 @@ TYPES_TO_COMPRESS = (
     "text/plain",
     "text/xml",
 ) + JS_MIMETYPES + CSS_MIMETYPES
-
-def client():
-    backend_name = getattr(settings, "MEDIASYNC", {}).get("BACKEND", None)
-    return load_backend(backend_name)
 
 def listdir_recursive(dir):
     for root, dirs, files in os.walk(dir):
@@ -42,38 +37,23 @@ def sync(bucket=None, prefix=''):
     """
     
     from django.conf import settings
-    from mediasync.backends import s3
+    from mediasync import backends
     import cStringIO
     
     assert hasattr(settings, "MEDIA_ROOT")
+    assert hasattr(settings, "MEDIASYNC")
     
-    CSS_PATH = getattr(settings, "MEDIASYNC_CSS_PATH", "").strip('/')
-    JS_PATH = getattr(settings, "MEDIASYNC_JS_PATH", "").strip('/')
-        
-    # check for bucket and prefix parameters
-    
-    if not bucket:
-        bucket = getattr(settings, "MEDIASYNC_AWS_BUCKET", None)
-        if not bucket:
-            raise ValueError("bucket is required")
-            
-    if not prefix:
-        prefix = getattr(settings, "MEDIASYNC_AWS_PREFIX", '').strip('/')
-    
-    # construct media url
-    bucket_cname = getattr(settings, "MEDIASYNC_BUCKET_CNAME", False)
-    media_url = (bucket_cname and "http://%s" or "http://%s.s3.amazonaws.com") % bucket
-    if prefix:
-        media_url = "%s/%s" % (media_url, prefix)
+    CSS_PATH = settings.MEDIASYNC.get("CSS_PATH", "").strip('/')
+    JS_PATH = settings.MEDIASYNC.get("JS_PATH", "").strip('/')
     
     # create s3 connection
-    client = s3.Client(settings.MEDIASYNC_AWS_KEY, settings.MEDIASYNC_AWS_SECRET, bucket, prefix)
+    client = backends.client()
 
     #
     # sync joined media
     #
     
-    joined = getattr(settings, "MEDIASYNC_JOINED", {})
+    joined = settings.MEDIASYNC.get("JOINED", {})
     
     for joinfile, sourcefiles in joined.iteritems():
         
@@ -100,12 +80,11 @@ def sync(bucket=None, prefix=''):
         filedata = buffer.getvalue()
         buffer.close()
         
-        s3filepath = prefix
+        remote_path = joinfile
         if dirname:
-            s3filepath = "%s/%s" % (s3filepath, dirname)
-        s3filepath = "%s/%s" % (s3filepath, joinfile)
+            remote_path = "%s/%s" % (dirname, remote_path)
         
-        _sync_file(client, joinfile, s3filepath, filedata)
+        _sync_file(client, joinfile, remote_path, filedata)
         
     #
     # sync static media
@@ -121,17 +100,18 @@ def sync(bucket=None, prefix=''):
                 
                 # calculate local and remote paths
                 filepath = os.path.join(dirpath, filename)
-                s3filepath = "%s/%s/%s" % (prefix, dirname, filename)
+                remote_path = "%s/%s" % (dirname, filename)
                 
                 if filename.startswith('.') or not os.path.isfile(filepath):
                     continue # hidden file or directory, do not upload
                 
-                _sync_file(client, filepath, s3filepath)
+                _sync_file(client, filepath, remote_path)
                 
 
 def _sync_file(client, filepath, remote_path, filedata=None):
     
     from django.conf import settings
+    from mediasync.utils import cssmin, jsmin
     import mimetypes
                 
     # load file data from local path
