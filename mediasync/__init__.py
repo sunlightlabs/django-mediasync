@@ -1,7 +1,22 @@
 from django.conf import settings
-from mediasync.utils import load_backend
+from mediasync.utils import load_backend, cssmin, jsmin
 import os
 import re
+
+JS_MIMETYPES = (
+    "application/javascript",
+    "text/javascript", # obsolete, see RFC 4329
+)
+CSS_MIMETYPES = (
+    "text/css",
+)
+TYPES_TO_COMPRESS = (
+    "application/json",
+    "application/xml",
+    "text/html",
+    "text/plain",
+    "text/xml",
+) + JS_MIMETYPES + CSS_MIMETYPES
 
 def client():
     backend_name = getattr(settings, "MEDIASYNC", {}).get("BACKEND", None)
@@ -127,6 +142,12 @@ def _sync_file(client, filepath, remote_path, filedata=None):
     content_type = mimetypes.guess_type(filepath)[0]
     if not content_type:
         content_type = "text/plain"
+
+    # check to see if cssmin or jsmin should be run
+    if content_type in CSS_MIMETYPES:
+        filedata = cssmin.cssmin(filedata)
+    elif content_type in JS_MIMETYPES:
+        filedata = jsmin.jsmin(filedata)
     
     # rewrite CSS if the user chooses
     if getattr(settings, "MEDIASYNC_REWRITE_CSS", False): 
