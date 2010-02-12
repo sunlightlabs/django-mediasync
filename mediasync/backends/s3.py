@@ -1,7 +1,7 @@
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from django.conf import settings
-from mediasync import JS_MIMETYPES, CSS_MIMETYPES, TYPES_TO_COMPRESS
+from mediasync import TYPES_TO_COMPRESS
 from mediasync.backends import BaseClient
 import base64
 import datetime
@@ -22,8 +22,8 @@ class Client(BaseClient):
         key = self._settings.get("AWS_KEY", None)
         secret = self._settings.get("AWS_SECRET", None)
         
-        self._conn = S3Connection(key, secret)
-        self._bucket = self._conn.create_bucket(self.aws_bucket)
+        _conn = S3Connection(key, secret)
+        self._bucket = _conn.create_bucket(self.aws_bucket)
 
         self._entries = { }
         for entry in self._bucket.list(self.aws_prefix):
