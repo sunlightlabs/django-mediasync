@@ -1,0 +1,1 @@
+django-admin.py test --settings=mediasync.tests.settings --pythonpath=../..
