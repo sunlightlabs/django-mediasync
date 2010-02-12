@@ -129,12 +129,6 @@ def _sync_file(client, filepath, remote_path, filedata=None):
     elif content_type in JS_MIMETYPES:
         filedata = jsmin.jsmin(filedata)
     
-    # rewrite CSS if the user chooses
-    if getattr(settings, "MEDIASYNC_REWRITE_CSS", False): 
-        if content_type == "text/css" or filepath.endswith('.htc'):
-            MEDIA_URL_RE = re.compile(r"/media/\w+/")
-            filedata = MEDIA_URL_RE.sub(r'%s/\1/' % media_url, filedata)
-    
     if client.put(filedata, content_type, remote_path):
         print "[%s] %s" % (content_type, remote_path)
 
