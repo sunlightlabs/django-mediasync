@@ -1,6 +1,9 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from mediasync import backends
 import mediasync
+import os
+import sys
 import unittest
 
 class BaseTestCase(unittest.TestCase):
@@ -9,7 +12,7 @@ class BaseTestCase(unittest.TestCase):
         settings.MEDIASYNC = {
             'BACKEND': 'not.a.backend',
         }
-        self.assertRaises(ImproperlyConfigured, mediasync.client)
+        self.assertRaises(ImproperlyConfigured, backends.client)
 
 class DummyBackendTestCase(unittest.TestCase):
     
@@ -18,11 +21,19 @@ class DummyBackendTestCase(unittest.TestCase):
         settings.MEDIASYNC = {
             'BACKEND': 'mediasync.backends.dummy',
         }
-        self.client = mediasync.client()
+        self.client = backends.client()
     
-    def testPush():
+    def testPush(self):
+        
+        def callback(*args):
+            pass
+        
+        self.client.put_callback = callback
+        mediasync.sync(self.client)
+    
+    def testJoinedPush(self):
         pass
-
+    
 class S3BackendTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -30,8 +41,10 @@ class S3BackendTestCase(unittest.TestCase):
         settings.MEDIASYNC = {
             'BACKEND': 'mediasync.backends.s3',
             'AWS_BUCKET': 'mediasync_test',
+            'AWS_KEY': os.environ['AWS_KEY'],
+            'AWS_SECRET': os.environ['AWS_SECRET'],
         }
-        self.client = mediasync.client()
+        self.client = backends.client()
         
     def testMediaURL(self):
         
@@ -41,23 +54,23 @@ class S3BackendTestCase(unittest.TestCase):
             pass
             
         settings.DEBUG = True
-        self.assertEqual(mediasync.client().media_url(), '/media')
+        self.assertEqual(backends.client().media_url(), '/media')
         
         settings.DEBUG = False
-        self.assertEqual(mediasync.client().media_url(), 'http://mediasync_test.s3.amazonaws.com')
+        self.assertEqual(backends.client().media_url(), 'http://mediasync_test.s3.amazonaws.com')
     
     def testServeRemote(self):
         
         settings.DEBUG = False
         settings.MEDIASYNC['SERVE_REMOTE'] = False
-        self.assertEqual(mediasync.client().media_url(), '/media')
+        self.assertEqual(backends.client().media_url(), '/media')
         
         settings.DEBUG = True
         settings.MEDIASYNC['SERVE_REMOTE'] = True
-        self.assertEqual(mediasync.client().media_url(), 'http://mediasync_test.s3.amazonaws.com')
+        self.assertEqual(backends.client().media_url(), 'http://mediasync_test.s3.amazonaws.com')
     
     def testMissingBucket(self):
         del settings.MEDIASYNC['AWS_BUCKET']
-        self.assertRaises(AssertionError, mediasync.client)
+        self.assertRaises(AssertionError, backends.client)
         
         
