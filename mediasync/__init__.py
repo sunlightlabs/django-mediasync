@@ -29,7 +29,7 @@ def listdir_recursive(dir):
         else:
              pass # "Skipping directory %s" % root
 
-def sync(bucket=None, prefix=''):
+def sync(client=None):
     """ Let's face it... pushing this stuff to S3 is messy.
         A lot of different things need to be calculated for each file
         and they have to be in a certain order as some variables rely
@@ -46,8 +46,9 @@ def sync(bucket=None, prefix=''):
     CSS_PATH = settings.MEDIASYNC.get("CSS_PATH", "").strip('/')
     JS_PATH = settings.MEDIASYNC.get("JS_PATH", "").strip('/')
     
-    # create s3 connection
-    client = backends.client()
+    # create client connection
+    if client is None:
+        client = backends.client()
 
     #
     # sync joined media
