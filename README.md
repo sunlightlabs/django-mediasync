@@ -1,14 +1,14 @@
 # django-mediasync
 
-One of the more significant development roadblocks we have relates to local vs. deployed media. Ideally all media (graphics, css, scripts) development would occur locally and not use S3. Then, when ready to deploy, the media should be pushed to S3. That way there can be significant changes to media without disturbing the production web site.
+One of the more significant development roadblocks we have relates to local vs. deployed media. Ideally all media (graphics, css, scripts) development would occur locally and not use production media. Then, when ready to deploy, the media should be pushed to production. That way there can be significant changes to media without disturbing the production web site.
 
-To make this easier, I wrote some additions to the sunlightcore module that handles a lot of media tasks. The goal is to develop locally and then flip a switch in production that makes all the media URLs point to S3 instead of the local media directory. Specifically, MEDIASYNC executes the following tasks:
+The goal of mediasync is to develop locally and then flip a switch in production that makes all the media URLs point to remote media URLs instead of the local media directory. Specifically, mediasync executes the following tasks:
 
 - run deflate+jsmin on javascript files
 
 - run deflate+cssmin on css files
 
-- add expires headers to everything
+- add expires headers to everything (if supported by the backend)
 
 All code is under a BSD-style license, see LICENSE for details.
 
@@ -23,6 +23,7 @@ django >= 1.0
 
 boto >= 1.8d
 
+
 ## Installation
 
 To install run
@@ -32,7 +33,7 @@ To install run
 which will install the application into python's site-packages directory.
 
 
-## Quick Setup
+## Configuration
 
 
 ### settings.py
@@ -49,63 +50,101 @@ Additionally, replace the existing __MEDIA\_URL__ setting with:
 
 	MEDIA_URL = '/devmedia/'
 
-__MEDIA\_URL__ is the URL that will be used in debug mode. Otherwise, the __MEDIA\_URL__ will be inferred from the settings listed below.
+__MEDIA\_URL__ is the URL that will be used in debug mode. Otherwise, the __MEDIA\_URL__ will be loaded from the backend settings.
 
-The following settings must also be added: 
+The following settings dict must also be added: 
    
-	MEDIASYNC_AWS_KEY = "s3_key"  
-	MEDIASYNC_AWS_SECRET = "s3_secret"  
-	MEDIASYNC_AWS_BUCKET = "bucket_name"  
-	
-Optionally you may specify a key prefix:
+	MEDIASYNC = {
+		'BACKEND': 'path.to.backend',
+	}
 
-	MEDIASYNC_AWS_PREFIX = "key_prefix"  
+mediasync supports pluggable backends. Please see below for information on the provided backends as well as directions on implementing your own.
 
-Assuming a correct DNS CNAME entry, setting __MEDIASYNC\_AWS\_BUCKET__ to __assets.sunlightlabs.com__ and __MEDIASYNC\_AWS\_PREFIX__ to __myproject/media__ would sync the media directory to http://assets.sunlightlabs.com/myproject/media/.
+If the client supports media expiration, all files are set to expire 365 days after the file was synced. You may override this value by adding __EXPIRATION\_DAYS__ to the MEDIASYNC settings dict.
 
-By default, all files are given an expires header of 365 days after the file was synced to S3. You may override this value by adding __MEDIASYNC\_EXPIRATION\_DAYS__ to settings.py.
+	'EXPIRATION_DAYS': 365 * 10, # expire in 10 years
 
-    MEDIASYNC_EXPIRATION_DAYS = 365 * 10    # expire in 10 years
+The media URL is selected based on the __DEBUG__ attribute in settings.py. When *True*, media will be served locally instead of from S3. Sometimes it is necessary to serve media from S3 even when __DEBUG__ is *True*. To force remote serving of media, set __SERVE\_REMOTE__ to *True*.
 
-Since files are given a far future expires header, one needs a way to do "cache busting" when you want the browser to fetch new files before the expire date arrives.  One of the best and easiest ways to accomplish this is to alter the path to the media files with some sort of version string using the key prefix setting:
+	'SERVE_REMOTE': True,
 
-    MEDIASYNC_AWS_PREFIX = "myproject/media/v20001201"
+#### DOCTYPE
 
-Given that and the above DNS CNAME example, the media directory URL would end up being http://assets.sunlightlabs.com/myproject/media/v20001201/.  Whenever you need to update the media files, simply update the key prefix with a new versioned string.
+link and script tags are written using XHTML syntax. The rendering can be overridden by using the __DOCTYPE__ setting. Allowed values are *'html4'*, *'html5'*, or *'xhtml'*.
 
-Amazon allows users to create DNS CNAME entries to map custom domain names to an AWS bucket. MEDIASYNC can be configured to use the bucket as the media URL by setting __MEDIASYNC\_BUCKET\_CNAME__ to *True*.
+	'DOCTYPE': 'xhtml',
 
-	MEDIASYNC_BUCKET_CNAME = True
+For each doctype, the following tags are rendered:
 
-Previous versions of mediasync rewrote URLs in CSS files to use the correct __MEDIA\_URL__. Now users are encouraged to use relative paths in their CSS so that URL rewriting is not necessary. URL rewriting can be enabled by setting __MEDIASYNC\_REWRITE\_CSS__ to *True*.
-
-	MEDIASYNC_REWRITE_CSS = True
-
-The media URL is selected based on the __DEBUG__ attribute in settings.py. When *True*, media will be served locally instead of from S3. Sometimes it is necessary to serve media from S3 even when __DEBUG__ is *True*. To force remote serving of media, set __MEDIASYNC\_SERVE\_REMOTE__ to *True*.
-
-	MEDIASYNC_SERVE_REMOTE = True
-
-link and script tags are written using XHTML syntax. The rendering can be overridden by using the __MEDIASYNC\_DOCTYPE__ setting. Allowed values are *'html4'*, *'html5'*, or *'xhtml'*.
-
-	MEDIASYNC_DOCTYPE = 'xhtml'
-
-For each doctype, the tags are rendered:
-
-__MEDIASYNC_DOCTYPE__ = "html4"
+##### html4
 
     <link rel="stylesheet" href="..." type="text/css" media="...">
     <script type="text/javascript" charset="utf-8" src="..."></script>
 
-__MEDIASYNC_DOCTYPE__ = "html5"
+##### html5
 
     <link rel="stylesheet" href="..." type="text/css" media="...">
     <script src="..."></script>
 
-__MEDIASYNC_DOCTYPE__ = "xhtml"
+##### xhtml
 
     <link rel="stylesheet" href="..." type="text/css" media="..." />
     <script type="text/javascript" charset="utf-8" src="..."></script>
 
+
+### Backends
+
+mediasync now supports pluggable backends. A backend is a Python module that contains a Client class that implements a mediasync-provided BaseClient class.
+
+#### S3
+
+	'BACKEND': 'mediasync.backends.s3',
+
+##### Settings
+
+The following settings are required in the mediasync settings dict.
+
+	'AWS_KEY': "s3_key",
+	'AWS_SECRET': "s3_secret",
+	'AWS_BUCKET': "bucket_name",
+
+Optionally you may specify a path prefix:
+
+	'AWS_PREFIX': "key_prefix",
+
+Assuming a correct DNS CNAME entry, setting __AWS\_BUCKET__ to __assets.sunlightlabs.com__ and __AWS\_PREFIX__ to __myproject/media__ would sync the media directory to http://assets.sunlightlabs.com/myproject/media/.
+
+Amazon allows users to create DNS CNAME entries to map custom domain names to an AWS bucket. MEDIASYNC can be configured to use the bucket as the media URL by setting __AWS\_BUCKET\_CNAME__ to *True*.
+
+	'AWS_BUCKET_CNAME': True,
+
+##### Tips
+
+Since files are given a far future expires header, one needs a way to do "cache busting" when you want the browser to fetch new files before the expire date arrives.  One of the best and easiest ways to accomplish this is to alter the path to the media files with some sort of version string using the key prefix setting:
+
+    'AWS_PREFIX': "myproject/media/v20001201",
+
+Given that and the above DNS CNAME example, the media directory URL would end up being http://assets.sunlightlabs.com/myproject/media/v20001201/.  Whenever you need to update the media files, simply update the key prefix with a new versioned string.
+
+
+#### Custom backends
+
+You can create a custom backend by creating a Python module containing a Client class. This class must inherit from mediasync.backends.BaseClient. Additionally, you must implement two methods:
+
+	def remote_media_url(self):
+	    ...
+
+remote\_media\_url returns the full base URL for remote media. This can be either a static URL or one generated from mediasync settings.
+
+	def put(self, filedata, content_type, remote_path, force=False):
+	    ...
+
+put is responsible for pushing a file to the backend storage.
+
+* filedata - the contents of the file
+* content\_type - the mime type of the file
+* remote\_path - the remote path (relative from remote\_media\_url) to which the file should be written
+* force - if True, write file to remote storage even if it already exists
 
 ### urls.py
 
@@ -170,16 +209,6 @@ which is equivalent to
 Users are encouraged to write stylesheets using relative URLS. The media directory is synced with S3 as is, so relative local paths will still work when pushed remotely.
 
 	background: url(../images/arrow_left.png);
-	
-#### Deprecated URL rewriting
-
-Previous versions of mediasync rewrote absolute paths to use the correct __MEDIA\_URL__. If you would prefer to use this old method, write URLs using absolute paths and set __MEDIASYNC\_REWRITE\_CSS__ = *True* in settings.py.
-
-	background: url(/media/images/arrow_left.png);
-
-When pushed to S3, the local URL is rewritten as the MEDIA\_URL from settings.py. If the MEDIA_URL is __http://assets.mysite.com/__ then the CSS rule will be rewritten as:
-
-	background: url(http://assets.mysite.com/images/arrow_left.png);
 
 
 ### Joined files
