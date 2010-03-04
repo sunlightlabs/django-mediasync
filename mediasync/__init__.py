@@ -45,8 +45,6 @@ def sync(bucket=None, prefix=''):
     import cStringIO
     
     assert hasattr(settings, "MEDIA_ROOT")
-    assert hasattr(settings, "MEDIASYNC_AWS_KEY")
-    assert hasattr(settings, "MEDIASYNC_AWS_SECRET")
     
     CSS_PATH = getattr(settings, "MEDIASYNC_CSS_PATH", "").strip('/')
     JS_PATH = getattr(settings, "MEDIASYNC_JS_PATH", "").strip('/')
@@ -68,7 +66,7 @@ def sync(bucket=None, prefix=''):
         media_url = "%s/%s" % (media_url, prefix)
     
     # create s3 connection
-    client = s3.Client(settings.MEDIASYNC_AWS_KEY, settings.MEDIASYNC_AWS_SECRET, bucket, prefix)
+    client = s3.Client(bucket, prefix)
 
     #
     # sync joined media

@@ -1,6 +1,7 @@
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from mediasync.utils import cssmin, jsmin
 import base64
 import datetime
@@ -26,8 +27,18 @@ EXPIRATION_DAYS = getattr(settings, "MEDIASYNC_EXPIRATION_DAYS", 365)
 
 class Client(object):
     
-    def __init__(self, key, secret, bucket_name, prefix=''):
-        self._conn = S3Connection(key, secret)
+    def __init__(self, bucket_name, prefix=''):
+        key = getattr(settings, "MEDIASYNC_AWS_KEY", None)
+        secret = getattr(settings, "MEDIASYNC_AWS_SECRET", None)
+
+        if key and secret:
+            self._conn = S3Connection(key, secret)
+        else:
+            try:
+                self._conn = S3Connection()
+            except AttributeError:
+                raise ImproperlyConfigured("S3 keys not set and no boto config found.")
+
         self._bucket = self._conn.create_bucket(bucket_name)
         self._prefix = prefix
                 
