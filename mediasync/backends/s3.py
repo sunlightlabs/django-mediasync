@@ -22,7 +22,11 @@ class Client(BaseClient):
         key = self._settings.get("AWS_KEY", None)
         secret = self._settings.get("AWS_SECRET", None)
         
-        _conn = S3Connection(key, secret)
+        try:
+            _conn = S3Connection(key, secret)
+        except AttributeError:
+            raise ImproperlyConfigured("S3 keys not set and no boto config found.")
+                
         self._bucket = _conn.create_bucket(self.aws_bucket)
 
         self._entries = { }
