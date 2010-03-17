@@ -4,7 +4,7 @@ long_description = open('README.md').read()
 
 setup(
     name='django-mediasync',
-    version="1.0",
+    version="1.0.1",
     package_dir={'mediasync': 'mediasync'},
     packages=['mediasync','mediasync.backends','mediasync.management',
               'mediasync.management.commands','mediasync.templatetags',
@@ -14,7 +14,7 @@ setup(
     author_email='jcarbaugh@sunlightfoundation.com',
     license='BSD License',
     url='http://github.com/sunlightlabs/django-mediasync/',
-    long_description=long_description,
+    #long_description=long_description,
     platforms=["any"],
     classifiers=[
         'Development Status :: 4 - Beta',
