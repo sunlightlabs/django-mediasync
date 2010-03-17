@@ -231,3 +231,18 @@ The shortcut paths are also used on joined files.
 ## Running MEDIASYNC
 
 	./manage.py syncmedia
+
+## Change Log
+
+### 1.0.1
+
+* add application/javascript and application/x-javascript to JavaScript mimetypes
+* break out of CSS and JS mimetypes
+* add support for HTTPS URLs to S3
+* allow for storage of S3 keys in ~/.boto configuration file
+
+Thanks to Rob Hudson and Peter Sanchez for the changes in this release.
+
+### 1.0
+
+Initial release.
