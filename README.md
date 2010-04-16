@@ -271,6 +271,12 @@ The shortcut paths are also used on joined files.
 
 ## Change Log
 
+### 2.0
+
+* add pluggable backends
+* settings refactor
+* allow override of __settings.MEDIA\_URL__
+
 ### 1.0.1
 
 * add application/javascript and application/x-javascript to JavaScript mimetypes
