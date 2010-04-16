@@ -18,7 +18,9 @@ class BaseClient(object):
         
         # get settings.MEDIASYNC.MEDIA_URL or settings.MEDIA_URL
         self.local_media_url = self._settings.get('MEDIA_URL', getattr(settings, 'MEDIA_URL', ''))
-        
+        # get settings.MEDIASYNC.MEDIA_ROOT or settings.MEDIA_ROOT
+        self.media_root = self._settings.get('MEDIA_ROOT', getattr(settings, 'MEDIA_ROOT', ''))
+    
     def media_url(self):
         if self.serve_remote:
             url = self.remote_media_url()

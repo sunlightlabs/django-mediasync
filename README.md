@@ -62,7 +62,15 @@ If you want to use a different media URL than that specified in __settings.MEDIA
 
 	MEDIASYNC = {
 		...
-		'MEDIA_URL': '/other/path/to/media/', # becomes http://yourhost.com/other/path/to/media/
+		'MEDIA_URL': '/url/to/media/', # becomes http://yourhost.com/url/to/media/
+		...
+	}
+
+Same goes for __MEDIA\_ROOT__:
+
+	MEDIASYNC = {
+		...
+		'MEDIA_ROOT': '/path/to/media/',
 		...
 	}
 
@@ -156,13 +164,13 @@ put is responsible for pushing a file to the backend storage.
 
 ### urls.py
 
-A static media URL needs to be setup in urls.py that enables access to the media directory ONLY IN DEBUG MODE.
+Add a reference to mediasync.urls in your main urls.py file.
 
-    from django.conf import settings
-	if (settings.DEBUG):  
-		urlpatterns += patterns('',  
-			url(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),  
-		)  
+	urlpatterns = ('',
+		...
+		url(r'^', include('mediasync.urls)),
+		...
+	)
 
 
 ## Features

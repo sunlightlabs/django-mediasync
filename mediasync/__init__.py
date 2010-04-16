@@ -40,7 +40,6 @@ def sync(client=None):
     from mediasync import backends
     import cStringIO
     
-    assert hasattr(settings, "MEDIA_ROOT")
     assert hasattr(settings, "MEDIASYNC")
     
     CSS_PATH = settings.MEDIASYNC.get("CSS_PATH", "").strip('/')
@@ -71,7 +70,7 @@ def sync(client=None):
         
         for sourcefile in sourcefiles:
             
-            sourcepath = os.path.join(settings.MEDIA_ROOT, dirname, sourcefile)
+            sourcepath = os.path.join(client.media_root, dirname, sourcefile)
             if os.path.isfile(sourcepath):
                 f = open(sourcepath)
                 buffer.write(f.read())
@@ -91,9 +90,9 @@ def sync(client=None):
     # sync static media
     #
 
-    for dirname in os.listdir(settings.MEDIA_ROOT):
+    for dirname in os.listdir(client.media_root):
         
-        dirpath = os.path.abspath(os.path.join(settings.MEDIA_ROOT, dirname))
+        dirpath = os.path.abspath(os.path.join(client.media_root, dirname))
         
         if os.path.isdir(dirpath):
            
