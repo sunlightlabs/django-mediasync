@@ -16,8 +16,8 @@ class BaseClient(object):
         self.expiration_days = self._settings.get("EXPIRATION_DAYS", 365)
         self.serve_remote = self._settings.get('SERVE_REMOTE', not settings.DEBUG)
         
-        # project settings
-        self.local_media_url = getattr(settings, 'MEDIA_URL', '')
+        # get settings.MEDIASYNC.MEDIA_URL or settings.MEDIA_URL
+        self.local_media_url = self._settings.get('MEDIA_URL', getattr(settings, 'MEDIA_URL', ''))
         
     def media_url(self):
         if self.serve_remote:

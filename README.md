@@ -58,6 +58,14 @@ The following settings dict must also be added:
 		'BACKEND': 'path.to.backend',
 	}
 
+If you want to use a different media URL than that specified in __settings.MEDIA\_URL__, you can add __MEDIA\_URL__ to the __MEDIASYNC__ settings dict:
+
+	MEDIASYNC = {
+		...
+		'MEDIA_URL': '/other/path/to/media/', # becomes http://yourhost.com/other/path/to/media/
+		...
+	}
+
 mediasync supports pluggable backends. Please see below for information on the provided backends as well as directions on implementing your own.
 
 If the client supports media expiration, all files are set to expire 365 days after the file was synced. You may override this value by adding __EXPIRATION\_DAYS__ to the MEDIASYNC settings dict.

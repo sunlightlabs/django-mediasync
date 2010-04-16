@@ -133,4 +133,4 @@ def _sync_file(client, filepath, remote_path, filedata=None):
     if client.put(filedata, content_type, remote_path):
         print "[%s] %s" % (content_type, remote_path)
 
-__all__ = ['MEDIA_URL','sync']
+__all__ = ['sync']
