@@ -54,7 +54,7 @@ class Client(BaseClient):
             "x-amz-acl": "public-read",
             "Content-Type": content_type,
             "Expires": expires,
-            "Cache-Control": 'max-age %d' % (self.expiration_days * 24 * 3600),
+            "Cache-Control": 'max-age=%d' % (self.expiration_days * 24 * 3600),
         }
 
         # check to see if file should be gzipped based on content_type
