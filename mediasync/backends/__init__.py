@@ -1,8 +1,11 @@
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from mediasync.utils import load_backend
 
 def client():
     backend_name = getattr(settings, 'MEDIASYNC', {}).get('BACKEND', '')
+    if not backend_name:
+        raise ImproperlyConfigured('must define a mediasync BACKEND property')
     return load_backend(backend_name)
 
 class BaseClient(object):
