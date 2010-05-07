@@ -8,9 +8,9 @@ class Command(BaseCommand):
     
     requires_model_validation = False
     
-    def handle(self, bucket=None, prefix='', *args, **options):
+    def handle(self, *args, **options):
 
         try:
-            mediasync.sync(bucket, prefix.strip('/'))
+            mediasync.sync()
         except ValueError, ve:
             raise CommandError('%s\nUsage is mediasync %s' % (ve.message, self.args))
