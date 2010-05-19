@@ -48,6 +48,8 @@ def sync(client=None):
     # create client connection
     if client is None:
         client = backends.client()
+        
+    client.open()
 
     #
     # sync joined media
@@ -106,6 +108,8 @@ def sync(client=None):
                     continue # hidden file or directory, do not upload
                 
                 _sync_file(client, filepath, remote_path)
+    
+    client.close()
                 
 
 def _sync_file(client, filepath, remote_path, filedata=None):

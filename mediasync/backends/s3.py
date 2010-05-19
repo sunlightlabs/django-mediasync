@@ -19,6 +19,8 @@ class Client(BaseClient):
         self.aws_bucket_cname = self._settings.get('AWS_BUCKET_CNAME', False)
         
         assert self.aws_bucket
+    
+    def open(self):    
         
         key = self._settings.get("AWS_KEY", None)
         secret = self._settings.get("AWS_SECRET", None)
@@ -38,8 +40,8 @@ class Client(BaseClient):
         url = (self.aws_bucket_cname and "http://%s" or "http://%s.s3.amazonaws.com") % self.aws_bucket
         if self.aws_prefix:
             url = "%s/%s" % (url, self.aws_prefix)
-        return url        
-            
+        return url
+
     def put(self, filedata, content_type, remote_path, force=False):
 
         now = datetime.datetime.utcnow()

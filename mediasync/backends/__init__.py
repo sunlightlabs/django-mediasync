@@ -36,3 +36,9 @@ class BaseClient(object):
         
     def put(self, filedata, content_type, remote_path, force=False):
         raise NotImplementedError('put not defined in ' + self.__class__.__name__)
+    
+    def open(self):
+        pass
+    
+    def close(self):
+        pass
