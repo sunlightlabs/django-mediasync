@@ -231,14 +231,14 @@ Users are encouraged to write stylesheets using relative URLS. The media directo
 
 When serving media in production, it is beneficial to combine JavaScript and CSS into single files. This reduces the number of connections the browser needs to make to the web server. Fewer connections can dramatically decrease page load times and reduce the server-side load.
 
-Joined files are specified in settings.py using the __MEDIASYNC\_JOINED__. This is a dict that maps individual media to an alias for the joined files. 
+Joined files are specified in the __MEDIASYNC__ dict using __JOINED__. This is a dict that maps individual media to an alias for the joined files. 
 
-	MEDIASYNC_JOINED = {
-		'joined.css': ['reset.css','text.css'],
-		'joined.js': ['jquery.js','mediasync.js','processing.js'],
-	}
+	'JOINED': {
+		'styles/joined.css': ['styles/reset.css','styles/text.css'],
+		'scripts/joined.js': ['scripts/jquery.js','scripts/processing.js'],
+	},
 
-Files listed in __MEDIASYNC\_JOINED__ will be combined and pushed to S3 with the name of the alias. The individual CSS files will also be pushed to S3. Aliases must end in either .css or .js; mediasync will look for the source files in the appropriate directories based on the alias extension.
+Files listed in __JOINED__ will be combined and pushed to S3 with the name of the alias. The individual CSS files will also be pushed to S3. Aliases must end in either .css or .js in order for the content-type to be set appropriately.
 
 The existing template tags may be used to refer to the joined media. Simply use the joined alias as the argument:
 
@@ -258,19 +258,13 @@ When served remotely, one HTML tag will be rendered with the name of the joined 
 
 In some cases, all CSS and JS files will be in their own directory. It can be a pain to write full paths from __MEDIA\_ROOT__ when they can be inferred from the type of media being used. Shortcuts can be used in template tags and the joined files configuration if the default paths to JS and CSS files are set.
 
-    MEDIASYNC_CSS_PATH = 'styles'
-    MEDIASYNC_JS_PATH = 'scripts'
+    'CSS_PATH': 'styles',
+    'JS_PATH': 'scripts',
 
 When these paths are set, you can leave them off of the media paths in template tags. Using the above path settings, _styles/reset.css_ and _scripts/jquery.js_ can be referred to using: 
 
     {% css 'reset.css' %}
     {% js 'jquery.js' %}
-
-The shortcut paths are also used on joined files.
-
-    MEDIASYNC_JOINED = {
-	    'joined.css': ['reset.css','mysite.css'],
-    }
 
 
 ## Running MEDIASYNC
@@ -279,7 +273,7 @@ The shortcut paths are also used on joined files.
 
 ## Change Log
 
-### 2.0
+### 2.0 (in progress)
 
 * add pluggable backends
 * settings refactor
