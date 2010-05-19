@@ -9,6 +9,8 @@ class Client(BaseClient):
         
         self.container = self._settings.get('CLOUDFILES_CONTAINER', None)
         assert self.container
+    
+    def open(self):
         
         username = self._settings.get("CLOUDFILES_USERNAME", None)
         key = self._settings.get("CLOUDFILES_KEY", None)
