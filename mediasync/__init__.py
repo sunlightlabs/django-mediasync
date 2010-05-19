@@ -118,7 +118,7 @@ def _sync_file(client, filepath, remote_path, filedata=None):
     from mediasync.utils import cssmin, jsmin
     import mimetypes
                 
-    # load file data from local path
+    # load file data from local path if filedata is empty
     if not filedata:
         filedata = open(filepath, 'rb').read()
     
