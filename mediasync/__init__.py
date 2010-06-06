@@ -29,7 +29,7 @@ def listdir_recursive(dir):
         else:
              pass # "Skipping directory %s" % root
 
-def sync(client=None):
+def sync(client=None, force=False):
     """ Let's face it... pushing this stuff to S3 is messy.
         A lot of different things need to be calculated for each file
         and they have to be in a certain order as some variables rely
@@ -86,7 +86,7 @@ def sync(client=None):
         if dirname:
             remote_path = "%s/%s" % (dirname, remote_path)
         
-        _sync_file(client, joinfile, remote_path, filedata)
+        _sync_file(client, joinfile, remote_path, filedata, force=force)
         
     #
     # sync static media
@@ -107,12 +107,12 @@ def sync(client=None):
                 if filename.startswith('.') or not os.path.isfile(filepath):
                     continue # hidden file or directory, do not upload
                 
-                _sync_file(client, filepath, remote_path)
+                _sync_file(client, filepath, remote_path, force=force)
     
     client.close()
                 
 
-def _sync_file(client, filepath, remote_path, filedata=None):
+def _sync_file(client, filepath, remote_path, filedata=None, force=False):
     
     from django.conf import settings
     from mediasync.utils import cssmin, jsmin
@@ -133,7 +133,7 @@ def _sync_file(client, filepath, remote_path, filedata=None):
     elif content_type in JS_MIMETYPES:
         filedata = jsmin.jsmin(filedata)
     
-    if client.put(filedata, content_type, remote_path):
+    if client.put(filedata, content_type, remote_path, force=force):
         print "[%s] %s" % (content_type, remote_path)
 
 __all__ = ['sync']
