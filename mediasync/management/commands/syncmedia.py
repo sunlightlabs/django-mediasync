@@ -10,7 +10,7 @@ class Command(BaseCommand):
     requires_model_validation = False
     
     option_list = BaseCommand.option_list + (
-        make_option("-f", "--force", dest="force", help="force files to sync", action="store_true"),
+        make_option("-F", "--force", dest="force", help="force files to sync", action="store_true"),
     )
     
     def handle(self, *args, **options):
