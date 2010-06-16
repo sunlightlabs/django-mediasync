@@ -20,10 +20,11 @@ JS_PATH = mediasync_settings.get("JS_PATH", "")
 
 register = template.Library()
 
-def mkpath(url, path, filename):
+def mkpath(url, path, filename=None):
     if path:
         url = "%s/%s" % (url.rstrip('/'), path.strip('/'))
-    url = "%s/%s" % (url, filename.lstrip('/'))
+    if filename:
+        url = "%s/%s" % (url, filename.lstrip('/'))
     if CACHE_BUSTER:
         url = "%s?%s" % (url, CACHE_BUSTER(url) if callable(CACHE_BUSTER) else CACHE_BUSTER)
     return URL_PROCESSOR(url)
@@ -33,8 +34,10 @@ def mkpath(url, path, filename):
 #
 
 @register.simple_tag
-def media_url():
-    return MEDIA_URL
+def media_url(path=None):
+    if not path:
+        return MEDIA_URL
+    return mkpath(MEDIA_URL, path)
 
 #
 # CSS related tags
