@@ -142,6 +142,13 @@ Since files are given a far future expires header, one needs a way to do "cache 
 
 Given that and the above DNS CNAME example, the media directory URL would end up being http://assets.sunlightlabs.com/myproject/media/v20001201/.  Whenever you need to update the media files, simply update the key prefix with a new versioned string.
 
+A __CACHE\_BUSTER__ settings can be added to the main __MEDIASYNC__ settings dict to add a query string parameter to all media URLs. The cache buster can either be a value or a callable which is passed the media URL as a parameter.
+
+	'CACHE_BUSTER': 1234567890,
+
+The above setting will generate a media path similar to:
+
+	http://yourhost.com/url/to/media/image.png?1234567890
 
 #### Custom backends
 

@@ -13,6 +13,7 @@ JOINED = mediasync_settings.get("JOINED", {})
 MEDIA_URL = client.media_url()
 SERVE_REMOTE = client.serve_remote or not settings.DEBUG
 URL_PROCESSOR = mediasync_settings.get("URL_PROCESSOR", lambda x: x)
+CACHE_BUSTER = mediasync_settings.get("CACHE_BUSTER", None)
 
 CSS_PATH = mediasync_settings.get("CSS_PATH", "")
 JS_PATH = mediasync_settings.get("JS_PATH", "")
@@ -23,6 +24,8 @@ def mkpath(url, path, filename):
     if path:
         url = "%s/%s" % (url.rstrip('/'), path.strip('/'))
     url = "%s/%s" % (url, filename.lstrip('/'))
+    if CACHE_BUSTER:
+        url = "%s?%s" % (url, CACHE_BUSTER(url) if callable(CACHE_BUSTER) else CACHE_BUSTER)
     return URL_PROCESSOR(url)
 
 #
