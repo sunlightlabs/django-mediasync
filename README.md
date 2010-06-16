@@ -200,6 +200,14 @@ Renders the MEDIA_URL from settings.py with trailing slashes removed.
 
 	<img src="{% media_url %}/images/stuff.png">
 
+MEDIA\_URL takes an optional argument that is the media path. Using the argument allows mediasync to add the CACHE_BUSTER to the URL if one is specified.
+
+	<img src="{% media_url '/images/stuff.png' %}">
+
+If __CACHE\_BUSTER__ is set to 12345, the above example will render as:
+
+	<img src="http://assets.example.com/path/to/media/images/stuff.png?12345">
+
 
 #### js
 
