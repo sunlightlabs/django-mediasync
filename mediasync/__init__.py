@@ -1,6 +1,5 @@
 from django.conf import settings
 import os
-import re
 
 JS_MIMETYPES = (
     "application/javascript",
