@@ -19,8 +19,8 @@ TYPES_TO_COMPRESS = (
 def is_syncable_dir(dir_str):
     return not dir_str.startswith('.') and not dir_str.startswith('_')
 
-def is_syncable_file(file):
-    return not file.startswith('.') and not file.startswith('_')
+def is_syncable_file(file_str):
+    return not file_str.startswith('.') and not file_str.startswith('_')
 
 def listdir_recursive(dir_str):
     for root, dirs, files in os.walk(dir_str):
