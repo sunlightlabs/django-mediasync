@@ -17,12 +17,24 @@ TYPES_TO_COMPRESS = (
     "text/xml",
 ) + JS_MIMETYPES + CSS_MIMETYPES
 
-def listdir_recursive(dir):
-    for root, dirs, files in os.walk(dir):
+def is_syncable_dir(dir_str):
+    return not dir_str.startswith('.') and not dir_str.startswith('_')
+
+def is_syncable_file(file):
+    return not file.startswith('.') and not file.startswith('_')
+
+def listdir_recursive(dir_str):
+    for root, dirs, files in os.walk(dir_str):
+        # Go through and yank any directories that don't pass our syncable
+        # dir test. This needs to be done in place so that walk() will avoid.
+        for dir_candidate in dirs:
+            if not is_syncable_dir(dir_candidate):
+                dirs.remove(dir_candidate)
+  
         basename = os.path.basename(root)
-        if not (basename.startswith('.') or basename.startswith('_')):
+        if is_syncable_dir(basename):
             for file in files:
-                fname = os.path.join(root, file).replace(dir, '', 1)
+                fname = os.path.join(root, file).replace(dir_str, '', 1)
                 if fname.startswith('/'):
                     fname = fname[1:]
                 yield fname
@@ -104,7 +116,7 @@ def sync(client=None, force=False):
                 filepath = os.path.join(dirpath, filename)
                 remote_path = "%s/%s" % (dirname, filename)
                 
-                if filename.startswith('.') or not os.path.isfile(filepath):
+                if not is_syncable_file(os.path.basename(filename)) or not os.path.isfile(filepath):
                     continue # hidden file or directory, do not upload
                 
                 _sync_file(client, filepath, remote_path, force=force)
