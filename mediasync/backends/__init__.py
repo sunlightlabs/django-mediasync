@@ -25,6 +25,7 @@ class BaseClient(object):
         self.media_root = self._settings.get('MEDIA_ROOT', getattr(settings, 'MEDIA_ROOT', ''))
     
     def media_url(self):
+        # TODO: PATCH THIS FOR SSL
         if self.serve_remote:
             url = self.remote_media_url()
         else:

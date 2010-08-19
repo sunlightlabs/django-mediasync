@@ -37,6 +37,7 @@ class Client(BaseClient):
             self._entries[entry.key] = entry.etag.strip('"')
     
     def remote_media_url(self):
+        # TODO: PATCH THIS FOR SSL
         url = (self.aws_bucket_cname and "http://%s" or "http://%s.s3.amazonaws.com") % self.aws_bucket
         if self.aws_prefix:
             url = "%s/%s" % (url, self.aws_prefix)

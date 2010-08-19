@@ -33,6 +33,33 @@ def mkpath(url, path, filename=None):
 # media stuff
 #
 
+def do_media_url2(parser, token):
+    print "RAW", token.split_contents()
+    tokens = token.split_contents()
+
+    if len(tokens) > 1:
+        # Tag only takes one argument. Discard the rest. Also, first and
+        # last characters are quotes when a string is passed, lop those off.
+        url_str = tokens[1][1:-1]
+    else:
+        url_str = None
+    
+    return MediaUrlNode(url_str)
+register.tag('media_url2', do_media_url2)
+
+class MediaUrlNode(template.Node):
+    def __init__(self, url_str):
+        self.url_str = url_str
+    def render(self, context):
+        is_secure = context['request'].is_secure()
+        print "CONTEXT", is_secure
+
+        if not self.url_str:
+            print "RVAL", MEDIA_URL
+            return MEDIA_URL
+        print "RVAL", mkpath(MEDIA_URL, self.url_str, is_secure=is_secure)
+        return mkpath(MEDIA_URL, self.url_str, is_secure=is_secure)
+
 @register.simple_tag
 def media_url(path=None):
     if not path:
