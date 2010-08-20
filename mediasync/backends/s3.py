@@ -36,9 +36,17 @@ class Client(BaseClient):
         for entry in self._bucket.list(self.aws_prefix):
             self._entries[entry.key] = entry.etag.strip('"')
     
-    def remote_media_url(self):
-        # TODO: PATCH THIS FOR SSL
-        url = (self.aws_bucket_cname and "http://%s" or "http://%s.s3.amazonaws.com") % self.aws_bucket
+    def remote_media_url(self, with_ssl):
+        """
+        Returns the base remote media URL. In this case, we can safely make
+        some assumptions on the URL string based on bucket names, and having
+        public ACL on.
+        
+        args:
+          with_ssl: (bool) If True, return an HTTPS url.
+        """
+        protocol = 'http' if with_ssl is False else 'https'
+        url = (self.aws_bucket_cname and "%s://%s" or "%s://%s.s3.amazonaws.com") % (protocol, self.aws_bucket)
         if self.aws_prefix:
             url = "%s/%s" % (url, self.aws_prefix)
         return url
