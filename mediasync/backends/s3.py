@@ -36,7 +36,7 @@ class Client(BaseClient):
         for entry in self._bucket.list(self.aws_prefix):
             self._entries[entry.key] = entry.etag.strip('"')
     
-    def remote_media_url(self, with_ssl):
+    def remote_media_url(self, with_ssl=False):
         """
         Returns the base remote media URL. In this case, we can safely make
         some assumptions on the URL string based on bucket names, and having

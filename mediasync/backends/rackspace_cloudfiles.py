@@ -18,7 +18,7 @@ class Client(BaseClient):
         _conn = cloudfiles.get_connection(username, key)
         self._container = _conn.create_container(self.container)
     
-    def remote_media_url(self, with_ssl):
+    def remote_media_url(self, with_ssl=False):
         return ""
             
     def put(self, filedata, content_type, remote_path, force=False):

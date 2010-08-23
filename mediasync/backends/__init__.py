@@ -58,7 +58,7 @@ class BaseClient(object):
             url = self.local_media_url
         return url.rstrip('/')
         
-    def remote_media_url(self, with_ssl):
+    def remote_media_url(self, with_ssl=False):
         raise NotImplementedError('remote_media_url not defined in ' + self.__class__.__name__)
         
     def put(self, filedata, content_type, remote_path, force=False):
