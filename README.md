@@ -186,7 +186,7 @@ You can create a custom backend by creating a Python module containing a Client
 class. This class must inherit from mediasync.backends.BaseClient. Additionally, 
 you must implement two methods:
 
-	def remote_media_url(self):
+	def remote_media_url(self, with_ssl):
 	    ...
 
 remote\_media\_url returns the full base URL for remote media. This can be 
@@ -235,6 +235,12 @@ your master urls.py file:
     from django.template import add_to_builtins
     add_to_builtins('mediasync.templatetags.media')
 
+Some backends (S3) support https URLs when the requesting page is secure.
+In order for the https to be detected, the request must be placed in the
+template context with the key 'request'. This can be done automatically by adding
+'django.core.context_processors.request' to __TEMPLATE\_CONTEXT\_PROCESSORS__
+in settings.py
+
 #### media_url
 
 Renders the MEDIA_URL from settings.py with trailing slashes removed.
@@ -267,7 +273,6 @@ Shortcut to render as a print stylesheet.
 which is equivalent to
 
 	{% css "myfile.css" "print" %}
-
 
 ### Writing Style Sheets
 

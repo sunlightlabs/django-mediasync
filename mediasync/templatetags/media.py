@@ -39,8 +39,10 @@ class BaseTagNode(template.Node):
         secured with SSL. Linking unencrypted media on an encrypted page will
         show a warning icon on some browsers. We need to be able to serve from
         an encrypted source for encrypted pages, if our backend supports it.
+        'django.core.context_processors.request' must be added to
+        TEMPLATE_CONTEXT_PROCESSORS in settings.py.
         """
-        return context['request'].is_secure()
+        return 'request' in context and context['request'].is_secure()
     
     def get_media_url(self, context):
         """
