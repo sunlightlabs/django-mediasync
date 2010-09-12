@@ -136,6 +136,35 @@ xhtml
     <script type="text/javascript" charset="utf-8" src="..."></script>
 
 
+SSL
+---
+
+mediasync will attempt to intelligently determine if your media should be
+served using HTTPS. In order to use automatic SSL detection, *django.core.context_processors.request*
+must be added to *TEMPLATE_CONTEXT_PROCESSORS* in settings.py::
+
+	TEMPLATE_CONTEXT_PROCESSORS = (
+		...
+		'django.core.context_processors.request',
+		...
+	)
+
+The *USE_SSL* mediasync setting can be used to override the SSL
+URL detection.
+
+::
+
+	'USE_SSL': True, # force HTTPS
+
+or
+
+:: 
+
+	'USE_SSL': False, # force HTTP
+
+Some backends will be unable to use SSL. In these cases *USE_SSL* and SSL
+detection will be ignored.
+
 Backends
 ========
 
@@ -423,6 +452,8 @@ Change Log
 * Make template tags aware of whether the current page is SSL-secured. If it
   is, ask the backend for an SSL media URL (if implemented by your backend).
 
+Thanks to Greg Taylor and Peter Sanchez for their contributions to this release.
+
 1.0.1
 =====
 
@@ -431,7 +462,7 @@ Change Log
 * add support for HTTPS URLs to S3
 * allow for storage of S3 keys in ~/.boto configuration file
 
-Thanks to Rob Hudson and Peter Sanchez for the changes in this release.
+Thanks to Rob Hudson and Peter Sanchez for their contributions to this release.
 
 1.0
 ===
