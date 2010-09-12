@@ -11,13 +11,15 @@ client = backends.client()
 
 DOCTYPE = mediasync_settings.get("DOCTYPE", "xhtml")
 JOINED = mediasync_settings.get("JOINED", {})
-# Intelligently determines your base MEDIA_URL depending on your settings.
-MEDIA_URL = client.media_url()
-# This where to get SSL media for SSL pages.
-SECURE_MEDIA_URL = client.media_url(with_ssl=True)
+
 SERVE_REMOTE = client.serve_remote or not settings.DEBUG
 URL_PROCESSOR = mediasync_settings.get("URL_PROCESSOR", lambda x: x)
 CACHE_BUSTER = mediasync_settings.get("CACHE_BUSTER", None)
+
+# SSL settings
+USE_SSL = mediasync_settings.get("USE_SSL", None)
+MEDIA_URL = client.media_url()
+SECURE_MEDIA_URL = client.media_url(with_ssl=True)
 
 CSS_PATH = mediasync_settings.get("CSS_PATH", "")
 JS_PATH = mediasync_settings.get("JS_PATH", "")
@@ -48,11 +50,13 @@ class BaseTagNode(template.Node):
         """
         Checks to see whether to use the normal or the secure media source,
         depending on whether the current page view is being sent over SSL.
+        The USE_SSL setting can be used to force HTTPS (True) or HTTP (False).
         
         NOTE: Not all backends implement SSL media. In this case, they'll just
         return an unencrypted URL.
         """
-        return SECURE_MEDIA_URL if self.is_secure(context) else MEDIA_URL
+        is_secure = USE_SSL if USE_SSL is not None else self.is_secure(context)
+        return SECURE_MEDIA_URL if is_secure else MEDIA_URL
         
     def mkpath(self, url, path, filename=None):
         """
