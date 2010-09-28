@@ -26,10 +26,9 @@ Source: http://github.com/sunlightlabs/django-mediasync/
 Requirements
 ------------
 
-* python >= 2.4 (with zlib)
 * django >= 1.0
 * boto >= 1.8d
-
+* slimmer == 0.1.30 (optional)
 
 -------------
 Configuration
@@ -255,6 +254,46 @@ put is responsible for pushing a file to the backend storage.
   the file should be written
 * force - if True, write file to remote storage even if it already exists
 
+File Processors
+===============
+
+File processors allow you to modify the content of a file as it is being
+synced or served statically. mediasync comes with two default filters, CSS
+and JavaScript minifiers. These processors require the *slimmer* python
+package and will automatically run when syncing media.
+
+Custom processors can be specified using the *PROCESSORS* entry in the
+mediasync settings dict. *PROCESSORS* should be a list of processor entries.
+Each processor entry can be a callable or a string path to a callable. If the
+path is to a class definition, the class will be instantiated into an object.
+The processor callable should return a string of the processed file data, None
+if it chooses to not process the file, or raise *mediasync.SyncException* if
+something goes terribly wrong. The callable should take the following arguments::
+
+	def proc(filedata, content_type, remote_path, is_remote):
+		...
+
+filedata
+	the content of the file as a string
+
+content_type
+	the mimetype of the file being processed
+
+remote_path
+	the path to which the file is being synced (contains the file name)
+
+is_remote
+	True if the filedata will be pushed remotely, False if it is a static local file
+
+If the *PROCESSORS* setting is used, you will need to include the defaults if you plan on using them::
+
+	'PROCESSORS': (
+	    'mediasync.processors.css_minifier',
+	    'mediasync.processors.js_minifier',
+		...
+	),
+
+
 urls.py
 =======
 
@@ -445,6 +484,7 @@ Change Log
 =================
 
 * add pluggable backends
+* add pluggable file processors
 * settings refactor
 * allow override of *settings.MEDIA_URL*
 * Improvements to the logic that decides which files to sync. Safely ignore

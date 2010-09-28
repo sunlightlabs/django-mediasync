@@ -93,7 +93,7 @@ class BaseClient(object):
 
     def process_and_put(self, filedata, content_type, remote_path, force=False):
         filedata = self.process(filedata, content_type, remote_path)
-        self.put(filedata, content_type, remote_path, force)
+        return self.put(filedata, content_type, remote_path, force)
         
     def put(self, filedata, content_type, remote_path, force=False):
         raise NotImplementedError('put not defined in ' + self.__class__.__name__)
