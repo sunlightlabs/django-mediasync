@@ -72,5 +72,21 @@ class S3BackendTestCase(unittest.TestCase):
     def testMissingBucket(self):
         del settings.MEDIASYNC['AWS_BUCKET']
         self.assertRaises(AssertionError, backends.client)
-        
+
+class ProcessorTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        settings.MEDIASYNC['PROCESSORS'] = (
+            'mediasync.processors.js_minifier',
+            lambda fd, ct, rp, r: fd.upper(),
+        )
+        self.client = backends.client()
+    
+    def testProcessor(self):
+        content = """var foo = function() {
+            alert(1);
+        };"""
+        ct = 'text/javascript'
+        procd = self.client.process(content, ct, 'test.js')
+        self.assertEqual(procd, "VAR FOO = FUNCTION(){ALERT(1)};")
         
