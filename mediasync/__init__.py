@@ -1,4 +1,4 @@
-from django.conf import settings
+import mimetypes
 import os
 
 JS_MIMETYPES = (
@@ -15,6 +15,9 @@ TYPES_TO_COMPRESS = (
     "text/plain",
     "text/xml",
 ) + JS_MIMETYPES + CSS_MIMETYPES
+
+class SyncException(Exception):
+    pass
 
 def is_syncable_dir(dir_str):
     return not dir_str.startswith('.') and not dir_str.startswith('_')
@@ -61,6 +64,7 @@ def sync(client=None, force=False):
         client = backends.client()
         
     client.open()
+    client.serve_remote = True
 
     #
     # sync joined media
@@ -93,12 +97,15 @@ def sync(client=None, force=False):
         filedata = buffer.getvalue()
         buffer.close()
         
+        content_type = mimetypes.guess_type(joinfile)[0] or 'application/octet-stream'
+        
         remote_path = joinfile
         if dirname:
             remote_path = "%s/%s" % (dirname, remote_path)
         
-        _sync_file(client, joinfile, remote_path, filedata, force=force)
-        
+        if client.process_and_put(filedata, content_type, remote_path, force=force):
+            print "[%s] %s" % (content_type, remote_path)
+    
     #
     # sync static media
     #
@@ -115,36 +122,18 @@ def sync(client=None, force=False):
                 filepath = os.path.join(dirpath, filename)
                 remote_path = "%s/%s" % (dirname, filename)
                 
+                content_type = mimetypes.guess_type(filepath)[0] or 'application/octet-stream'
+                
                 if not is_syncable_file(os.path.basename(filename)) or not os.path.isfile(filepath):
                     continue # hidden file or directory, do not upload
                 
-                _sync_file(client, filepath, remote_path, force=force)
+                filedata = open(filepath, 'rb').read()
+                
+                if client.process_and_put(filedata, content_type, remote_path, force=force):
+                    print "[%s] %s" % (content_type, remote_path)
     
     client.close()
-                
 
-def _sync_file(client, filepath, remote_path, filedata=None, force=False):
-    
-    from django.conf import settings
-    from mediasync.utils import cssmin, jsmin
-    import mimetypes
-                
-    # load file data from local path if filedata is empty
-    if not filedata:
-        filedata = open(filepath, 'rb').read()
-    
-    # guess the content type
-    content_type = mimetypes.guess_type(filepath)[0]
-    if not content_type:
-        content_type = "text/plain"
 
-    # check to see if cssmin or jsmin should be run
-    if content_type in CSS_MIMETYPES:
-        filedata = cssmin.cssmin(filedata)
-    elif content_type in JS_MIMETYPES:
-        filedata = jsmin.jsmin(filedata)
-    
-    if client.put(filedata, content_type, remote_path, force=force):
-        print "[%s] %s" % (content_type, remote_path)
-
-__all__ = ['sync']
+__all__ = ['sync','SyncException']
+__version__ = '2.0a'

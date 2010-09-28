@@ -1,3 +1,4 @@
+from mediasync import __version__
 from setuptools import setup, find_packages
 import os
 
@@ -7,7 +8,7 @@ f.close()
 
 setup(
     name='django-mediasync',
-    version="1.0.1",
+    version=__version__,
     description='Django static media development and distribution tools',
     long_description=readme,
     author='Jeremy Carbaugh',

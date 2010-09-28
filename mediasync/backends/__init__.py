@@ -1,12 +1,26 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from mediasync.utils import load_backend
+from django.utils.importlib import import_module
+from mediasync import processors
+
+DEFAULT_PROCESSORS = (
+    processors.css_minifier,
+    processors.js_minifier,
+)
 
 def client():
     backend_name = getattr(settings, 'MEDIASYNC', {}).get('BACKEND', '')
     if not backend_name:
         raise ImproperlyConfigured('must define a mediasync BACKEND property')
     return load_backend(backend_name)
+
+def load_backend(backend_name):
+    try:
+        backend = import_module(backend_name)
+        return backend.Client()
+    except ImportError, e:
+        raise ImproperlyConfigured(("%s is not a valid mediasync backend. \n" +
+            "Error was: %s") % (backend_name, e))
 
 class BaseClient(object):
     
@@ -22,13 +36,26 @@ class BaseClient(object):
         self.local_media_url = self.get_local_media_url()
         self.media_root = self.get_media_root()
         
+        self.processors = []
+        for proc in self._settings.get("PROCESSORS", DEFAULT_PROCESSORS):
+            
+            if isinstance(proc, basestring):
+                (module, attr) = proc.rsplit('.', 1)
+                module = import_module(module)
+                proc = getattr(module, attr, None)
+            
+            if isinstance(proc, type):
+                proc = proc()
+            
+            if callable(proc):
+                self.processors.append(proc)
+        
     def get_local_media_url(self):
         """
         Checks settings.MEDIASYNC['MEDIA_URL'], then settings.MEDIA_URL.
         
         Broken out to allow overriding if need be.
         """
-        # get settings.MEDIASYNC.MEDIA_URL or settings.MEDIA_URL
         return self._settings.get('MEDIA_URL', getattr(settings, 'MEDIA_URL', ''))
     
     def get_media_root(self):
@@ -37,7 +64,6 @@ class BaseClient(object):
         
         Broken out to allow overriding if need be.
         """
-        # get settings.MEDIASYNC.MEDIA_ROOT or settings.MEDIA_ROOT
         return self._settings.get('MEDIA_ROOT', getattr(settings, 'MEDIA_ROOT', ''))
     
     def media_url(self, with_ssl=False):
@@ -58,11 +84,22 @@ class BaseClient(object):
             url = self.local_media_url
         return url.rstrip('/')
         
-    def remote_media_url(self, with_ssl=False):
-        raise NotImplementedError('remote_media_url not defined in ' + self.__class__.__name__)
+    def process(self, filedata, content_type, remote_path):
+        for proc in self.processors:
+            prcssd_filedata = proc(filedata, content_type, remote_path, self.serve_remote)
+            if prcssd_filedata is not None:
+                filedata = prcssd_filedata
+        return filedata
+
+    def process_and_put(self, filedata, content_type, remote_path, force=False):
+        filedata = self.process(filedata, content_type, remote_path)
+        self.put(filedata, content_type, remote_path, force)
         
     def put(self, filedata, content_type, remote_path, force=False):
         raise NotImplementedError('put not defined in ' + self.__class__.__name__)
+        
+    def remote_media_url(self, with_ssl=False):
+        raise NotImplementedError('remote_media_url not defined in ' + self.__class__.__name__)
     
     def open(self):
         pass
