@@ -11,11 +11,7 @@ to media without disturbing the production web site.
 
 The goal of mediasync is to develop locally and then flip a switch in production 
 that makes all the media URLs point to remote media URLs instead of the local 
-media directory. Specifically, mediasync executes the following tasks:
-
-* run deflate+jsmin on javascript files
-* run deflate+cssmin on css files
-* add expires headers to everything (if supported by the backend)
+media directory.
 
 All code is under a BSD-style license, see LICENSE for details.
 
