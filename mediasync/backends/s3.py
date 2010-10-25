@@ -5,9 +5,23 @@ from django.core.exceptions import ImproperlyConfigured
 from mediasync import TYPES_TO_COMPRESS
 from mediasync.backends import BaseClient
 import base64
+import cStringIO
 import datetime
+import gzip
 import hashlib
-import zlib
+
+def _checksum(data):
+    checksum = hashlib.md5(data)
+    hexdigest = checksum.hexdigest()
+    b64digest = base64.b64encode(checksum.digest())
+    return (hexdigest, b64digest)
+
+def _compress(s):
+    zbuf = cStringIO.StringIO()
+    zfile = gzip.GzipFile(mode='wb', compresslevel=6, fileobj=zbuf)
+    zfile.write(s)
+    zfile.close()
+    return zbuf.getvalue()
 
 class Client(BaseClient):
 
@@ -31,10 +45,6 @@ class Client(BaseClient):
             raise ImproperlyConfigured("S3 keys not set and no boto config found.")
                 
         self._bucket = _conn.create_bucket(self.aws_bucket)
-
-        self._entries = { }
-        for entry in self._bucket.list(self.aws_prefix):
-            self._entries[entry.key] = entry.etag.strip('"')
     
     def remote_media_url(self, with_ssl=False):
         """
@@ -59,6 +69,9 @@ class Client(BaseClient):
         
         if self.aws_prefix:
             remote_path = "%s/%s" % (self.aws_prefix, remote_path)
+            
+        (hexdigest, b64digest) = _checksum(filedata)
+        raw_b64digest = b64digest # store raw b64digest to add as file metadata
 
         # create initial set of headers
         headers = {
@@ -71,23 +84,19 @@ class Client(BaseClient):
         # check to see if file should be gzipped based on content_type
         # also check to see if filesize is greater than 1kb
         if content_type in TYPES_TO_COMPRESS and len(filedata) > 1024:
-            filedata = zlib.compress(filedata)[2:-4] # strip zlib header and checksum
-            headers["Content-Encoding"] = "deflate"
-
-        # calculate md5 digest of filedata
-        checksum = hashlib.md5(filedata)
-        hexdigest = checksum.hexdigest()
-        b64digest = base64.b64encode(checksum.digest())
-
-        # check to see if local file has changed from what is on S3
-        etag = self._entries.get(remote_path, '')
-        if force or etag != hexdigest:
-
-            # upload file
+            filedata = _compress(filedata)
+            headers["Content-Encoding"] = "gzip"
+            (hexdigest, b64digest) = _checksum(filedata) # update checksum with compressed data
+        
+        key = self._bucket.get_key(remote_path)
+        
+        if key is None:
             key = Key(self._bucket)
             key.key = remote_path
+        
+        if key.get_metadata('mediasync-checksum') != raw_b64digest:
+            
+            key.set_metadata('mediasync-checksum', raw_b64digest)
             key.set_contents_from_string(filedata, headers=headers, md5=(hexdigest, b64digest))
-
-            self._entries[remote_path] = etag
-
+        
             return True
