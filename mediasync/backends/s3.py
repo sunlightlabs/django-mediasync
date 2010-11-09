@@ -46,7 +46,7 @@ class Client(BaseClient):
           with_ssl: (bool) If True, return an HTTPS url.
         """
         protocol = 'http' if with_ssl is False else 'https'
-        url = (self.aws_bucket_cname and "%s://%s" or "%s://%s.s3.amazonaws.com") % (protocol, self.aws_bucket)
+        url = (self.aws_bucket_cname and "%s://%s" or "%s://s3.amazonaws.com/%s") % (protocol, self.aws_bucket)
         if self.aws_prefix:
             url = "%s/%s" % (url, self.aws_prefix)
         return url
