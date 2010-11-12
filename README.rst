@@ -54,27 +54,27 @@ the *MEDIA_URL* will be loaded from the backend settings.
 
 The following settings dict must also be added::
 
-	MEDIASYNC = {
-		'BACKEND': 'path.to.backend',
-	}
+    MEDIASYNC = {
+        'BACKEND': 'path.to.backend',
+    }
 
 If you want to use a different media URL than that specified 
 in *settings.MEDIA_URL*, you can add *MEDIA_URL* to the *MEDIASYNC* 
 settings dict::
 
-	MEDIASYNC = {
-		...
-		'MEDIA_URL': '/url/to/media/', # becomes http://yourhost.com/url/to/media/
-		...
-	}
+    MEDIASYNC = {
+        ...
+        'MEDIA_URL': '/url/to/media/', # becomes http://yourhost.com/url/to/media/
+        ...
+    }
 
 Same goes for *MEDIA_ROOT*::
 
-	MEDIASYNC = {
-		...
-		'MEDIA_ROOT': '/path/to/media/',
-		...
-	}
+    MEDIASYNC = {
+        ...
+        'MEDIA_ROOT': '/path/to/media/',
+        ...
+    }
 
 mediasync supports pluggable backends. Please see below for information on 
 the provided backends as well as directions on implementing your own.
@@ -97,8 +97,10 @@ instead of from S3.
     # This would force mediasync to serve all media through the value
     # specified in settings.MEDIA_URL.
     MEDIASYNC['SERVE_REMOTE'] = False
+    
     # This would serve all media through S3/Cloud Files.
     MEDIASYNC['SERVE_REMOTE'] = True
+    
     # This would serve media locally while in DEBUG mode, and remotely when
     # in production (DEBUG == False).
     MEDIASYNC['SERVE_REMOTE'] = DEBUG
@@ -317,11 +319,11 @@ Add a reference to mediasync.urls in your main urls.py file.
 
 ::
 
-	urlpatterns = ('',
-		...
-		url(r'^', include('mediasync.urls)),
-		...
-	)
+    urlpatterns = ('',
+        ...
+        url(r'^', include('mediasync.urls)),
+        ...
+    )
 
 
 --------
@@ -439,10 +441,10 @@ a dict that maps individual media to an alias for the joined files.
 
 ::
 
-	'JOINED': {
-		'styles/joined.css': ['styles/reset.css','styles/text.css'],
-		'scripts/joined.js': ['scripts/jquery.js','scripts/processing.js'],
-	},
+    'JOINED': {
+        'styles/joined.css': ['styles/reset.css','styles/text.css'],
+        'scripts/joined.js': ['scripts/jquery.js','scripts/processing.js'],
+    },
 
 Files listed in *JOINED* will be combined and pushed to S3 with the name of 
 the alias. The individual CSS files will also be pushed to S3. Aliases must end 
@@ -490,7 +492,7 @@ Running MEDIASYNC
 
 ::
 
-	./manage.py syncmedia
+    ./manage.py syncmedia
 
 ----------
 Change Log
