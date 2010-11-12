@@ -79,6 +79,9 @@ Same goes for *MEDIA_ROOT*::
 mediasync supports pluggable backends. Please see below for information on 
 the provided backends as well as directions on implementing your own.
 
+Media expiration
+----------------
+
 If the client supports media expiration, all files are set to expire 365 days 
 after the file was synced. You may override this value by adding 
 *EXPIRATION_DAYS* to the MEDIASYNC settings dict.
@@ -87,6 +90,9 @@ after the file was synced. You may override this value by adding
 
     # Expire in 10 years.
     MEDIASYNC['EXPIRATION_DAYS'] = 365 * 10
+
+Serving media remote (S3/Cloud Files) or locally
+------------------------------------------------
 
 The media URL is selected based on the *SERVE_REMOTE* attribute in the
 *MEDIASYNC* dict in settings.py. When *True*, media will be served locally 
@@ -104,6 +110,18 @@ instead of from S3.
     # This would serve media locally while in DEBUG mode, and remotely when
     # in production (DEBUG == False).
     MEDIASYNC['SERVE_REMOTE'] = DEBUG
+    
+When serving files locally, you can emulate the CSS/JS combo/minifying
+behavior we get from using media processors by specifying the following.
+
+::
+
+    MEDIASYNC['SERVE_REMOTE'] = False
+    MEDIASYNC['EMULATE_COMBO'] = True
+
+Note that this will only work if your *MEDIA_URL* is pointing at your
+Django dev server. Also keep in mind that some processors may take a while,
+and is best used to check things over before rolling out to production.
 
 DOCTYPE
 -------
@@ -377,6 +395,9 @@ MEDIA_URL takes an optional argument that is the media path. Using the argument 
 If *CACHE_BUSTER* is set to 12345, the above example will render as::
 
 	<img src="http://assets.example.com/path/to/media/images/stuff.png?12345">
+	
+*NOTE*: Don't use this tag to serve CSS or JS files. Use the js and css tags
+that were specifically designed for the purpose.
 
 
 js

@@ -13,6 +13,7 @@ DOCTYPE = mediasync_settings.get("DOCTYPE", "xhtml")
 JOINED = mediasync_settings.get("JOINED", {})
 
 SERVE_REMOTE = client.serve_remote
+EMULATE_COMBO = mediasync_settings.get("EMULATE_COMBO", False)
 URL_PROCESSOR = mediasync_settings.get("URL_PROCESSOR", lambda x: x)
 CACHE_BUSTER = mediasync_settings.get("CACHE_BUSTER", None)
 
@@ -99,7 +100,7 @@ def get_path_from_tokens(token):
 
 def media_url_tag(parser, token):
     """
-    If developing locally, returns your MEDIA_URL. 
+    If settings.MEDIASYNC['serve_remote'] == False, returns your MEDIA_URL. 
     When settings.MEDIASYNC['serve_remote'] == True, returns your storage 
     backend's remote URL (IE: S3 URL). 
     
@@ -199,8 +200,17 @@ class CssTagNode(BaseTagNode):
         media_url = self.get_media_url(context)
 
         if SERVE_REMOTE and self.path in JOINED:
+            # Serving from S3/Cloud Files.
+            return self.linktag(media_url, CSS_PATH, self.path, self.media_type)
+        elif not SERVE_REMOTE and EMULATE_COMBO:
+            # Don't split the combo file into its component files. Emulate
+            # the combo behavior, but generate/serve it locally. Useful for
+            # testing combo CSS before deploying.
             return self.linktag(media_url, CSS_PATH, self.path, self.media_type)
         else:
+            # If this is a combo file seen in the JOINED key on the
+            # MEDIASYNC dict, break it apart into its component files and
+            # write separate <link> tags for each.
             filenames = JOINED.get(self.path, (self.path,))
             return ' '.join((self.linktag(media_url, CSS_PATH, fn, self.media_type) for fn in filenames))
 
@@ -239,8 +249,17 @@ class JsTagNode(BaseTagNode):
         media_url = self.get_media_url(context)
 
         if SERVE_REMOTE and self.path in JOINED:
+            # Serving from S3/Cloud Files.
+            return self.scripttag(media_url, JS_PATH, self.path)
+        elif not SERVE_REMOTE and EMULATE_COMBO:
+            # Don't split the combo file into its component files. Emulate
+            # the combo behavior, but generate/serve it locally. Useful for
+            # testing combo JS before deploying.
             return self.scripttag(media_url, JS_PATH, self.path)
         else:
+            # If this is a combo file seen in the JOINED key on the
+            # MEDIASYNC dict, break it apart into its component files and
+            # write separate <link> tags for each.
             filenames = JOINED.get(self.path, (self.path,))
             return ' '.join((self.scripttag(media_url, JS_PATH, fn) for fn in filenames))
 
