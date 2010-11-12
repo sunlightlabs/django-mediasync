@@ -38,11 +38,14 @@ Add to *INSTALLED_APPS*::
 
 	'mediasync'
 
-Add the proper *MEDIA_ROOT* setting::
+Make sure your *MEDIA_ROOT* setting is the correct path to your media::
 
     MEDIA_ROOT = '/path/to/media'
 
-Additionally, replace the existing *MEDIA_URL* setting with::
+When media is being served locally (instead of from S3 or Cloud Files), 
+mediasync serves media through a Django view. Set your *MEDIA_URL* to what 
+you'd like that local media URL to be. This can be whatever you'd like, as long 
+as you're using the {% media_url %} tag (more details on this later)::
 
 	MEDIA_URL = '/devmedia/'
 
@@ -82,16 +85,23 @@ after the file was synced. You may override this value by adding
 
 ::
 
-	'EXPIRATION_DAYS': 365 * 10, # expire in 10 years
+    # Expire in 10 years.
+	MEDIASYNC['EXPIRATION_DAYS'] = 365 * 10
 
-The media URL is selected based on the *DEBUG* attribute in settings.py. 
-When *True*, media will be served locally instead of from S3. Sometimes it is 
-necessary to serve media from S3 even when *DEBUG* is *True*. To force remote 
-serving of media, set *SERVE_REMOTE* to *True*.
+The media URL is selected based on the *SERVE_REMOTE* attribute in the
+*MEDIASYNC* dict in settings.py. When *True*, media will be served locally 
+instead of from S3.
 
 ::
 
-	'SERVE_REMOTE': True,
+    # This would force mediasync to serve all media through the value
+    # specified in settings.MEDIA_URL.
+	MEDIASYNC['SERVE_REMOTE'] = False
+	# This would serve all media through S3/Cloud Files.
+	MEDIASYNC['SERVE_REMOTE'] = True
+	# This would serve media locally while in DEBUG mode, and remotely when
+	# in production (DEBUG == False).
+	MEDIASYNC['SERVE_REMOTE'] = DEBUG
 
 DOCTYPE
 -------
@@ -102,7 +112,7 @@ overridden by using the *DOCTYPE* setting. Allowed values are *'html4'*,
 
 ::
 
-	'DOCTYPE': 'xhtml',
+    MEDIASYNC['DOCTYPE'] = 'xhtml'
 
 For each doctype, the following tags are rendered:
 
@@ -149,13 +159,15 @@ URL detection.
 
 ::
 
-	'USE_SSL': True, # force HTTPS
+    # Force HTTPS.
+    MEDIASYNC['USE_SSL'] = True 
 
 or
 
 :: 
 
-	'USE_SSL': False, # force HTTP
+    # Force HTTP.
+	MEDIASYNC['USE_SSL'] = False
 
 Some backends will be unable to use SSL. In these cases *USE_SSL* and SSL
 detection will be ignored.
@@ -171,20 +183,22 @@ S3
 
 ::
 
-	'BACKEND': 'mediasync.backends.s3',
+    MEDIASYNC['BACKEND'] = 'mediasync.backends.s3'
 
 Settings
 ~~~~~~~~
 
 The following settings are required in the mediasync settings dict::
 
-	'AWS_KEY': "s3_key",
-	'AWS_SECRET': "s3_secret",
-	'AWS_BUCKET': "bucket_name",
+    MEDIASYNC = {
+    	'AWS_KEY': "s3_key",
+    	'AWS_SECRET': "s3_secret",
+    	'AWS_BUCKET': "bucket_name",
+    }
 
 Optionally you may specify a path prefix::
 
-	'AWS_PREFIX': "key_prefix",
+	MEDIASYNC['AWS_PREFIX'] = "key_prefix"
 
 Assuming a correct DNS CNAME entry, setting *AWS_BUCKET* to 
 *assets.sunlightlabs.com* and *AWS_PREFIX* to *myproject/media* would 
@@ -196,7 +210,7 @@ URL by setting *AWS_BUCKET_CNAME* to *True*.
 
 ::
 
-	'AWS_BUCKET_CNAME': True,
+	MEDIASYNC['AWS_BUCKET_CNAME'] = True
 
 Tips
 ~~~~
@@ -207,7 +221,7 @@ date arrives.  One of the best and easiest ways to accomplish this is to alter
 the path to the media files with some sort of version string using the key 
 prefix setting::
 
-    'AWS_PREFIX': "myproject/media/v20001201",
+    MEDIASYNC['AWS_PREFIX'] = "myproject/media/v20001201"
 
 Given that and the above DNS CNAME example, the media directory URL would end 
 up being http://assets.sunlightlabs.com/myproject/media/v20001201/.  Whenever 
@@ -220,11 +234,17 @@ either be a value or a callable which is passed the media URL as a parameter.
 
 ::
 
-	'CACHE_BUSTER': 1234567890,
+	MEDIASYNC['CACHE_BUSTER'] = 1234567890
 
 The above setting will generate a media path similar to::
 
 	http://yourhost.com/url/to/media/image.png?1234567890
+	
+An important thing to note is that if you're running your Django site in a
+multi-threaded or multi-node setup, you'll want to be careful about using a 
+time-based cache buster value. Each worker/thread will probably have a slightly 
+different value for datetime.now(), which means your users will find themselves
+having cache misses randomly from page to page. 
 
 Custom backends
 ---------------
