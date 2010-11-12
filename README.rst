@@ -36,7 +36,7 @@ settings.py
 
 Add to *INSTALLED_APPS*::
 
-	'mediasync'
+    'mediasync'
 
 Make sure your *MEDIA_ROOT* setting is the correct path to your media::
 
@@ -86,7 +86,7 @@ after the file was synced. You may override this value by adding
 ::
 
     # Expire in 10 years.
-	MEDIASYNC['EXPIRATION_DAYS'] = 365 * 10
+    MEDIASYNC['EXPIRATION_DAYS'] = 365 * 10
 
 The media URL is selected based on the *SERVE_REMOTE* attribute in the
 *MEDIASYNC* dict in settings.py. When *True*, media will be served locally 
@@ -96,12 +96,12 @@ instead of from S3.
 
     # This would force mediasync to serve all media through the value
     # specified in settings.MEDIA_URL.
-	MEDIASYNC['SERVE_REMOTE'] = False
-	# This would serve all media through S3/Cloud Files.
-	MEDIASYNC['SERVE_REMOTE'] = True
-	# This would serve media locally while in DEBUG mode, and remotely when
-	# in production (DEBUG == False).
-	MEDIASYNC['SERVE_REMOTE'] = DEBUG
+    MEDIASYNC['SERVE_REMOTE'] = False
+    # This would serve all media through S3/Cloud Files.
+    MEDIASYNC['SERVE_REMOTE'] = True
+    # This would serve media locally while in DEBUG mode, and remotely when
+    # in production (DEBUG == False).
+    MEDIASYNC['SERVE_REMOTE'] = DEBUG
 
 DOCTYPE
 -------
@@ -167,7 +167,7 @@ or
 :: 
 
     # Force HTTP.
-	MEDIASYNC['USE_SSL'] = False
+    MEDIASYNC['USE_SSL'] = False
 
 Some backends will be unable to use SSL. In these cases *USE_SSL* and SSL
 detection will be ignored.
