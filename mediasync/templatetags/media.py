@@ -12,7 +12,7 @@ client = backends.client()
 DOCTYPE = mediasync_settings.get("DOCTYPE", "xhtml")
 JOINED = mediasync_settings.get("JOINED", {})
 
-SERVE_REMOTE = client.serve_remote or not settings.DEBUG
+SERVE_REMOTE = client.serve_remote
 URL_PROCESSOR = mediasync_settings.get("URL_PROCESSOR", lambda x: x)
 CACHE_BUSTER = mediasync_settings.get("CACHE_BUSTER", None)
 
@@ -34,7 +34,7 @@ class BaseTagNode(template.Node):
         super(BaseTagNode, self).__init__()
         # This is the filename or path+filename supplied by the template call.
         self.path = path
-        
+
     def is_secure(self, context):
         """
         Looks at the RequestContext object and determines if this page is
@@ -45,7 +45,7 @@ class BaseTagNode(template.Node):
         TEMPLATE_CONTEXT_PROCESSORS in settings.py.
         """
         return 'request' in context and context['request'].is_secure()
-    
+
     def get_media_url(self, context):
         """
         Checks to see whether to use the normal or the secure media source,
@@ -57,7 +57,7 @@ class BaseTagNode(template.Node):
         """
         is_secure = USE_SSL if USE_SSL is not None else self.is_secure(context)
         return SECURE_MEDIA_URL if is_secure else MEDIA_URL
-        
+
     def mkpath(self, url, path, filename=None):
         """
         Assembles various components to form a complete resource URL.
@@ -82,7 +82,7 @@ class BaseTagNode(template.Node):
             url = "%s?%s" % (url, cache_buster_val)
 
         return URL_PROCESSOR(url)
-        
+
 def get_path_from_tokens(token):
     """
     Just yanks the path out of a list of template tokens. Ignores any
@@ -99,9 +99,9 @@ def get_path_from_tokens(token):
 
 def media_url_tag(parser, token):
     """
-    If developing locally, returns your MEDIA_URL. When DEBUG == False, or
-    settings.MEDIASYNC['serve_remote'] == True, returns your storage backend's
-    remote URL (IE: S3 URL). 
+    If developing locally, returns your MEDIA_URL. 
+    When settings.MEDIASYNC['serve_remote'] == True, returns your storage 
+    backend's remote URL (IE: S3 URL). 
     
     If an argument is provided with the tag, it will be appended on the end
     of your media URL.
@@ -156,7 +156,7 @@ def css_tag(parser, token):
     """
     path = get_path_from_tokens(token)
 
-    tokens = token.split_contents()    
+    tokens = token.split_contents()
     if len(tokens) > 2:
         # Get the media types from the tag call provided by the user.
         media_type = tokens[2][1:-1]
@@ -203,7 +203,7 @@ class CssTagNode(BaseTagNode):
         else:
             filenames = JOINED.get(self.path, (self.path,))
             return ' '.join((self.linktag(media_url, CSS_PATH, fn, self.media_type) for fn in filenames))
-        
+
     def linktag(self, url, path, filename, media):
         """
         Renders a <link> tag for the stylesheet(s).
@@ -243,7 +243,7 @@ class JsTagNode(BaseTagNode):
         else:
             filenames = JOINED.get(self.path, (self.path,))
             return ' '.join((self.scripttag(media_url, JS_PATH, fn) for fn in filenames))
-        
+
     def scripttag(self, url, path, filename):
         """
         Renders a <script> tag for the JS file(s).

@@ -7,16 +7,18 @@ from mediasync import backends
 client = backends.client()
 
 def static_serve(request, path):
-    
-    if not settings.DEBUG:
+    _settings = getattr(settings, 'MEDIASYNC', None)
+    serve_remote = _settings.get('SERVE_REMOTE', False)
+
+    if serve_remote:
         url = client.remote_media_url().strip('/') + '/%(path)s'
         return redirect_to(request, url, path=path)
-    
+
     resp = serve(request, path, document_root=client.media_root)
     resp.content = client.process(resp.content, resp['Content-Type'], path)
-    
+
     return resp
 
-urlpatterns = patterns('',  
+urlpatterns = patterns('',
     url(r'^%s/(?P<path>.*)$' % client.local_media_url.strip('/'), static_serve),
 )

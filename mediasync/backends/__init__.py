@@ -23,33 +23,33 @@ def load_backend(backend_name):
             "Error was: %s") % (backend_name, e))
 
 class BaseClient(object):
-    
+
     def __init__(self, *args, **kwargs):
-        
+
         self._settings = getattr(settings, 'MEDIASYNC', None)
         assert self._settings
-        
+
         # mediasync settings
         self.expiration_days = self._settings.get("EXPIRATION_DAYS", 365)
-        self.serve_remote = self._settings.get('SERVE_REMOTE', not settings.DEBUG)
-        
+        self.serve_remote = self._settings.get('SERVE_REMOTE', False)
+
         self.local_media_url = self.get_local_media_url()
         self.media_root = self.get_media_root()
-        
+
         self.processors = []
         for proc in self._settings.get("PROCESSORS", DEFAULT_PROCESSORS):
-            
+
             if isinstance(proc, basestring):
                 (module, attr) = proc.rsplit('.', 1)
                 module = import_module(module)
                 proc = getattr(module, attr, None)
-            
+
             if isinstance(proc, type):
                 proc = proc()
-            
+
             if callable(proc):
                 self.processors.append(proc)
-        
+
     def get_local_media_url(self):
         """
         Checks settings.MEDIASYNC['MEDIA_URL'], then settings.MEDIA_URL.
@@ -57,7 +57,7 @@ class BaseClient(object):
         Broken out to allow overriding if need be.
         """
         return self._settings.get('MEDIA_URL', getattr(settings, 'MEDIA_URL', ''))
-    
+
     def get_media_root(self):
         """
         Checks settings.MEDIASYNC['MEDIA_ROOT'], then settings.MEDIA_ROOT.
@@ -65,7 +65,7 @@ class BaseClient(object):
         Broken out to allow overriding if need be.
         """
         return self._settings.get('MEDIA_ROOT', getattr(settings, 'MEDIA_ROOT', ''))
-    
+
     def media_url(self, with_ssl=False):
         """
         Used to return a base media URL. Depending on whether we're serving
@@ -83,7 +83,7 @@ class BaseClient(object):
             # Serving locally, just use the value in settings.py.
             url = self.local_media_url
         return url.rstrip('/')
-        
+
     def process(self, filedata, content_type, remote_path):
         for proc in self.processors:
             prcssd_filedata = proc(filedata, content_type, remote_path, self.serve_remote)
@@ -94,15 +94,15 @@ class BaseClient(object):
     def process_and_put(self, filedata, content_type, remote_path, force=False):
         filedata = self.process(filedata, content_type, remote_path)
         return self.put(filedata, content_type, remote_path, force)
-        
+
     def put(self, filedata, content_type, remote_path, force=False):
         raise NotImplementedError('put not defined in ' + self.__class__.__name__)
-        
+
     def remote_media_url(self, with_ssl=False):
         raise NotImplementedError('remote_media_url not defined in ' + self.__class__.__name__)
-    
+
     def open(self):
         pass
-    
+
     def close(self):
         pass

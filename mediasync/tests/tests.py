@@ -49,7 +49,7 @@ class BackendTestCase(unittest.TestCase):
         
     def tearDown(self):
         settings.MEDIASYNC['BACKEND'] = 'mediasync.backends.dummy'
-    
+
     def testInvalidBackend(self):
         self.assertRaises(ImproperlyConfigured, backends.client)
 
@@ -160,7 +160,7 @@ class S3ClientTestCase(unittest.TestCase):
         }
         
         self.client = backends.client()
-        
+
     def testMediaURL(self):
         
         try:
@@ -175,12 +175,9 @@ class S3ClientTestCase(unittest.TestCase):
         self.assertEqual(backends.client().media_url(), 'http://s3.amazonaws.com/%s' % self.bucket_name)
     
     def testServeRemote(self):
-        
-        settings.DEBUG = False
         settings.MEDIASYNC['SERVE_REMOTE'] = False
         self.assertEqual(backends.client().media_url(), '/media')
-        
-        settings.DEBUG = True
+
         settings.MEDIASYNC['SERVE_REMOTE'] = True
         self.assertEqual(backends.client().media_url(), 'http://s3.amazonaws.com/%s' % self.bucket_name)
     
@@ -250,7 +247,7 @@ class S3ClientTestCase(unittest.TestCase):
         self.assertRaises(AssertionError, backends.client)
 
 class ProcessorTestCase(unittest.TestCase):
-    
+
     def setUp(self):
         settings.MEDIASYNC['BACKEND'] = 'mediasync.tests.tests'
         settings.MEDIASYNC['PROCESSORS'] = (
@@ -294,4 +291,3 @@ class ProcessorTestCase(unittest.TestCase):
     def testCustomProcessor(self):
         procd = self.client.process('asdf', 'text/plain', 'asdf.txt')
         self.assertEqual(procd, "ASDF")
-        
