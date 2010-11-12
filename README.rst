@@ -150,11 +150,11 @@ mediasync will attempt to intelligently determine if your media should be
 served using HTTPS. In order to use automatic SSL detection, *django.core.context_processors.request*
 must be added to *TEMPLATE_CONTEXT_PROCESSORS* in settings.py::
 
-	TEMPLATE_CONTEXT_PROCESSORS = (
-		...
-		'django.core.context_processors.request',
-		...
-	)
+    TEMPLATE_CONTEXT_PROCESSORS = (
+        ...
+        'django.core.context_processors.request',
+        ...
+    )
 
 The *USE_SSL* mediasync setting can be used to override the SSL
 URL detection.
