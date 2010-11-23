@@ -479,6 +479,7 @@ Change Log
 2.0 (in progress)
 =================
 
+* use gzip instead of deflate for compression
 * add pluggable backends
 * add pluggable file processors
 * settings refactor
@@ -488,7 +489,7 @@ Change Log
 * Make template tags aware of whether the current page is SSL-secured. If it
   is, ask the backend for an SSL media URL (if implemented by your backend).
 
-Thanks to Greg Taylor and Peter Sanchez for their contributions to this release.
+Thanks to Greg Taylor, Peter Sanchez, and Jonathan Drosdeck for their contributions to this release.
 
 1.0.1
 =====
