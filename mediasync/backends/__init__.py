@@ -86,7 +86,8 @@ class BaseClient(object):
 
     def process(self, filedata, content_type, remote_path):
         for proc in self.processors:
-            prcssd_filedata = proc(filedata, content_type, remote_path, self.serve_remote)
+            is_active = self.serve_remote or self._settings.get("EMULATE_COMBO", False)
+            prcssd_filedata = proc(filedata, content_type, remote_path, is_active)
             if prcssd_filedata is not None:
                 filedata = prcssd_filedata
         return filedata
