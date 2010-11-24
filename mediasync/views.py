@@ -29,8 +29,8 @@ def combo_serve(request, path, client):
     joinfile = path
     sourcefiles = JOINED[path]
     # Generate the combo file as a string.
-    combo_data = combine_files(joinfile, sourcefiles, client)
-
+    combo_data, dirname = combine_files(joinfile, sourcefiles, client)
+    
     if path.endswith('.css'):
         mime_type = 'text/css'
     elif joinfile.endswith('.js'):

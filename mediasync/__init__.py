@@ -89,7 +89,7 @@ def combine_files(joinfile, sourcefiles, client):
 
     filedata = buffer.getvalue()
     buffer.close()
-    return filedata
+    return (filedata, dirname)
 
 def sync(client=None, force=False, verbose=True):
     """ Let's face it... pushing this stuff to S3 is messy.
@@ -121,6 +121,7 @@ def sync(client=None, force=False, verbose=True):
         if filedata is None:
             # combine_files() is only interested in CSS/JS files.
             continue
+        filedata, dirname = filedata
 
         content_type = mimetypes.guess_type(joinfile)[0] or 'application/octet-stream'
 
