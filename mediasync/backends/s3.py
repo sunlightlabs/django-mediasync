@@ -94,7 +94,8 @@ class Client(BaseClient):
             key = Key(self._bucket)
             key.key = remote_path
         
-        if force or key.get_metadata('mediasync-checksum') != raw_b64digest:
+        s3_checksum = key.get_metadata('mediasync-checksum').replace(' ', '+')
+        if force or s3_checksum != raw_b64digest:
             
             key.set_metadata('mediasync-checksum', raw_b64digest)
             key.set_contents_from_string(filedata, headers=headers, md5=(hexdigest, b64digest))
