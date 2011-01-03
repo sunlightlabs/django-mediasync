@@ -57,7 +57,7 @@ class S3BackendTestCase(unittest.TestCase):
         self.assertEqual(backends.client().media_url(), '/media')
         
         settings.DEBUG = False
-        self.assertEqual(backends.client().media_url(), 'http://mediasync_test.s3.amazonaws.com')
+        self.assertEqual(backends.client().media_url(), 'http://s3.amazonaws.com/mediasync_test')
     
     def testServeRemote(self):
         
@@ -67,7 +67,7 @@ class S3BackendTestCase(unittest.TestCase):
         
         settings.DEBUG = True
         settings.MEDIASYNC['SERVE_REMOTE'] = True
-        self.assertEqual(backends.client().media_url(), 'http://mediasync_test.s3.amazonaws.com')
+        self.assertEqual(backends.client().media_url(), 'http://s3.amazonaws.com/mediasync_test')
     
     def testMissingBucket(self):
         del settings.MEDIASYNC['AWS_BUCKET']
@@ -83,9 +83,16 @@ class ProcessorTestCase(unittest.TestCase):
         self.client = backends.client()
     
     def testProcessor(self):
+        
+        try:
+            import slimmer
+        except ImportError:
+            self.skipTest("slimmer not installed, skipping test")
+            
         content = """var foo = function() {
             alert(1);
         };"""
+        
         ct = 'text/javascript'
         procd = self.client.process(content, ct, 'test.js')
         self.assertEqual(procd, "VAR FOO = FUNCTION(){ALERT(1)};")
