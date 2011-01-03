@@ -1,10 +1,23 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from mediasync import backends
+from mediasync.backends import BaseClient
 import mediasync
 import os
 import sys
 import unittest
+
+class Client(BaseClient):
+    
+    def put(self, filedata, content_type, remote_path, force=False):
+        return True
+        
+    def remote_media_url(self, with_ssl=False):
+        return ''
+
+#
+# tests
+#
 
 class BaseTestCase(unittest.TestCase):
     
@@ -33,6 +46,12 @@ class DummyBackendTestCase(unittest.TestCase):
     
     def testJoinedPush(self):
         pass
+
+class MockClientTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        settings.MEDIASYNC['BACKEND'] = 'mediasync.tests.tests'
+        self.client = backends.client()
     
 class S3BackendTestCase(unittest.TestCase):
 
@@ -76,24 +95,46 @@ class S3BackendTestCase(unittest.TestCase):
 class ProcessorTestCase(unittest.TestCase):
     
     def setUp(self):
+        
         settings.MEDIASYNC['PROCESSORS'] = (
+            'mediasync.processors.css_minifier',
             'mediasync.processors.js_minifier',
             lambda fd, ct, rp, r: fd.upper(),
         )
         self.client = backends.client()
     
-    def testProcessor(self):
+    def testJSProcessor(self):
         
         try:
             import slimmer
         except ImportError:
             self.skipTest("slimmer not installed, skipping test")
-            
+        
         content = """var foo = function() {
             alert(1);
         };"""
         
         ct = 'text/javascript'
         procd = self.client.process(content, ct, 'test.js')
-        self.assertEqual(procd, "VAR FOO = FUNCTION(){ALERT(1)};")
+        self.assertEqual(procd, 'VAR FOO = FUNCTION(){ALERT(1)};')
+    
+    def testCSSProcessor(self):
+        
+        try:
+            import slimmer
+        except ImportError:
+            self.skipTest("slimmer not installed, skipping test")
+        
+        content = """html {
+            border: 1px solid #000000;
+            font-family: "Helvetica", "Arial", sans-serif;
+        }"""
+
+        ct = 'text/css'
+        procd = self.client.process(content, ct, 'test.css')
+        self.assertEqual(procd, 'HTML{BORDER:1PX SOLID #000;FONT-FAMILY:"HELVETICA","ARIAL",SANS-SERIF}')
+    
+    def testCustomProcessor(self):
+        procd = self.client.process('asdf', 'text/plain', 'asdf.txt')
+        self.assertEqual(procd, "ASDF")
         
