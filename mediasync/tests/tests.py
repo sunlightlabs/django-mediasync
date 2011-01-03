@@ -9,6 +9,9 @@ import unittest
 
 class Client(BaseClient):
     
+    def __init__(self, *args, **kwargs):
+        super(Client, self).__init__(*args, **kwargs)
+    
     def put(self, filedata, content_type, remote_path, force=False):
         return True
         
@@ -27,25 +30,25 @@ class BaseTestCase(unittest.TestCase):
         }
         self.assertRaises(ImproperlyConfigured, backends.client)
 
-class DummyBackendTestCase(unittest.TestCase):
-    
-    def setUp(self):
-        settings.DEBUG = False
-        settings.MEDIASYNC = {
-            'BACKEND': 'mediasync.backends.dummy',
-        }
-        self.client = backends.client()
-    
-    def testPush(self):
-        
-        def callback(*args):
-            pass
-        
-        self.client.put_callback = callback
-        mediasync.sync(self.client)
-    
-    def testJoinedPush(self):
-        pass
+# class DummyBackendTestCase(unittest.TestCase):
+#     
+#     def setUp(self):
+#         settings.DEBUG = False
+#         settings.MEDIASYNC = {
+#             'BACKEND': 'mediasync.backends.dummy',
+#         }
+#         self.client = backends.client()
+#     
+#     def testPush(self):
+#         
+#         def callback(*args):
+#             pass
+#         
+#         self.client.put_callback = callback
+#         mediasync.sync(self.client)
+#     
+#     def testJoinedPush(self):
+#         pass
 
 class MockClientTestCase(unittest.TestCase):
     
