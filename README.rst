@@ -522,7 +522,7 @@ Change Log
 2.0 (in progress)
 =================
 
-* use gzip instead of deflate for compression
+* use gzip instead of deflate for compression (better browser support)
 * add pluggable backends
 * add pluggable file processors
 * settings refactor
@@ -531,6 +531,9 @@ Change Log
   a wider variety of hidden files/directories.
 * Make template tags aware of whether the current page is SSL-secured. If it
   is, ask the backend for an SSL media URL (if implemented by your backend).
+* made SERVE_REMOTE setting the sole factor in determining if
+  media should be served locally or remotely
+* add many more tests
 
 Thanks to Greg Taylor, Peter Sanchez, and Jonathan Drosdeck for their contributions to this release.
 
