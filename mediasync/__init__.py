@@ -3,7 +3,6 @@ import hashlib
 import mimetypes
 import os
 import cStringIO
-from django.conf import settings
 
 JS_MIMETYPES = (
     "application/javascript",
@@ -62,6 +61,8 @@ def combine_files(joinfile, sourcefiles, client):
     Returns a string containing the combo file, or None if the specified
     file can not be combo'd.
     """
+    from django.conf import settings
+    
     CSS_PATH = settings.MEDIASYNC.get("CSS_PATH", "").strip('/')
     JS_PATH = settings.MEDIASYNC.get("JS_PATH", "").strip('/')
 
@@ -98,6 +99,7 @@ def sync(client=None, force=False, verbose=True):
         on others.
     """
 
+    from django.conf import settings
     from mediasync import backends
 
     assert hasattr(settings, "MEDIASYNC")
