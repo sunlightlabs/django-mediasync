@@ -31,7 +31,7 @@ class BaseClient(object):
 
         # mediasync settings
         self.expiration_days = self._settings.get("EXPIRATION_DAYS", 365)
-        self.serve_remote = self._settings.get('SERVE_REMOTE', False)
+        self.serve_remote = self._settings.get('SERVE_REMOTE', not settings.DEBUG)
 
         self.local_media_url = self.get_local_media_url()
         self.media_root = self.get_media_root()
