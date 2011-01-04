@@ -5,16 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 from mediasync import TYPES_TO_COMPRESS
 from mediasync.backends import BaseClient
 import mediasync
-import cStringIO
 import datetime
-import gzip
-
-def _compress(s):
-    zbuf = cStringIO.StringIO()
-    zfile = gzip.GzipFile(mode='wb', compresslevel=6, fileobj=zbuf)
-    zfile.write(s)
-    zfile.close()
-    return zbuf.getvalue()
 
 class Client(BaseClient):
 
@@ -80,19 +71,11 @@ class Client(BaseClient):
             "Expires": expires,
             "Cache-Control": 'max-age=%d' % (self.expiration_days * 24 * 3600),
         }
-
-        # check to see if file should be gzipped based on content_type
-        # also check to see if filesize is greater than 1kb
-        if content_type in TYPES_TO_COMPRESS and len(filedata) > 1024:
-            filedata = _compress(filedata)
-            headers["Content-Encoding"] = "gzip"
-            (hexdigest, b64digest) = mediasync.checksum(filedata) # update checksum with compressed data
         
         key = self._bucket.get_key(remote_path)
         
         if key is None:
-            key = Key(self._bucket)
-            key.key = remote_path
+            key = Key(self._bucket, remote_path)
         
         key_meta = key.get_metadata('mediasync-checksum') or ''
         s3_checksum = key_meta.replace(' ', '+')
@@ -101,4 +84,17 @@ class Client(BaseClient):
             key.set_metadata('mediasync-checksum', raw_b64digest)
             key.set_contents_from_string(filedata, headers=headers, md5=(hexdigest, b64digest))
         
+            # check to see if file should be gzipped based on content_type
+            # also check to see if filesize is greater than 1kb
+            if content_type in TYPES_TO_COMPRESS:
+                
+                key = Key(self._bucket, "%s.gz" % remote_path)
+                
+                filedata = mediasync.compress(filedata)
+                (hexdigest, b64digest) = mediasync.checksum(filedata) # update checksum with compressed data
+                headers["Content-Encoding"] = "gzip"
+                
+                key.set_metadata('mediasync-checksum', raw_b64digest)
+                key.set_contents_from_string(filedata, headers=headers, md5=(hexdigest, b64digest))
+            
             return True

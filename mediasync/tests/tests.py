@@ -180,6 +180,9 @@ class S3ClientTestCase(unittest.TestCase):
         self.client.open()
         conn = self.client.get_connection()
         
+        # setup http connection
+        http_conn = httplib.HTTPSConnection('s3.amazonaws.com')
+        
         # test synced files then delete them
         bucket = conn.get_bucket(self.bucket_name)
         static_paths = mediasync.listdir_recursive(os.path.join(PWD, 'media'))
@@ -204,10 +207,9 @@ class S3ClientTestCase(unittest.TestCase):
             self.assertEqual(s3_checksum, b64digest)
             
             # do a HEAD request on the file
-            http_conn = httplib.HTTPSConnection('s3.amazonaws.com')
             http_conn.request('HEAD', "/%s/%s" % (self.bucket_name, path))
             response = http_conn.getresponse()
-            http_conn.close()
+            response.read()
             
             # verify valid content type
             content_type = mimetypes.guess_type(path)[0] or 'application/octet-stream'
@@ -223,6 +225,23 @@ class S3ClientTestCase(unittest.TestCase):
             
             # done with the file, delete it from S3
             key.delete()
+            
+            if content_type in mediasync.TYPES_TO_COMPRESS:
+                
+                key = bucket.get_key("%s.gz" % path)
+                
+                # do a HEAD request on the file
+                http_conn.request('HEAD', "/%s/%s.gz" % (self.bucket_name, path))
+                response = http_conn.getresponse()
+                response.read()
+                
+                key_meta = key.get_metadata('mediasync-checksum') or ''
+                s3_checksum = key_meta.replace(' ', '+')
+                self.assertEqual(s3_checksum, b64digest)
+                
+                key.delete()
+        
+        http_conn.close()
         
         # wait a moment then delete temporary bucket
         time.sleep(2)
