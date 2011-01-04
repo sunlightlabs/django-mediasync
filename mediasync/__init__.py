@@ -1,8 +1,9 @@
 import base64
+import cStringIO
+import gzip
 import hashlib
 import mimetypes
 import os
-import cStringIO
 
 JS_MIMETYPES = (
     "application/javascript",
@@ -27,6 +28,13 @@ def checksum(data):
     hexdigest = checksum.hexdigest()
     b64digest = base64.b64encode(checksum.digest())
     return (hexdigest, b64digest)
+
+def compress(s):
+    zbuf = cStringIO.StringIO()
+    zfile = gzip.GzipFile(mode='wb', compresslevel=6, fileobj=zbuf)
+    zfile.write(s)
+    zfile.close()
+    return zbuf.getvalue()
 
 def is_syncable_dir(dir_str):
     return not dir_str.startswith('.') and not dir_str.startswith('_')
@@ -95,8 +103,6 @@ def sync(client=None, force=False, verbose=True):
         and they have to be in a certain order as some variables rely
         on others.
     """
-
-    from django.conf import settings
     from mediasync import backends
     from mediasync.conf import msettings
 
