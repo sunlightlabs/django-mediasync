@@ -58,6 +58,7 @@ class MockClientTestCase(unittest.TestCase):
     def setUp(self):
         settings.MEDIASYNC['BACKEND'] = 'mediasync.tests.tests'
         settings.MEDIASYNC['PROCESSORS'] = []
+        settings.MEDIASYNC['SERVE_REMOTE'] = True
         settings.MEDIASYNC['JOINED'] = {
             'css/joined.css': ('css/1.css', 'css/2.css'),
             'js/joined.js': ('js/1.js', 'js/2.js'),
@@ -148,33 +149,21 @@ class S3ClientTestCase(unittest.TestCase):
         bucket_hash = md5("%i-%s" % (int(time.time()), os.environ['USER'])).hexdigest()
         self.bucket_name = 'mediasync_test_' + bucket_hash
         
-        settings.DEBUG = False
         settings.MEDIASYNC['BACKEND'] = 'mediasync.backends.s3'
         settings.MEDIASYNC['AWS_BUCKET'] = self.bucket_name
         settings.MEDIASYNC['AWS_KEY'] = os.environ['AWS_KEY'] or None
         settings.MEDIASYNC['AWS_SECRET'] = os.environ['AWS_SECRET'] or None
         settings.MEDIASYNC['PROCESSORS'] = []
+        settings.MEDIASYNC['SERVE_REMOTE'] = True
         settings.MEDIASYNC['JOINED'] = {
             'css/joined.css': ('css/1.css', 'css/2.css'),
             'js/joined.js': ('js/1.js', 'js/2.js'),
         }
         
         self.client = backends.client()
-
-    def testMediaURL(self):
-        
-        try:
-            del settings.MEDIASYNC['SERVE_REMOTE']
-        except KeyError:
-            pass
-            
-        settings.DEBUG = True
-        self.assertEqual(backends.client().media_url(), '/media')
-        
-        settings.DEBUG = False
-        self.assertEqual(backends.client().media_url(), 'http://s3.amazonaws.com/%s' % self.bucket_name)
     
     def testServeRemote(self):
+        
         settings.MEDIASYNC['SERVE_REMOTE'] = False
         self.assertEqual(backends.client().media_url(), '/media')
 
