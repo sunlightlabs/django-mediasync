@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from hashlib import md5
 import httplib
+import itertools
 import os
 import re
 import sys
@@ -195,12 +196,16 @@ class S3ClientTestCase(unittest.TestCase):
         
         # test synced files then delete them
         bucket = conn.get_bucket(self.bucket_name)
-        for key in bucket.get_all_keys():
+        static_paths = mediasync.listdir_recursive(os.path.join(PWD, 'media'))
+        joined_paths = settings.MEDIASYNC['JOINED'].iterkeys()
+        for path in itertools.chain(static_paths, joined_paths):
             
-            if key.key in settings.MEDIASYNC['JOINED']:
-                args = [PWD, 'media', '_test', key.key.split('/')[1]]
+            key = bucket.get_key(path)
+            
+            if path in settings.MEDIASYNC['JOINED']:
+                args = [PWD, 'media', '_test', path.split('/')[1]]
             else:
-                args = [PWD, 'media'] + key.key.split('/')
+                args = [PWD, 'media'] + path.split('/')
             local_content = readfile(os.path.join(*args))
 
             # compare file content
@@ -214,12 +219,12 @@ class S3ClientTestCase(unittest.TestCase):
             
             # do a HEAD request on the file
             http_conn = httplib.HTTPSConnection('s3.amazonaws.com')
-            http_conn.request('HEAD', "/%s/%s" % (self.bucket_name, key.key))
+            http_conn.request('HEAD', "/%s/%s" % (self.bucket_name, path))
             response = http_conn.getresponse()
             http_conn.close()
             
             # verify valid content type
-            content_type = mimetypes.guess_type(key.key)[0] or 'application/octet-stream'
+            content_type = mimetypes.guess_type(path)[0] or 'application/octet-stream'
             self.assertEqual(response.getheader("Content-Type", None), content_type)
             
             # check for valid expires headers
@@ -230,10 +235,8 @@ class S3ClientTestCase(unittest.TestCase):
             cc_header = response.getheader("Cache-Control", None)
             self.assertEqual(cc_header, cc)
             
-            
-            # done with the file, delete it
+            # done with the file, delete it from S3
             key.delete()
-        
         
         # wait a moment then delete temporary bucket
         time.sleep(2)
