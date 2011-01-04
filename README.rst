@@ -109,7 +109,7 @@ instead of from S3.
     
     # This would serve media locally while in DEBUG mode, and remotely when
     # in production (DEBUG == False).
-    MEDIASYNC['SERVE_REMOTE'] = DEBUG
+    MEDIASYNC['SERVE_REMOTE'] = not DEBUG
     
 When serving files locally, you can emulate the CSS/JS combo/minifying
 behavior we get from using media processors by specifying the following.
