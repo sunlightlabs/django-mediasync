@@ -4,17 +4,10 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from mediasync import TYPES_TO_COMPRESS
 from mediasync.backends import BaseClient
-import base64
+import mediasync
 import cStringIO
 import datetime
 import gzip
-import hashlib
-
-def _checksum(data):
-    checksum = hashlib.md5(data)
-    hexdigest = checksum.hexdigest()
-    b64digest = base64.b64encode(checksum.digest())
-    return (hexdigest, b64digest)
 
 def _compress(s):
     zbuf = cStringIO.StringIO()
@@ -34,17 +27,24 @@ class Client(BaseClient):
         
         assert self.aws_bucket
     
+    def get_connection(self):
+        return self._conn
+    
     def open(self):    
         
         key = self._settings.get("AWS_KEY", None)
         secret = self._settings.get("AWS_SECRET", None)
         
         try:
-            _conn = S3Connection(key, secret)
+            self._conn = S3Connection(key, secret)
         except AttributeError:
             raise ImproperlyConfigured("S3 keys not set and no boto config found.")
                 
-        self._bucket = _conn.create_bucket(self.aws_bucket)
+        self._bucket = self._conn.create_bucket(self.aws_bucket)
+    
+    def close(self):
+        self._bucket = None
+        self._conn = None
     
     def remote_media_url(self, with_ssl=False):
         """
@@ -70,7 +70,7 @@ class Client(BaseClient):
         if self.aws_prefix:
             remote_path = "%s/%s" % (self.aws_prefix, remote_path)
             
-        (hexdigest, b64digest) = _checksum(filedata)
+        (hexdigest, b64digest) = mediasync.checksum(filedata)
         raw_b64digest = b64digest # store raw b64digest to add as file metadata
 
         # create initial set of headers
@@ -86,7 +86,7 @@ class Client(BaseClient):
         if content_type in TYPES_TO_COMPRESS and len(filedata) > 1024:
             filedata = _compress(filedata)
             headers["Content-Encoding"] = "gzip"
-            (hexdigest, b64digest) = _checksum(filedata) # update checksum with compressed data
+            (hexdigest, b64digest) = mediasync.checksum(filedata) # update checksum with compressed data
         
         key = self._bucket.get_key(remote_path)
         

@@ -1,3 +1,5 @@
+import base64
+import hashlib
 import mimetypes
 import os
 
@@ -18,6 +20,12 @@ TYPES_TO_COMPRESS = (
 
 class SyncException(Exception):
     pass
+
+def checksum(data):
+    checksum = hashlib.md5(data)
+    hexdigest = checksum.hexdigest()
+    b64digest = base64.b64encode(checksum.digest())
+    return (hexdigest, b64digest)
 
 def is_syncable_dir(dir_str):
     return not dir_str.startswith('.') and not dir_str.startswith('_')
@@ -43,7 +51,7 @@ def listdir_recursive(dir_str):
         else:
              pass # "Skipping directory %s" % root
 
-def sync(client=None, force=False):
+def sync(client=None, force=False, verbose=True):
     """ Let's face it... pushing this stuff to S3 is messy.
         A lot of different things need to be calculated for each file
         and they have to be in a certain order as some variables rely
@@ -78,8 +86,10 @@ def sync(client=None, force=False):
         
         if joinfile.endswith('.css'):
             dirname = CSS_PATH
+            separator = '\n'
         elif joinfile.endswith('.js'):
             dirname = JS_PATH
+            separator = ';\n'
         else:
             continue # bypass this file since we only join css and js
         
@@ -92,7 +102,7 @@ def sync(client=None, force=False):
                 f = open(sourcepath)
                 buffer.write(f.read())
                 f.close()
-                buffer.write('\n')        
+                buffer.write(separator)
         
         filedata = buffer.getvalue()
         buffer.close()
@@ -104,7 +114,8 @@ def sync(client=None, force=False):
             remote_path = "%s/%s" % (dirname, remote_path)
         
         if client.process_and_put(filedata, content_type, remote_path, force=force):
-            print "[%s] %s" % (content_type, remote_path)
+            if verbose:
+                print "[%s] %s" % (content_type, remote_path)
     
     #
     # sync static media
@@ -130,7 +141,8 @@ def sync(client=None, force=False):
                 filedata = open(filepath, 'rb').read()
                 
                 if client.process_and_put(filedata, content_type, remote_path, force=force):
-                    print "[%s] %s" % (content_type, remote_path)
+                    if verbose:
+                        print "[%s] %s" % (content_type, remote_path)
     
     client.close()
 
