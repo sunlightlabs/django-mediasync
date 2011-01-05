@@ -520,8 +520,8 @@ Running MEDIASYNC
 Change Log
 ----------
 
-2.0 (in progress)
-=================
+2.0.0
+=====
 
 * remove CSS_PATH and JS_PATH settings
 * use gzip instead of deflate for compression (better browser support)
