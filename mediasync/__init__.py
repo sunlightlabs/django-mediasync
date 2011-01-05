@@ -61,18 +61,15 @@ def combine_files(joinfile, sourcefiles, client):
     Returns a string containing the combo file, or None if the specified
     file can not be combo'd.
     """
-    from django.conf import settings
-    
-    CSS_PATH = settings.MEDIASYNC.get("CSS_PATH", "").strip('/')
-    JS_PATH = settings.MEDIASYNC.get("JS_PATH", "").strip('/')
+    from mediasync.conf import msettings
 
     joinfile = joinfile.strip('/')
 
     if joinfile.endswith('.css'):
-        dirname = CSS_PATH
+        dirname = msettings['CSS_PATH'].strip('/')
         separator = '\n'
     elif joinfile.endswith('.js'):
-        dirname = JS_PATH
+        dirname = msettings['JS_PATH'].strip('/')
         separator = ';\n'
     else:
         # By-pass this file since we only join CSS and JS.
@@ -101,8 +98,7 @@ def sync(client=None, force=False, verbose=True):
 
     from django.conf import settings
     from mediasync import backends
-
-    assert hasattr(settings, "MEDIASYNC")
+    from mediasync.conf import msettings
 
     # create client connection
     if client is None:
@@ -115,9 +111,7 @@ def sync(client=None, force=False, verbose=True):
     # sync joined media
     #
 
-    joined = settings.MEDIASYNC.get("JOINED", {})
-
-    for joinfile, sourcefiles in joined.iteritems():
+    for joinfile, sourcefiles in msettings['JOINED'].iteritems():
         
         filedata = combine_files(joinfile, sourcefiles, client)
         if filedata is None:

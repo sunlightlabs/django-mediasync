@@ -1,6 +1,6 @@
 """
 This module contains views used to serve static media if 
-settings.MEDIASYNC['SERVE_REMOTE'] == False. See mediasync.urls to see how
+msettings['SERVE_REMOTE'] == False. See mediasync.urls to see how
 these are shimmed in.
 
 The static_serve() function is where the party starts.
@@ -10,13 +10,7 @@ from django.http import HttpResponse
 from django.views.static import serve
 from django.views.generic.simple import redirect_to
 from mediasync import combine_files
-
-mediasync_settings = getattr(settings, 'MEDIASYNC', {})
-CSS_PATH = mediasync_settings.get("CSS_PATH", "")
-JS_PATH = mediasync_settings.get("JS_PATH", "")
-JOINED = mediasync_settings.get("JOINED", {})
-SERVE_REMOTE = mediasync_settings.get("SERVE_REMOTE", False)
-EMULATE_COMBO = mediasync_settings.get("EMULATE_COMBO", False)
+from mediasync.conf import msettings
 
 def combo_serve(request, path, client):
     """
@@ -27,7 +21,7 @@ def combo_serve(request, path, client):
     to production.
     """
     joinfile = path
-    sourcefiles = JOINED[path]
+    sourcefiles = msettings['JOINED'][path]
     # Generate the combo file as a string.
     combo_data, dirname = combine_files(joinfile, sourcefiles, client)
     
@@ -47,9 +41,9 @@ def _form_key_str(path):
     settings, if they have been set.
     """
     if path.endswith('.css'):
-        media_path_prefix = CSS_PATH
+        media_path_prefix = msettings['CSS_PATH']
     elif path.endswith('.js'):
-        media_path_prefix = JS_PATH
+        media_path_prefix = msettings['JS_PATH']
     else:
         # This isn't a CSS/JS file, no combo for you.
         return None
@@ -83,7 +77,7 @@ def _find_combo_match(path):
         # _form_key_str() says this isn't even a CSS/JS file.
         return None
 
-    if not JOINED.has_key(key_str):
+    if not msettings['JOINED'].has_key(key_str):
         # No combo file match found. Must be an single file.
         return None
     else:
@@ -96,12 +90,12 @@ def static_serve(request, path, client):
     to get the correct thing delivered to the user. This can also emulate the
     combo behavior seen when SERVE_REMOTE == False and EMULATE_COMBO == True.
     """
-    if SERVE_REMOTE:
+    if msettings['SERVE_REMOTE']:
         # We're serving from S3, redirect there.
         url = client.remote_media_url().strip('/') + '/%(path)s'
         return redirect_to(request, url, path=path)
 
-    if SERVE_REMOTE is False and EMULATE_COMBO:
+    if not msettings['SERVE_REMOTE'] and msettings['EMULATE_COMBO']:
         # Combo emulation is on and we're serving media locally. Try to see if
         # the given path matches a combo file defined in the JOINED dict in
         # the MEDIASYNC settings dict.

@@ -2,28 +2,11 @@ from django import template
 from django.conf import settings
 from django.template.defaultfilters import stringfilter
 from mediasync import backends
+from mediasync.conf import settings
 import warnings
-
-mediasync_settings = getattr(settings, 'MEDIASYNC', {})
 
 # Instance of the backend you configured in settings.py.
 client = backends.client()
-
-DOCTYPE = mediasync_settings.get("DOCTYPE", "xhtml")
-JOINED = mediasync_settings.get("JOINED", {})
-
-SERVE_REMOTE = client.serve_remote
-EMULATE_COMBO = mediasync_settings.get("EMULATE_COMBO", False)
-URL_PROCESSOR = mediasync_settings.get("URL_PROCESSOR", lambda x: x)
-CACHE_BUSTER = mediasync_settings.get("CACHE_BUSTER", None)
-
-# SSL settings
-USE_SSL = mediasync_settings.get("USE_SSL", None)
-MEDIA_URL = client.media_url()
-SECURE_MEDIA_URL = client.media_url(with_ssl=True)
-
-CSS_PATH = mediasync_settings.get("CSS_PATH", "")
-JS_PATH = mediasync_settings.get("JS_PATH", "")
 
 register = template.Library()
 
@@ -56,8 +39,9 @@ class BaseTagNode(template.Node):
         NOTE: Not all backends implement SSL media. In this case, they'll just
         return an unencrypted URL.
         """
-        is_secure = USE_SSL if USE_SSL is not None else self.is_secure(context)
-        return SECURE_MEDIA_URL if is_secure else MEDIA_URL
+        use_ssl = msettings['USE_SSL']
+        is_secure = use_ssl if use_ssl is not None else self.is_secure(context)
+        return client.media_url(with_ssl=True) if is_secure else client.media_url()
 
     def mkpath(self, url, path, filename=None):
         """
@@ -75,14 +59,15 @@ class BaseTagNode(template.Node):
         if filename:
             url = "%s/%s" % (url, filename.lstrip('/'))
 
-        if CACHE_BUSTER:
+        cb = msettings['CACHE_BUSTER']
+        if cb:
             # Cache busters help tell the client to re-download the file after
             # a change. This can either be a callable or a constant defined
             # in settings.py.
-            cache_buster_val = CACHE_BUSTER(url) if callable(CACHE_BUSTER) else CACHE_BUSTER
-            url = "%s?%s" % (url, cache_buster_val)
+            cb_val = cb(url) if callable(cb) else cb
+            url = "%s?%s" % (url, cb_val)
 
-        return URL_PROCESSOR(url)
+        return msettings['URL_PROCESSOR'](url)
 
 def get_path_from_tokens(token):
     """
@@ -100,8 +85,8 @@ def get_path_from_tokens(token):
 
 def media_url_tag(parser, token):
     """
-    If settings.MEDIASYNC['serve_remote'] == False, returns your MEDIA_URL. 
-    When settings.MEDIASYNC['serve_remote'] == True, returns your storage 
+    If msettings['SERVE_REMOTE'] == False, returns your MEDIA_URL. 
+    When msettings['SERVE_REMOTE'] == True, returns your storage 
     backend's remote URL (IE: S3 URL). 
     
     If an argument is provided with the tag, it will be appended on the end
@@ -198,27 +183,29 @@ class CssTagNode(BaseTagNode):
 
     def render(self, context):
         media_url = self.get_media_url(context)
-
-        if SERVE_REMOTE and self.path in JOINED:
+        css_path = msettings['CSS_PATH']
+        joined = msettings['JOINED']
+        
+        if msettings['SERVE_REMOTE'] and self.path in joined:
             # Serving from S3/Cloud Files.
-            return self.linktag(media_url, CSS_PATH, self.path, self.media_type)
-        elif not SERVE_REMOTE and EMULATE_COMBO:
+            return self.linktag(media_url, css_path, self.path, self.media_type)
+        elif not msettings['SERVE_REMOTE'] and msettings['EMULATE_COMBO']:
             # Don't split the combo file into its component files. Emulate
             # the combo behavior, but generate/serve it locally. Useful for
             # testing combo CSS before deploying.
-            return self.linktag(media_url, CSS_PATH, self.path, self.media_type)
+            return self.linktag(media_url, css_path, self.path, self.media_type)
         else:
             # If this is a combo file seen in the JOINED key on the
             # MEDIASYNC dict, break it apart into its component files and
             # write separate <link> tags for each.
-            filenames = JOINED.get(self.path, (self.path,))
-            return ' '.join((self.linktag(media_url, CSS_PATH, fn, self.media_type) for fn in filenames))
+            filenames = joined.get(self.path, (self.path,))
+            return ' '.join((self.linktag(media_url, css_path, fn, self.media_type) for fn in filenames))
 
     def linktag(self, url, path, filename, media):
         """
         Renders a <link> tag for the stylesheet(s).
         """
-        if DOCTYPE == 'xhtml':
+        if msettings['DOCTYPE'] == 'xhtml':
             markup = """<link rel="stylesheet" href="%s" type="text/css" media="%s" />"""
         else:
             markup = """<link rel="stylesheet" href="%s" type="text/css" media="%s">"""
@@ -247,27 +234,29 @@ class JsTagNode(BaseTagNode):
     """
     def render(self, context):
         media_url = self.get_media_url(context)
+        js_path = msettings['JS_PATH']
+        joined = msettings['JOINED']
 
-        if SERVE_REMOTE and self.path in JOINED:
+        if msettings['SERVE_REMOTE'] and self.path in joined:
             # Serving from S3/Cloud Files.
-            return self.scripttag(media_url, JS_PATH, self.path)
-        elif not SERVE_REMOTE and EMULATE_COMBO:
+            return self.scripttag(media_url, js_path, self.path)
+        elif not msettings['SERVE_REMOTE'] and msettings['EMULATE_COMBO']:
             # Don't split the combo file into its component files. Emulate
             # the combo behavior, but generate/serve it locally. Useful for
             # testing combo JS before deploying.
-            return self.scripttag(media_url, JS_PATH, self.path)
+            return self.scripttag(media_url, js_path, self.path)
         else:
             # If this is a combo file seen in the JOINED key on the
             # MEDIASYNC dict, break it apart into its component files and
             # write separate <link> tags for each.
-            filenames = JOINED.get(self.path, (self.path,))
-            return ' '.join((self.scripttag(media_url, JS_PATH, fn) for fn in filenames))
+            filenames = joined.get(self.path, (self.path,))
+            return ' '.join((self.scripttag(media_url, js_path, fn) for fn in filenames))
 
     def scripttag(self, url, path, filename):
         """
         Renders a <script> tag for the JS file(s).
         """
-        if DOCTYPE == 'html5':
+        if msettings['DOCTYPE'] == 'html5':
             markup = """<script src="%s"></script>"""
         else:
             markup = """<script type="text/javascript" charset="utf-8" src="%s"></script>"""

@@ -1,5 +1,5 @@
-from django.conf import settings
 from mediasync.backends import BaseClient
+from mediasync.conf import settings
 import cloudfiles
 
 class Client(BaseClient):
@@ -7,13 +7,13 @@ class Client(BaseClient):
     def __init__(self, *args, **kwargs):
         super(Client, self).__init__(*args, **kwargs)
         
-        self.container = self._settings.get('CLOUDFILES_CONTAINER', None)
+        self.container = msettings['CLOUDFILES_CONTAINER']
         assert self.container
     
     def open(self):
         
-        username = self._settings.get("CLOUDFILES_USERNAME", None)
-        key = self._settings.get("CLOUDFILES_KEY", None)
+        username = msettings['CLOUDFILES_USERNAME']
+        key = msettings['CLOUDFILES_KEY']
         
         _conn = cloudfiles.get_connection(username, key)
         self._container = _conn.create_container(self.container)

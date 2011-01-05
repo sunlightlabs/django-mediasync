@@ -11,6 +11,7 @@ import unittest
 
 from mediasync import backends
 from mediasync.backends import BaseClient
+from mediasync.conf import msettings
 import mediasync
 import mimetypes
 
@@ -45,10 +46,10 @@ class Client(BaseClient):
 class BackendTestCase(unittest.TestCase):
     
     def setUp(self):
-        settings.MEDIASYNC['BACKEND'] = 'not.a.backend'
+        msettings['BACKEND'] = 'not.a.backend'
         
     def tearDown(self):
-        settings.MEDIASYNC['BACKEND'] = 'mediasync.backends.dummy'
+        msettings['BACKEND'] = 'mediasync.backends.dummy'
 
     def testInvalidBackend(self):
         self.assertRaises(ImproperlyConfigured, backends.client)
@@ -56,17 +57,17 @@ class BackendTestCase(unittest.TestCase):
 class MockClientTestCase(unittest.TestCase):
     
     def setUp(self):
-        settings.MEDIASYNC['BACKEND'] = 'mediasync.tests.tests'
-        settings.MEDIASYNC['PROCESSORS'] = []
-        settings.MEDIASYNC['SERVE_REMOTE'] = True
-        settings.MEDIASYNC['JOINED'] = {
+        msettings['BACKEND'] = 'mediasync.tests.tests'
+        msettings['PROCESSORS'] = []
+        msettings['SERVE_REMOTE'] = True
+        msettings['JOINED'] = {
             'css/joined.css': ('css/1.css', 'css/2.css'),
             'js/joined.js': ('js/1.js', 'js/2.js'),
         }
         self.client = backends.client()
     
     def tearDown(self):
-        settings.MEDIASYNC['JOINED'] = {}
+        msettings['JOINED'] = {}
     
     def testLocalMediaURL(self):
         self.assertEqual(self.client.get_local_media_url(), "/media/")
@@ -124,7 +125,7 @@ class MockClientTestCase(unittest.TestCase):
                 self.assertEqual(content_type, to_sync[remote_path])
                 self.assertEqual(force, is_forced)
                 
-                if remote_path in settings.MEDIASYNC['JOINED']:
+                if remote_path in msettings['JOINED']:
                     original = readfile(os.path.join(PWD, 'media', '_test', remote_path.split('/')[1]))
                 else:
                     args = [PWD, 'media'] + remote_path.split('/')
@@ -149,13 +150,13 @@ class S3ClientTestCase(unittest.TestCase):
         bucket_hash = md5("%i-%s" % (int(time.time()), os.environ['USER'])).hexdigest()
         self.bucket_name = 'mediasync_test_' + bucket_hash
         
-        settings.MEDIASYNC['BACKEND'] = 'mediasync.backends.s3'
-        settings.MEDIASYNC['AWS_BUCKET'] = self.bucket_name
-        settings.MEDIASYNC['AWS_KEY'] = os.environ['AWS_KEY'] or None
-        settings.MEDIASYNC['AWS_SECRET'] = os.environ['AWS_SECRET'] or None
-        settings.MEDIASYNC['PROCESSORS'] = []
-        settings.MEDIASYNC['SERVE_REMOTE'] = True
-        settings.MEDIASYNC['JOINED'] = {
+        msettings['BACKEND'] = 'mediasync.backends.s3'
+        msettings['AWS_BUCKET'] = self.bucket_name
+        msettings['AWS_KEY'] = os.environ['AWS_KEY'] or None
+        msettings['AWS_SECRET'] = os.environ['AWS_SECRET'] or None
+        msettings['PROCESSORS'] = []
+        msettings['SERVE_REMOTE'] = True
+        msettings['JOINED'] = {
             'css/joined.css': ('css/1.css', 'css/2.css'),
             'js/joined.js': ('js/1.js', 'js/2.js'),
         }
@@ -164,10 +165,10 @@ class S3ClientTestCase(unittest.TestCase):
     
     def testServeRemote(self):
         
-        settings.MEDIASYNC['SERVE_REMOTE'] = False
+        msettings['SERVE_REMOTE'] = False
         self.assertEqual(backends.client().media_url(), '/media')
 
-        settings.MEDIASYNC['SERVE_REMOTE'] = True
+        msettings['SERVE_REMOTE'] = True
         self.assertEqual(backends.client().media_url(), 'http://s3.amazonaws.com/%s' % self.bucket_name)
     
     def testSync(self):
@@ -182,13 +183,15 @@ class S3ClientTestCase(unittest.TestCase):
         
         # test synced files then delete them
         bucket = conn.get_bucket(self.bucket_name)
+        
         static_paths = mediasync.listdir_recursive(os.path.join(PWD, 'media'))
-        joined_paths = settings.MEDIASYNC['JOINED'].iterkeys()
+        joined_paths = msettings['JOINED'].iterkeys()
+        
         for path in itertools.chain(static_paths, joined_paths):
             
             key = bucket.get_key(path)
             
-            if path in settings.MEDIASYNC['JOINED']:
+            if path in msettings['JOINED']:
                 args = [PWD, 'media', '_test', path.split('/')[1]]
             else:
                 args = [PWD, 'media'] + path.split('/')
@@ -232,14 +235,14 @@ class S3ClientTestCase(unittest.TestCase):
         self.client.close()
     
     def testMissingBucket(self):
-        del settings.MEDIASYNC['AWS_BUCKET']
+        del msettings['AWS_BUCKET']
         self.assertRaises(AssertionError, backends.client)
 
 class ProcessorTestCase(unittest.TestCase):
 
     def setUp(self):
-        settings.MEDIASYNC['BACKEND'] = 'mediasync.tests.tests'
-        settings.MEDIASYNC['PROCESSORS'] = (
+        msettings['BACKEND'] = 'mediasync.tests.tests'
+        msettings['PROCESSORS'] = (
             'mediasync.processors.css_minifier',
             'mediasync.processors.js_minifier',
             lambda fd, ct, rp, r: fd.upper(),

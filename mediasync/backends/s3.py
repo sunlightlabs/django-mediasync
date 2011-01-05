@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from mediasync import TYPES_TO_COMPRESS
 from mediasync.backends import BaseClient
+from mediasync.conf import msettings
 import mediasync
 import cStringIO
 import datetime
@@ -21,9 +22,9 @@ class Client(BaseClient):
     def __init__(self, *args, **kwargs):
         super(Client, self).__init__(*args, **kwargs)
         
-        self.aws_bucket = self._settings.get('AWS_BUCKET', None)
-        self.aws_prefix = self._settings.get('AWS_PREFIX', '').strip('/')
-        self.aws_bucket_cname = self._settings.get('AWS_BUCKET_CNAME', False)
+        self.aws_bucket = msettings['AWS_BUCKET']
+        self.aws_prefix = msettings.get('AWS_PREFIX', '').strip('/')
+        self.aws_bucket_cname =  msettings.get('AWS_BUCKET_CNAME', False)
         
         assert self.aws_bucket
     
@@ -32,8 +33,8 @@ class Client(BaseClient):
     
     def open(self):    
         
-        key = self._settings.get("AWS_KEY", None)
-        secret = self._settings.get("AWS_SECRET", None)
+        key = msettings['AWS_KEY']
+        secret = msettings['AWS_SECRET']
         
         try:
             self._conn = S3Connection(key, secret)
