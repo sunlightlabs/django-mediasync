@@ -74,10 +74,8 @@ def combine_files(joinfile, sourcefiles, client):
     joinfile = joinfile.strip('/')
 
     if joinfile.endswith('.css'):
-        dirname = msettings['CSS_PATH'].strip('/')
         separator = '\n'
     elif joinfile.endswith('.js'):
-        dirname = msettings['JS_PATH'].strip('/')
         separator = ';\n'
     else:
         # By-pass this file since we only join CSS and JS.
@@ -86,7 +84,7 @@ def combine_files(joinfile, sourcefiles, client):
     buffer = cStringIO.StringIO()
 
     for sourcefile in sourcefiles:
-        sourcepath = os.path.join(client.media_root, dirname, sourcefile)
+        sourcepath = os.path.join(client.media_root, sourcefile)
         if os.path.isfile(sourcepath):
             f = open(sourcepath)
             buffer.write(f.read())
@@ -95,7 +93,7 @@ def combine_files(joinfile, sourcefiles, client):
 
     filedata = buffer.getvalue()
     buffer.close()
-    return (filedata, dirname)
+    return filedata
 
 def sync(client=None, force=False, verbose=True):
     """ Let's face it... pushing this stuff to S3 is messy.
@@ -123,13 +121,10 @@ def sync(client=None, force=False, verbose=True):
         if filedata is None:
             # combine_files() is only interested in CSS/JS files.
             continue
-        filedata, dirname = filedata
 
         content_type = mimetypes.guess_type(joinfile)[0] or 'application/octet-stream'
 
         remote_path = joinfile
-        if dirname:
-            remote_path = "%s/%s" % (dirname, remote_path)
 
         if client.process_and_put(filedata, content_type, remote_path, force=force):
             if verbose:

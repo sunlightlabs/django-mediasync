@@ -202,25 +202,24 @@ class CssTagNode(BaseTagNode):
 
     def render(self, context):
         media_url = self.get_media_url(context)
-        css_path = msettings['CSS_PATH']
         joined = msettings['JOINED']
         
         if msettings['SERVE_REMOTE'] and self.path in joined:
             # Serving from S3/Cloud Files.
-            return self.linktag(media_url, css_path, self.path, self.media_type, context)
+            return self.linktag(media_url, self.path, self.media_type, context)
         elif not msettings['SERVE_REMOTE'] and msettings['EMULATE_COMBO']:
             # Don't split the combo file into its component files. Emulate
             # the combo behavior, but generate/serve it locally. Useful for
             # testing combo CSS before deploying.
-            return self.linktag(media_url, css_path, self.path, self.media_type, context)
+            return self.linktag(media_url, self.path, self.media_type, context)
         else:
             # If this is a combo file seen in the JOINED key on the
             # MEDIASYNC dict, break it apart into its component files and
             # write separate <link> tags for each.
             filenames = joined.get(self.path, (self.path,))
-            return ' '.join((self.linktag(media_url, css_path, fn, self.media_type, context) for fn in filenames))
+            return ' '.join((self.linktag(media_url, fn, self.media_type, context) for fn in filenames))
 
-    def linktag(self, url, path, filename, media, context):
+    def linktag(self, url, filename, media, context):
         """
         Renders a <link> tag for the stylesheet(s).
         """
@@ -228,7 +227,7 @@ class CssTagNode(BaseTagNode):
             markup = """<link rel="stylesheet" href="%s" type="text/css" media="%s" />"""
         else:
             markup = """<link rel="stylesheet" href="%s" type="text/css" media="%s">"""
-        return markup % (self.mkpath(url, path, filename, gzip=self.supports_gzip(context)), media)
+        return markup % (self.mkpath(url, '', filename, gzip=self.supports_gzip(context)), media)
 
 """
 # JavaScript related tags
@@ -253,25 +252,24 @@ class JsTagNode(BaseTagNode):
     """
     def render(self, context):
         media_url = self.get_media_url(context)
-        js_path = msettings['JS_PATH']
         joined = msettings['JOINED']
 
         if msettings['SERVE_REMOTE'] and self.path in joined:
             # Serving from S3/Cloud Files.
-            return self.scripttag(media_url, js_path, self.path, context)
+            return self.scripttag(media_url, self.path, context)
         elif not msettings['SERVE_REMOTE'] and msettings['EMULATE_COMBO']:
             # Don't split the combo file into its component files. Emulate
             # the combo behavior, but generate/serve it locally. Useful for
             # testing combo JS before deploying.
-            return self.scripttag(media_url, js_path, self.path, context)
+            return self.scripttag(media_url, self.path, context)
         else:
             # If this is a combo file seen in the JOINED key on the
             # MEDIASYNC dict, break it apart into its component files and
             # write separate <link> tags for each.
             filenames = joined.get(self.path, (self.path,))
-            return ' '.join((self.scripttag(media_url, js_path, fn, context) for fn in filenames))
+            return ' '.join((self.scripttag(media_url, fn, context) for fn in filenames))
 
-    def scripttag(self, url, path, filename, context):
+    def scripttag(self, url, filename, context):
         """
         Renders a <script> tag for the JS file(s).
         """
@@ -279,4 +277,4 @@ class JsTagNode(BaseTagNode):
             markup = """<script src="%s"></script>"""
         else:
             markup = """<script type="text/javascript" charset="utf-8" src="%s"></script>"""
-        return markup % self.mkpath(url, path, filename, gzip=self.supports_gzip(context))
+        return markup % self.mkpath(url, '', filename, gzip=self.supports_gzip(context))
