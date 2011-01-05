@@ -34,6 +34,7 @@ Upgrading from mediasync 1.x
 #. Run *./manage.py syncmedia --force* to force updates of all files:
 	* gzip instead of deflate compression
 	* sync both compressed and original versions of files
+#. add "django.core.context_processors.request" to TEMPLATE_CONTEXT_PROCESSORS
 
 -------------
 Configuration
@@ -45,6 +46,10 @@ settings.py
 Add to *INSTALLED_APPS*::
 
     'mediasync'
+
+Add to *TEMPLATE_CONTEXT_PROCESSORS*::
+
+	'django.core.context_processors.request'
 
 Make sure your *MEDIA_ROOT* setting is the correct path to your media::
 
