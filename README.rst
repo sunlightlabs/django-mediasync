@@ -26,10 +26,18 @@ Requirements
 * boto >= 1.8d
 * slimmer == 0.1.30 (optional)
 
+----------------------------
+Upgrading from mediasync 1.x
+----------------------------
+
+1. Update your mediasync settings as described in the next section.
+1. Run *./manage.py syncmedia --force* to force updates of all files:
+	* gzip instead of deflate compression
+	* sync both compressed and original versions of files
+
 -------------
 Configuration
 -------------
-
 
 settings.py
 ===========
@@ -128,11 +136,12 @@ DOCTYPE
 
 link and script tags are written using XHTML syntax. The rendering can be 
 overridden by using the *DOCTYPE* setting. Allowed values are *'html4'*, 
-*'html5'*, or *'xhtml'*.
+*'html5'*, or *'xhtml'*. The default in mediasync 2.0 is html5, just as
+the DOCTYPE on your site should be.
 
 ::
 
-    MEDIASYNC['DOCTYPE'] = 'xhtml'
+    MEDIASYNC['DOCTYPE'] = 'html5'
 
 For each doctype, the following tags are rendered:
 
@@ -506,6 +515,18 @@ can be referred to using::
     {% css 'reset.css' %}
     {% js 'jquery.js' %}
 
+Smart GZIP for S3
+=================
+
+In previous versions of mediasync's S3 client, certain content was always pushed
+in a compressed format. This can cause major issues with clients that do not
+support gzip. New in version 2.0, mediasync will push both a gzipped and an
+uncompressed version of the file to S3. The template tags look at the request
+and direct the user to the appropriate file based on the ACCEPT_ENCODING HTTP
+header. Assuming a file styles/layout.css, the following would be synced to S3::
+
+	styles/layout.css
+	styles/layout.css.gz
 
 -----------------
 Running MEDIASYNC
@@ -523,6 +544,7 @@ Change Log
 =================
 
 * use gzip instead of deflate for compression (better browser support)
+* smart gzip client support detection
 * add pluggable backends
 * add pluggable file processors
 * settings refactor
