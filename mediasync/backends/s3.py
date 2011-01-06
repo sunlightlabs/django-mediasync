@@ -89,7 +89,7 @@ class Client(BaseClient):
             # also check to see if filesize is greater than 1kb
             if content_type in TYPES_TO_COMPRESS:
                 
-                key = Key(self._bucket, "%s.gz" % remote_path)
+                key = Key(self._bucket, "%sgz" % remote_path)
                 
                 filedata = mediasync.compress(filedata)
                 (hexdigest, b64digest) = mediasync.checksum(filedata) # update checksum with compressed data
