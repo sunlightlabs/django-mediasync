@@ -500,26 +500,6 @@ When served remotely, one HTML tag will be rendered with the name of the joined 
 
 	<link rel="stylesheet" href="http://bucket.s3.amazonaws.com/styles/joined.css" type="text/css" media="screen, projection" />
 
-Media Path Shortcuts
-====================
-
-In some cases, all CSS and JS files will be in their own directory. It can be a 
-pain to write full paths from *MEDIA_ROOT* when they can be inferred from the 
-type of media being used. Shortcuts can be used in template tags and the joined 
-files configuration if the default paths to JS and CSS files are set.
-
-::
-
-    'CSS_PATH': 'styles',
-    'JS_PATH': 'scripts',
-
-When these paths are set, you can leave them off of the media paths in template 
-tags. Using the above path settings, styles/reset.css and scripts/jquery.js
-can be referred to using::
-
-    {% css 'reset.css' %}
-    {% js 'jquery.js' %}
-
 Smart GZIP for S3
 =================
 
@@ -561,6 +541,7 @@ Change Log
 * made SERVE_REMOTE setting the sole factor in determining if
   media should be served locally or remotely
 * add many more tests
+* deprecate CSS_PATH and JS_PATH
 
 Thanks to Greg Taylor, Peter Sanchez, and Jonathan Drosdeck for their contributions to this release.
 
