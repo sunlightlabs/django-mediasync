@@ -32,22 +32,57 @@ def combo_serve(request, path, client):
 
     return HttpResponse(combo_data, mimetype=mime_type)
 
+def _form_key_str(path):
+    """
+    Given a URL path, massage it into a key we can perform a lookup on the
+    MEDIASYNC['JOINED'] dict with.
+    
+    This mostly involves figuring into account the CSS_PATH and JS_PATH
+    settings, if they have been set.
+    """
+    if path.endswith('.css'):
+        media_path_prefix = msettings['CSS_PATH']
+    elif path.endswith('.js'):
+        media_path_prefix = msettings['JS_PATH']
+    else:
+        # This isn't a CSS/JS file, no combo for you.
+        return None
+
+    if media_path_prefix:
+        # CS/JSS path prefix has been set. Factor that into the key lookup.
+        if not media_path_prefix.endswith('/'):
+            # We need to add this slash so we can lop it off the 'path'
+            # variable, to match the value in the JOINED dict.
+            media_path_prefix += '/'
+
+        if path.startswith(media_path_prefix):
+            # Given path starts with the CSS/JS media prefix. Lop this off
+            # so we can perform a lookup in the JOINED dict.
+            return path[len(media_path_prefix):]
+        else:
+            # Path is in a root dir, send along as-is.
+            return path
+
+    # No CSS/JS path prefix set. Keep it raw.
+    return path
+
 def _find_combo_match(path):
     """
     Calculate the key to check the MEDIASYNC['JOINED'] dict for, perform the
     lookup, and return the matching key string if a match is found. If no
     match is found, return None instead.
     """
-    if not path:
+    key_str = _form_key_str(path)
+    if not key_str:
         # _form_key_str() says this isn't even a CSS/JS file.
         return None
 
-    if not msettings['JOINED'].has_key(path):
+    if not msettings['JOINED'].has_key(key_str):
         # No combo file match found. Must be an single file.
         return None
     else:
         # Combo match found, return the JOINED key.
-        return path
+        return key_str
 
 def static_serve(request, path, client):
     """

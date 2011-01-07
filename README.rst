@@ -30,8 +30,8 @@ Requirements
 Upgrading from mediasync 1.x
 ----------------------------
 
-#. Update your mediasync settings as described in the next section.
-#. Run *./manage.py syncmedia --force* to force updates of all files:
+1. Update your mediasync settings as described in the next section.
+1. Run *./manage.py syncmedia --force* to force updates of all files:
 	* gzip instead of deflate compression
 	* sync both compressed and original versions of files
 #. add "django.core.context_processors.request" to TEMPLATE_CONTEXT_PROCESSORS
@@ -500,6 +500,26 @@ When served remotely, one HTML tag will be rendered with the name of the joined 
 
 	<link rel="stylesheet" href="http://bucket.s3.amazonaws.com/styles/joined.css" type="text/css" media="screen, projection" />
 
+Media Path Shortcuts
+====================
+
+In some cases, all CSS and JS files will be in their own directory. It can be a 
+pain to write full paths from *MEDIA_ROOT* when they can be inferred from the 
+type of media being used. Shortcuts can be used in template tags and the joined 
+files configuration if the default paths to JS and CSS files are set.
+
+::
+
+    'CSS_PATH': 'styles',
+    'JS_PATH': 'scripts',
+
+When these paths are set, you can leave them off of the media paths in template 
+tags. Using the above path settings, styles/reset.css and scripts/jquery.js
+can be referred to using::
+
+    {% css 'reset.css' %}
+    {% js 'jquery.js' %}
+
 Smart GZIP for S3
 =================
 
@@ -528,7 +548,6 @@ Change Log
 2.0.0
 =====
 
-* remove CSS_PATH and JS_PATH settings
 * use gzip instead of deflate for compression (better browser support)
 * smart gzip client support detection
 * add pluggable backends

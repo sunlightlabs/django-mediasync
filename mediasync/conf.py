@@ -2,10 +2,12 @@ from django.conf import settings
 from mediasync import processors
 
 _settings = {
+    'CSS_PATH': "",
     'DOCTYPE': 'html5',
     'EMULATE_COMBO': False,
     'EXPIRATION_DAYS': 365,
     'JOINED': {},
+    'JS_PATH': "",
     'MEDIA_ROOT': settings.MEDIA_ROOT,
     'MEDIA_URL': settings.MEDIA_URL,
     'PROCESSORS': (processors.css_minifier, processors.js_minifier),
