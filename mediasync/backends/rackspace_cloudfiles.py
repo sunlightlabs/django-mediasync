@@ -1,5 +1,7 @@
 import cloudfiles
 
+from django.core.exceptions import ImproperlyConfigured
+
 from mediasync.backends import BaseClient
 from mediasync.conf import msettings
 
@@ -8,14 +10,21 @@ class Client(BaseClient):
 
     def __init__(self, *args, **kwargs):
         super(Client, self).__init__(*args, **kwargs)
-
         self.container = msettings['CLOUDFILES_CONTAINER']
-        assert self.container
+
+        if not self.container:
+            raise ImproperlyConfigured("CLOUDFILES_CONTAINER is a required setting.")
 
     def open(self):
         "Set up the CloudFiles connection and grab the container."
         username = msettings['CLOUDFILES_USERNAME']
         key = msettings['CLOUDFILES_KEY']
+
+        if not username:
+            raise ImproperlyConfigured("CLOUDFILES_USERNAME is a required setting.")
+
+        if not key:
+            raise ImproperlyConfigured("CLOUDFILES_KEY is a required setting.")
 
         _conn = cloudfiles.get_connection(username, key)
         self._container = _conn.create_container(self.container)
