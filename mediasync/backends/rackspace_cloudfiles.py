@@ -42,6 +42,7 @@ class Client(BaseClient):
     def put(self, filedata, content_type, remote_path, force=False):
 
         obj = self._container.create_object(remote_path)
+        obj.content_type = content_type
         obj.write(filedata)
 
         return True
