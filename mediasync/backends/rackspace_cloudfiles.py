@@ -18,13 +18,13 @@ class Client(BaseClient):
     def open(self):
         "Set up the CloudFiles connection and grab the container."
         username = msettings['CLOUDFILES_USERNAME']
-        key = msettings['CLOUDFILES_KEY']
+        key = msettings['CLOUDFILES_API_KEY']
 
         if not username:
             raise ImproperlyConfigured("CLOUDFILES_USERNAME is a required setting.")
 
         if not key:
-            raise ImproperlyConfigured("CLOUDFILES_KEY is a required setting.")
+            raise ImproperlyConfigured("CLOUDFILES_API_KEY is a required setting.")
 
         _conn = cloudfiles.get_connection(username, key)
         self._container = _conn.create_container(self.container)
