@@ -24,7 +24,11 @@ class Client(BaseClient):
             self._container.make_public()
 
     def remote_media_url(self, with_ssl=False):
-        return ""
+        "Grab the remote URL for the contianer."
+        if with_ssl:
+            raise UserWarning("""Rackspace CloudFiles does not yet support SSL.
+                    See http://bit.ly/hYV502 for more info.""")
+        return self._container.public_uri()
 
     def put(self, filedata, content_type, remote_path, force=False):
 
