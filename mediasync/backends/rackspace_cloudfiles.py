@@ -13,12 +13,15 @@ class Client(BaseClient):
         assert self.container
 
     def open(self):
-
+        "Set up the CloudFiles connection and grab the container."
         username = msettings['CLOUDFILES_USERNAME']
         key = msettings['CLOUDFILES_KEY']
 
         _conn = cloudfiles.get_connection(username, key)
         self._container = _conn.create_container(self.container)
+
+        if not self._container.is_public():
+            self._container.make_public()
 
     def remote_media_url(self, with_ssl=False):
         return ""
