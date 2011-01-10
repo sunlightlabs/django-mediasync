@@ -39,7 +39,7 @@ class BaseTagNode(template.Node):
         to the gzipped version of files that are allowed to be compressed.
         Clients without gzip support will be served the original media.
         """
-        if 'request' in context:
+        if 'request' in context and client.supports_gzip():
             enc = context['request'].META.get('HTTP_ACCEPT_ENCODING', '')
             return 'gzip' in enc and msettings['SERVE_REMOTE']
         return False

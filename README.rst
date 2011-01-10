@@ -25,13 +25,14 @@ Requirements
 * django >= 1.0
 * boto >= 1.8d
 * slimmer == 0.1.30 (optional)
+* python-cloudfiles == 1.7.5 (optional, for Rackspace Cloud Files backend)
 
 ----------------------------
 Upgrading from mediasync 1.x
 ----------------------------
 
-1. Update your mediasync settings as described in the next section.
-1. Run *./manage.py syncmedia --force* to force updates of all files:
+#. Update your mediasync settings as described in the next section.
+#. Run *./manage.py syncmedia --force* to force updates of all files:
 	* gzip instead of deflate compression
 	* sync both compressed and original versions of files
 #. add "django.core.context_processors.request" to TEMPLATE_CONTEXT_PROCESSORS
@@ -280,6 +281,33 @@ time-based cache buster value. Each worker/thread will probably have a slightly
 different value for datetime.now(), which means your users will find themselves
 having cache misses randomly from page to page. 
 
+Rackspace Cloud Files
+---------------------
+
+::
+
+    MEDIASYNC['BACKEND'] = 'mediasync.backends.cloudfiles'
+
+Settings
+~~~~~~~~
+
+The following settings are required in the mediasync settings dict::
+
+    MEDIASYNC = {
+    	'CLOUDFILES_CONTAINER': 'container_name',
+    	'CLOUDFILES_USERNAME': 'cf_username',
+    	'CLOUDFILES_API_KEY': 'cf_apikey',
+    }
+
+Tips
+~~~~
+
+The Cloud Files backend lacks support for the following features:
+
+* setting HTTP Expires header
+* setting HTTP Cache-Control header
+* content compression (gzip)
+
 Custom backends
 ---------------
 
@@ -303,6 +331,12 @@ put is responsible for pushing a file to the backend storage.
 * remote_path - the remote path (relative from remote_media_url) to which 
   the file should be written
 * force - if True, write file to remote storage even if it already exists
+
+If the client supports gzipped content, you will need to override supports_gzip
+to return True::
+
+	def supports_gzip(self):
+		return True
 
 File Processors
 ===============
@@ -528,6 +562,7 @@ Change Log
 2.0.0
 =====
 
+* updated Rackspace Cloud Files backend
 * use gzip instead of deflate for compression (better browser support)
 * smart gzip client support detection
 * add pluggable backends
@@ -543,7 +578,7 @@ Change Log
 * add many more tests
 * deprecate CSS_PATH and JS_PATH
 
-Thanks to Greg Taylor, Peter Sanchez, and Jonathan Drosdeck for their contributions to this release.
+Thanks to Greg Taylor, Peter Sanchez, Jonathan Drosdeck, and Rich Leland for their contributions to this release.
 
 1.0.1
 =====

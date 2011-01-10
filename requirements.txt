@@ -1,2 +1,3 @@
 boto>=1.8d,<2.0b1
 slimmer==0.1.30
+python-cloudfiles==1.7.5

@@ -40,6 +40,9 @@ class BaseClient(object):
 
             if callable(proc):
                 self.processors.append(proc)
+    
+    def supports_gzip(self):
+        return False
 
     def get_local_media_url(self):
         """
