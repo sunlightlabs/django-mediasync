@@ -307,6 +307,8 @@ The Cloud Files backend lacks support for the following features:
 * setting HTTP Expires header
 * setting HTTP Cache-Control header
 * content compression (gzip)
+* SSL support
+* conditional sync based on file checksum
 
 Custom backends
 ---------------
