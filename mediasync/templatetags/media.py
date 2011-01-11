@@ -66,7 +66,7 @@ class BaseTagNode(template.Node):
           path: (str) The path on the host (specified in 'url') leading up
                       to the file.
           filename: (str) The file name to serve.
-          gzip: (bool) True if client should receive *gz version of file.
+          gzip: (bool) True if client should receive *.gz version of file.
         """
         if path:
             url = "%s/%s" % (url.rstrip('/'), path.strip('/'))
@@ -76,7 +76,7 @@ class BaseTagNode(template.Node):
         
         content_type = mimetypes.guess_type(url)[0]
         if gzip and content_type in mediasync.TYPES_TO_COMPRESS:
-            url = "%sgz" % url
+            url = "%s.gz" % url
 
         cb = msettings['CACHE_BUSTER']
         if cb:

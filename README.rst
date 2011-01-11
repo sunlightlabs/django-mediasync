@@ -547,7 +547,7 @@ and direct the user to the appropriate file based on the ACCEPT_ENCODING HTTP
 header. Assuming a file styles/layout.css, the following would be synced to S3::
 
 	styles/layout.css
-	styles/layout.cssgz
+	styles/layout.css.gz
 
 -----------------
 Running MEDIASYNC
