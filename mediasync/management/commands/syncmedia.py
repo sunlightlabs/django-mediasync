@@ -4,7 +4,7 @@ import mediasync
 
 class Command(BaseCommand):
     
-    help = "Sync local media with S3"
+    help = "Sync local media with remote client"
     args = '[options]'
     
     requires_model_validation = False
