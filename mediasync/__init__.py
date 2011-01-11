@@ -166,4 +166,4 @@ def sync(client=None, force=False, verbose=True):
 
 
 __all__ = ['sync', 'SyncException']
-__version__ = '2.0.0a'
+__version__ = '2.0.0b'
