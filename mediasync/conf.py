@@ -1,5 +1,5 @@
 from django.conf import settings
-from mediasync import processors
+from mediasync.processors import slimmer_wrap
 
 _settings = {
     'CSS_PATH': "",
@@ -10,7 +10,7 @@ _settings = {
     'JS_PATH': "",
     'MEDIA_ROOT': settings.MEDIA_ROOT,
     'MEDIA_URL': settings.MEDIA_URL,
-    'PROCESSORS': (processors.css_minifier, processors.js_minifier),
+    'PROCESSORS': (slimmer_wrap.css_minifier, slimmer_wrap.js_minifier),
     'SERVE_REMOTE': not settings.DEBUG,
     'URL_PROCESSOR': lambda x: x,
 }
