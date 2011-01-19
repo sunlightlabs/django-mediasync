@@ -1,6 +1,5 @@
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from mediasync import TYPES_TO_COMPRESS
 from mediasync.backends import BaseClient

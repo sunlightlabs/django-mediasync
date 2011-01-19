@@ -5,7 +5,6 @@ these are shimmed in.
 
 The static_serve() function is where the party starts.
 """
-from django.conf import settings
 from django.http import HttpResponse
 from django.views.static import serve
 from django.views.generic.simple import redirect_to

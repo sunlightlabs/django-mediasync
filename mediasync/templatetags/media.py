@@ -1,11 +1,8 @@
 from django import template
-from django.conf import settings
-from django.template.defaultfilters import stringfilter
 from mediasync import backends
 from mediasync.conf import msettings
 import mediasync
 import mimetypes
-import warnings
 
 # Instance of the backend you configured in settings.py.
 client = backends.client()
