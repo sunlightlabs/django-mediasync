@@ -344,9 +344,18 @@ File Processors
 ===============
 
 File processors allow you to modify the content of a file as it is being
-synced or served statically. mediasync comes with two default filters, CSS
-and JavaScript minifiers. These processors require the *slimmer* python
-package and will automatically run when syncing media.
+synced or served statically. 
+
+Mediasync ships with two processor modules, each of which defines two
+processors for minifying both CSS and Javascript files:
+
+1. ``slimmer_wrap`` is a minifier written in Python and requires the
+   `slimmer` Python package. The Python package can be found here:
+   http://pypi.python.org/pypi/slimmer/
+
+2. ``yuicompressor`` is a minifier written in Java and can be downloaded
+   from YUI's download page: http://developer.yahoo.com/yui/compressor/.
+   This processor also requires an additional setting, as defined below.
 
 Custom processors can be specified using the *PROCESSORS* entry in the
 mediasync settings dict. *PROCESSORS* should be a list of processor entries.
@@ -374,11 +383,21 @@ is_remote
 If the *PROCESSORS* setting is used, you will need to include the defaults if you plan on using them::
 
 	'PROCESSORS': (
-	    'mediasync.processors.css_minifier',
-	    'mediasync.processors.js_minifier',
+	    'mediasync.processors.slimmer_wrap.css_minifier',
+	    'mediasync.processors.slimmer_wrap.js_minifier',
 		...
 	),
 
+Mediasync will attempt to use `slimmer` by default if you leave it out of
+your settings.  If it is on your Python path it will get used.
+
+To configure YUI Compressor you need to define a `PROCESSORS` and
+`YUI_COMPRESSOR_PATH` as follows, assuming you placed the ".jar" file in
+your `~/bin` path::
+
+    'PROCESSORS': ('mediasync.processors.yuicompressor.css_minifier',
+                   'mediasync.processors.yuicompressor.js_minifier'),
+    'YUI_COMPRESSOR_PATH': '~/bin/yuicompressor.jar',
 
 urls.py
 =======
