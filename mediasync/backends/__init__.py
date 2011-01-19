@@ -31,7 +31,11 @@ class BaseClient(object):
         for proc in msettings['PROCESSORS']:
 
             if isinstance(proc, basestring):
-                (module, attr) = proc.rsplit('.', 1)
+                try:
+                    dot = proc.rindex('.')
+                except ValueError:
+                    raise exceptions.ImproperlyConfigured, '%s isn\'t a processor module' % (proc,)
+                module, attr = proc[:dot], proc[dot+1:]
                 module = import_module(module)
                 proc = getattr(module, attr, None)
 
