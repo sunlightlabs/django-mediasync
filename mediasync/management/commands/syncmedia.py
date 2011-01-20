@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from optparse import make_option
+from mediasync.conf import msettings
 import mediasync
 
 class Command(BaseCommand):
@@ -14,6 +15,8 @@ class Command(BaseCommand):
     )
     
     def handle(self, *args, **options):
+        
+        msettings['SERVE_REMOTE'] = True
         
         force = options.get('force') or False
         
