@@ -180,8 +180,9 @@ SSL
 ---
 
 mediasync will attempt to intelligently determine if your media should be
-served using HTTPS. In order to use automatic SSL detection, *django.core.context_processors.request*
-must be added to *TEMPLATE_CONTEXT_PROCESSORS* in settings.py::
+served using HTTPS. In order to use automatic SSL detection,
+*django.core.context_processors.request* must be added to
+*TEMPLATE_CONTEXT_PROCESSORS* in settings.py::
 
     TEMPLATE_CONTEXT_PROCESSORS = (
         ...
@@ -349,13 +350,15 @@ synced or served statically.
 Mediasync ships with two processor modules, each of which defines two
 processors for minifying both CSS and Javascript files:
 
-1. ``slimmer_wrap`` is a minifier written in Python and requires the
+1. ``slim`` is a minifier written in Python and requires the
    `slimmer` Python package. The Python package can be found here:
    http://pypi.python.org/pypi/slimmer/
 
 2. ``yuicompressor`` is a minifier written in Java and can be downloaded
    from YUI's download page: http://developer.yahoo.com/yui/compressor/.
    This processor also requires an additional setting, as defined below.
+   `yuicompressor` is new and should be considered experimental until 
+   the mediasync 2.1 release.
 
 Custom processors can be specified using the *PROCESSORS* entry in the
 mediasync settings dict. *PROCESSORS* should be a list of processor entries.
@@ -380,16 +383,19 @@ remote_path
 is_remote
 	True if the filedata will be pushed remotely, False if it is a static local file
 
-If the *PROCESSORS* setting is used, you will need to include the defaults if you plan on using them::
+If the *PROCESSORS* setting is used, you will need to include the defaults
+if you plan on using them::
 
 	'PROCESSORS': (
-	    'mediasync.processors.slimmer_wrap.css_minifier',
-	    'mediasync.processors.slimmer_wrap.js_minifier',
+	    'mediasync.processors.slim.css_minifier',
+	    'mediasync.processors.slim.js_minifier',
 		...
 	),
 
 Mediasync will attempt to use `slimmer` by default if you leave it out of
 your settings.  If it is on your Python path it will get used.
+
+**EXPERIMENTAL**
 
 To configure YUI Compressor you need to define a `PROCESSORS` and
 `YUI_COMPRESSOR_PATH` as follows, assuming you placed the ".jar" file in
@@ -442,8 +448,8 @@ your master urls.py file::
 
 Some backends (S3) support https URLs when the requesting page is secure.
 In order for the https to be detected, the request must be placed in the
-template context with the key 'request'. This can be done automatically by adding
-'django.core.context_processors.request' to *TEMPLATE_CONTEXT_PROCESSORS*
+template context with the key 'request'. This can be done automatically by
+adding 'django.core.context_processors.request' to *TEMPLATE_CONTEXT_PROCESSORS*
 in settings.py
 
 media_url
@@ -455,7 +461,8 @@ Renders the MEDIA_URL from settings.py with trailing slashes removed.
 
 	<img src="{% media_url %}/images/stuff.png">
 
-MEDIA_URL takes an optional argument that is the media path. Using the argument allows mediasync to add the CACHE_BUSTER to the URL if one is specified.
+MEDIA_URL takes an optional argument that is the media path. Using the argument
+allows mediasync to add the CACHE_BUSTER to the URL if one is specified.
 
 ::
 
@@ -588,6 +595,7 @@ Change Log
 * smart gzip client support detection
 * add pluggable backends
 * add pluggable file processors
+* experimental YUI Compressor
 * settings refactor
 * allow override of *settings.MEDIA_URL*
 * Improvements to the logic that decides which files to sync. Safely ignore
@@ -599,17 +607,19 @@ Change Log
 * add many more tests
 * deprecate CSS_PATH and JS_PATH
 
-Thanks to Greg Taylor, Peter Sanchez, Jonathan Drosdeck, and Rich Leland for their contributions to this release.
+Thanks to Greg Taylor, Peter Sanchez, Jonathan Drosdeck, Rich Leland,
+and Rob Hudson for their contributions to this release.
 
 1.0.1
 =====
 
-* add application/javascript and application/x-javascript to JavaScript mimetypes
+* add application/javascript and application/x-javascript to JavaScript
+  mimetypes
 * break out of CSS and JS mimetypes
 * add support for HTTPS URLs to S3
 * allow for storage of S3 keys in ~/.boto configuration file
 
-Thanks to Rob Hudson and Peter Sanchez for their contributions to this release.
+Thanks to Rob Hudson and Peter Sanchez for their contributions.
 
 1.0
 ===
