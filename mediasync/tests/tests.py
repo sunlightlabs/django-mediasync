@@ -260,10 +260,11 @@ class S3ClientTestCase(unittest.TestCase):
 class ProcessorTestCase(unittest.TestCase):
 
     def setUp(self):
+        msettings['SERVE_REMOTE'] = True
         msettings['BACKEND'] = 'mediasync.tests.tests'
         msettings['PROCESSORS'] = (
-            'mediasync.processors.css_minifier',
-            'mediasync.processors.js_minifier',
+            'mediasync.processors.slim.css_minifier',
+            'mediasync.processors.slim.js_minifier',
             lambda fd, ct, rp, r: fd.upper(),
         )
         self.client = backends.client()
