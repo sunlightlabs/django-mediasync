@@ -368,7 +368,7 @@ The processor callable should return a string of the processed file data, None
 if it chooses to not process the file, or raise *mediasync.SyncException* if
 something goes terribly wrong. The callable should take the following arguments::
 
-	def proc(filedata, content_type, remote_path, is_remote):
+	def proc(filedata, content_type, remote_path, is_active):
 		...
 
 filedata
@@ -380,8 +380,8 @@ content_type
 remote_path
 	the path to which the file is being synced (contains the file name)
 
-is_remote
-	True if the filedata will be pushed remotely, False if it is a static local file
+is_active
+	True if the processor should... process
 
 If the *PROCESSORS* setting is used, you will need to include the defaults
 if you plan on using them::

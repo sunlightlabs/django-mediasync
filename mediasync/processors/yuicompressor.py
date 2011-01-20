@@ -13,7 +13,7 @@ def _yui_path(settings):
 def css_minifier(filedata, content_type, remote_path, is_active):
     is_css = (content_type == 'text/css' or remote_path.lower().endswith('.css'))
     yui_path = _yui_path(settings)
-    if is_css and yui_path:
+    if is_css and yui_path and is_active:
         proc = Popen(['java', '-jar', yui_path, '--type', 'css'], stdout=PIPE,
                      stderr=PIPE, stdin=PIPE)
         stdout, stderr = proc.communicate(input=filedata)
@@ -22,7 +22,7 @@ def css_minifier(filedata, content_type, remote_path, is_active):
 def js_minifier(filedata, content_type, remote_path, is_active):
     is_js = (content_type == 'text/javascript' or remote_path.lower().endswith('.js'))
     yui_path = _yui_path(settings)
-    if is_js and yui_path:
+    if is_js and yui_path and is_active:
         proc = Popen(['java', '-jar', yui_path, '--type', 'js'], stdout=PIPE,
                      stderr=PIPE, stdin=PIPE)
         stdout, stderr = proc.communicate(input=filedata)
