@@ -603,7 +603,7 @@ in-development
 * add pluggable file processors
 * experimental YUI Compressor
 * settings refactor
-* allow override of *settings.STATIC_URL*
+* allow override of *settings.MEDIA_URL*
 * Improvements to the logic that decides which files to sync. Safely ignore
   a wider variety of hidden files/directories.
 * Make template tags aware of whether the current page is SSL-secured. If it
