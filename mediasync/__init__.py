@@ -7,6 +7,7 @@ import os
 
 JS_MIMETYPES = (
     "application/javascript",
+    "application/x-javascript",
     "text/javascript", # obsolete, see RFC 4329
 )
 CSS_MIMETYPES = (
