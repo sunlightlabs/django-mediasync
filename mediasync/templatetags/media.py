@@ -101,7 +101,7 @@ def get_path_from_tokens(token):
 
 def media_url_tag(parser, token):
     """
-    If msettings['SERVE_REMOTE'] == False, returns your MEDIA_URL. 
+    If msettings['SERVE_REMOTE'] == False, returns your STATIC_URL. 
     When msettings['SERVE_REMOTE'] == True, returns your storage 
     backend's remote URL (IE: S3 URL). 
     

@@ -73,7 +73,7 @@ class MockClientTestCase(unittest.TestCase):
         self.assertEqual(self.client.get_local_media_url(), "/media/")
     
     def testMediaRoot(self):
-        self.assertEqual(self.client.get_media_root(), settings.MEDIA_ROOT)
+        self.assertEqual(self.client.get_media_root(), settings.STATIC_ROOT)
     
     def testMediaURL(self):
         self.assertEqual(self.client.media_url(with_ssl=False), "http://localhost")

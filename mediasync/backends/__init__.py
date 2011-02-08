@@ -50,25 +50,25 @@ class BaseClient(object):
 
     def get_local_media_url(self):
         """
-        Checks msettings['MEDIA_URL'], then settings.MEDIA_URL.
+        Checks msettings['STATIC_URL'], then settings.STATIC_URL.
         
         Broken out to allow overriding if need be.
         """
-        return msettings['MEDIA_URL']
+        return msettings['STATIC_URL']
 
     def get_media_root(self):
         """
-        Checks msettings['MEDIA_ROOT'], then settings.MEDIA_ROOT.
+        Checks msettings['STATIC_ROOT'], then settings.STATIC_ROOT.
         
         Broken out to allow overriding if need be.
         """
-        return msettings['MEDIA_ROOT']
+        return msettings['STATIC_ROOT']
 
     def media_url(self, with_ssl=False):
         """
         Used to return a base media URL. Depending on whether we're serving
         media remotely or locally, this either hands the decision off to the
-        backend, or just uses the value in settings.MEDIA_URL.
+        backend, or just uses the value in settings.STATIC_URL.
         
         args:
           with_ssl: (bool) If True, return an HTTPS url (depending on how

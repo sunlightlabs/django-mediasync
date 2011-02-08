@@ -52,19 +52,19 @@ Add to *TEMPLATE_CONTEXT_PROCESSORS*::
 
 	'django.core.context_processors.request'
 
-Make sure your *MEDIA_ROOT* setting is the correct path to your media::
+Make sure your *STATIC_ROOT* setting is the correct path to your media::
 
-    MEDIA_ROOT = '/path/to/media'
+    STATIC_ROOT = '/path/to/media'
 
 When media is being served locally (instead of from S3 or Cloud Files), 
-mediasync serves media through a Django view. Set your *MEDIA_URL* to what 
+mediasync serves media through a Django view. Set your *STATIC_URL* to what 
 you'd like that local media URL to be. This can be whatever you'd like, as long 
 as you're using the {% media_url %} tag (more details on this later)::
 
-	MEDIA_URL = '/devmedia/'
+	STATIC_URL = '/devmedia/'
 
-*MEDIA_URL* is the URL that will be used in debug mode. Otherwise, 
-the *MEDIA_URL* will be loaded from the backend settings.
+*STATIC_URL* is the URL that will be used in debug mode. Otherwise, 
+the *STATIC_URL* will be loaded from the backend settings.
 
 The following settings dict must also be added::
 
@@ -73,20 +73,20 @@ The following settings dict must also be added::
     }
 
 If you want to use a different media URL than that specified 
-in *settings.MEDIA_URL*, you can add *MEDIA_URL* to the *MEDIASYNC* 
+in *settings.STATIC_URL*, you can add *STATIC_URL* to the *MEDIASYNC* 
 settings dict::
 
     MEDIASYNC = {
         ...
-        'MEDIA_URL': '/url/to/media/', # becomes http://yourhost.com/url/to/media/
+        'STATIC_URL': '/url/to/media/', # becomes http://yourhost.com/url/to/media/
         ...
     }
 
-Same goes for *MEDIA_ROOT*::
+Same goes for *STATIC_ROOT*::
 
     MEDIASYNC = {
         ...
-        'MEDIA_ROOT': '/path/to/media/',
+        'STATIC_ROOT': '/path/to/media/',
         ...
     }
 
@@ -115,7 +115,7 @@ instead of from S3.
 ::
 
     # This would force mediasync to serve all media through the value
-    # specified in settings.MEDIA_URL.
+    # specified in settings.STATIC_URL.
     MEDIASYNC['SERVE_REMOTE'] = False
     
     # This would serve all media through S3/Cloud Files.
@@ -133,7 +133,7 @@ behavior we get from using media processors by specifying the following.
     MEDIASYNC['SERVE_REMOTE'] = False
     MEDIASYNC['EMULATE_COMBO'] = True
 
-Note that this will only work if your *MEDIA_URL* is pointing at your
+Note that this will only work if your *STATIC_URL* is pointing at your
 Django dev server. Also keep in mind that some processors may take a while,
 and is best used to check things over before rolling out to production.
 
@@ -426,7 +426,7 @@ Features
 Ignored Directories
 ===================
 
-Any directory in *MEDIA_ROOT* that is hidden or starts with an underscore 
+Any directory in *STATIC_ROOT* that is hidden or starts with an underscore 
 will be ignored during syncing.
 
 
@@ -455,13 +455,13 @@ in settings.py
 media_url
 ---------
 
-Renders the MEDIA_URL from settings.py with trailing slashes removed.
+Renders the STATIC_URL from settings.py with trailing slashes removed.
 
 ::
 
 	<img src="{% media_url %}/images/stuff.png">
 
-MEDIA_URL takes an optional argument that is the media path. Using the argument
+STATIC_URL takes an optional argument that is the media path. Using the argument
 allows mediasync to add the CACHE_BUSTER to the URL if one is specified.
 
 ::
@@ -587,6 +587,12 @@ Running MEDIASYNC
 Change Log
 ----------
 
+in-development
+==============
+
+* Default to using STATIC_URL and STATIC_ROOT (Django 1.3), falling back
+  to MEDIA_URL and MEDIA_ROOT if the STATIC_* settings are not set.
+
 2.0.0
 =====
 
@@ -597,7 +603,7 @@ Change Log
 * add pluggable file processors
 * experimental YUI Compressor
 * settings refactor
-* allow override of *settings.MEDIA_URL*
+* allow override of *settings.STATIC_URL*
 * Improvements to the logic that decides which files to sync. Safely ignore
   a wider variety of hidden files/directories.
 * Make template tags aware of whether the current page is SSL-secured. If it
