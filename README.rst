@@ -248,6 +248,11 @@ URL by setting *AWS_BUCKET_CNAME* to *True*.
 
 	MEDIASYNC['AWS_BUCKET_CNAME'] = True
 
+If you would prefer to not use gzip compression with the S3 client, it can be
+disabled::
+
+    MEDIASYNC['AWS_GZIP'] = False
+
 Tips
 ~~~~
 
@@ -592,6 +597,7 @@ Change Log
 
 * default to using STATIC_URL and STATIC_ROOT (Django 1.3), falling back
   to MEDIA_URL and MEDIA_ROOT if the STATIC_* settings are not set
+* add AWS_GZIP setting to optionally disable gzip compression in S3 client
 
 Thanks to Rob Hudson and Dolan Antenucci for their contributions to this
 release.
