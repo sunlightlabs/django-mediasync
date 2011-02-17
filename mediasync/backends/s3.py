@@ -19,7 +19,7 @@ class Client(BaseClient):
         assert self.aws_bucket
     
     def supports_gzip(self):
-        return True
+        return msettings.get('AWS_GZIP', True)
     
     def get_connection(self):
         return self._conn

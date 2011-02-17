@@ -8,8 +8,10 @@ _settings = {
     'EXPIRATION_DAYS': 365,
     'JOINED': {},
     'JS_PATH': "",
-    'STATIC_ROOT': settings.STATIC_ROOT or settings.MEDIA_ROOT,
-    'STATIC_URL': settings.STATIC_URL or settings.MEDIA_URL,
+    'STATIC_ROOT': getattr(settings, 'STATIC_ROOT', None) or
+                   getattr(settings, 'MEDIA_ROOT', None),
+    'STATIC_URL': getattr(settings, 'STATIC_URL', None) or
+                  getattr(settings, 'MEDIA_URL', None),
     'PROCESSORS': (slim.css_minifier, slim.js_minifier),
     'SERVE_REMOTE': not settings.DEBUG,
     'URL_PROCESSOR': lambda x: x,
