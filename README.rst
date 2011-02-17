@@ -587,6 +587,13 @@ Running MEDIASYNC
 Change Log
 ----------
 
+2.1.0
+=====
+
+* support Django 1.3's STATIC_MEDIA and STATIC_URL settings
+
+Thanks to Rob Hudson and Dolan Antenucci for their contributions to this release.
+
 2.0.0
 =====
 
