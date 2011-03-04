@@ -592,8 +592,8 @@ Running MEDIASYNC
 Change Log
 ----------
 
-2.1.0 (in-development)
-======================
+2.1.0
+=====
 
 * default to using STATIC_URL and STATIC_ROOT (Django 1.3), falling back
   to MEDIA_URL and MEDIA_ROOT if the STATIC_* settings are not set
@@ -636,7 +636,7 @@ and Rob Hudson for their contributions to this release.
 
 Thanks to Rob Hudson and Peter Sanchez for their contributions.
 
-1.0
-===
+1.0.0
+=====
 
 Initial release.
