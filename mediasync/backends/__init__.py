@@ -1,6 +1,7 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.importlib import import_module
 from mediasync.conf import msettings
+from urlparse import urlparse
 
 def client():
     backend_name = msettings['BACKEND']
@@ -54,7 +55,8 @@ class BaseClient(object):
         
         Broken out to allow overriding if need be.
         """
-        return msettings['STATIC_URL']
+        url = msettings['STATIC_URL']
+        return urlparse(url).path
 
     def get_media_root(self):
         """
