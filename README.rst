@@ -37,9 +37,9 @@ Upgrading from mediasync 1.x
 	* sync both compressed and original versions of files
 #. add "django.core.context_processors.request" to TEMPLATE_CONTEXT_PROCESSORS
 
-----------------------------------
-An important note about Django 1.3
-----------------------------------
+-------------------------------------
+_`An important note about Django 1.3`
+-------------------------------------
 
 When DEBUG = True and the project is run with *manage.py runserver*, Django 1.3
 automatically adds django.views.static.serve to urlpatterns. While this feature
@@ -74,10 +74,11 @@ mediasync serves media through a Django view. Set your *STATIC_URL* to what
 you'd like that local media URL to be. This can be whatever you'd like, as long 
 as you're using the {% media_url %} tag (more details on this later)::
 
-	STATIC_URL = '/devmedia/'
+	STATIC_URL = 'http://localhost:8000/devmedia/'
 
 *STATIC_URL* is the URL that will be used in debug mode. Otherwise, 
-the *STATIC_URL* will be loaded from the backend settings.
+the *STATIC_URL* will be loaded from the backend settings. Please see
+`An important note about Django 1.3`_.
 
 The following settings dict must also be added::
 
