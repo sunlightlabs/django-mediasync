@@ -89,6 +89,7 @@ def static_serve(request, path, client):
     to get the correct thing delivered to the user. This can also emulate the
     combo behavior seen when SERVE_REMOTE == False and EMULATE_COMBO == True.
     """
+    
     if msettings['SERVE_REMOTE']:
         # We're serving from S3, redirect there.
         url = client.remote_media_url().strip('/') + '/%(path)s'
@@ -105,6 +106,7 @@ def static_serve(request, path, client):
 
     # No combo file, but we're serving locally. Use the standard (inefficient)
     # Django static serve view.
-    resp = serve(request, path, document_root=client.media_root)
+    
+    resp = serve(request, path, document_root=client.media_root, show_indexes=True)
     resp.content = client.process(resp.content, resp['Content-Type'], path)
     return resp
