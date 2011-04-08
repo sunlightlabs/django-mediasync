@@ -594,6 +594,24 @@ header. Assuming a file styles/layout.css, the following would be synced to S3::
 	styles/layout.css
 	styles/layout.css.gz
 
+Signals
+=======
+
+mediasync provides two signals that allow you to hook into the syncing
+process. *pre_sync* is sent after the client is opened, but before the first
+file is synced. *post_sync* is sent after the last file is synced, but before
+the client is closed. This allows you to call commands on the client without
+having to worry about its state. The signals allow you to do common tasks such
+as calling Django 1.3's collectstatic command, process SASS stylesheets, or
+clean up files generated during a pre_sync process.
+
+A receiver for calling the collectstatic management command is provided::
+
+    from mediasync.signals import pre_sync, collectstatic_receiver
+    
+    # run collectstatic before syncing media
+    pre_sync.connect(collectstatic_receiver)
+
 -----------------
 Running MEDIASYNC
 -----------------
@@ -605,6 +623,13 @@ Running MEDIASYNC
 ----------
 Change Log
 ----------
+
+2.2.0 (in development)
+======================
+
+* added pre_sync and post_sync signals
+* provide basic receiver for calling collectstatic before syncing
+* show media directory listing when serving locally in debug mode
 
 2.1.0
 =====
