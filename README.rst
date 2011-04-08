@@ -37,6 +37,19 @@ Upgrading from mediasync 1.x
 	* sync both compressed and original versions of files
 #. add "django.core.context_processors.request" to TEMPLATE_CONTEXT_PROCESSORS
 
+----------------------------------
+An important note about Django 1.3
+----------------------------------
+
+When DEBUG = True and the project is run with *manage.py runserver*, Django 1.3
+automatically adds django.views.static.serve to urlpatterns. While this feature
+makes local development easier for most people, it screws everything up if
+you've added mediasync.urls to urlpatterns. As of now, the only way I can find
+to disable the automatic addition of django.views.static.serve is to use a full
+URL for STATIC_URL instead of just a path::
+
+    STATIC_URL = "http://localhost:8000/static/"
+
 -------------
 Configuration
 -------------
