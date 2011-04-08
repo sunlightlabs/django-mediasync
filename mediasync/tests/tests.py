@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.dispatch import receiver
 from hashlib import md5
 import httplib
 import itertools
@@ -11,6 +12,7 @@ import unittest
 from mediasync import backends
 from mediasync.backends import BaseClient
 from mediasync.conf import msettings
+from mediasync.signals import pre_sync, post_sync
 import mediasync
 import mimetypes
 
@@ -30,7 +32,7 @@ class Client(BaseClient):
         super(Client, self).__init__(*args, **kwargs)
     
     def put(self, filedata, content_type, remote_path, force=False):
-        if self.put_callback:
+        if hasattr(self, 'put_callback'):
             return self.put_callback(filedata, content_type, remote_path, force)
         else:
             return True
@@ -305,3 +307,31 @@ class ProcessorTestCase(unittest.TestCase):
     def testCustomProcessor(self):
         procd = self.client.process('asdf', 'text/plain', 'asdf.txt')
         self.assertEqual(procd, "ASDF")
+
+class SignalTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        msettings['BACKEND'] = 'mediasync.tests.tests'
+        self.client = backends.client()
+    
+    def testSyncSignals(self):
+        
+        self.client.called_presync = False
+        self.client.called_postsync = False
+        
+        @receiver(pre_sync, weak=False)
+        def presync_receiver(sender, **kwargs):
+            self.assertEqual(self.client, sender)
+            sender.called_presync = True
+        
+        @receiver(post_sync, weak=False)
+        def postsync_receiver(sender, **kwargs):
+            self.assertEqual(self.client, sender)
+            sender.called_postsync = True
+            
+        mediasync.sync(self.client, force=True, verbose=False)
+        
+        self.assertTrue(self.client.called_presync)
+        self.assertTrue(self.client.called_postsync)
+            
+        
