@@ -106,6 +106,7 @@ def sync(client=None, force=False, verbose=True):
     """
     from mediasync import backends
     from mediasync.conf import msettings
+    from mediasync.signals import pre_sync, post_sync
 
     # create client connection
     if client is None:
@@ -113,6 +114,9 @@ def sync(client=None, force=False, verbose=True):
 
     client.open()
     client.serve_remote = True
+
+    # send pre-sync signal
+    pre_sync.send(sender=client)
 
     #
     # sync joined media
@@ -162,7 +166,10 @@ def sync(client=None, force=False, verbose=True):
                 if client.process_and_put(filedata, content_type, remote_path, force=force):
                     if verbose:
                         print "[%s] %s" % (content_type, remote_path)
-                        
+    
+    # send post-sync signal while client is still open
+    post_sync.send(sender=client)
+    
     client.close()
 
 
