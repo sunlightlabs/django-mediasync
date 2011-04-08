@@ -222,6 +222,20 @@ or
 Some backends will be unable to use SSL. In these cases *USE_SSL* and SSL
 detection will be ignored.
 
+urls.py
+=======
+
+To serve local media through mediasync, add a reference to mediasync.urls in
+your main urls.py file.
+
+::
+
+    urlpatterns = ('',
+        ...
+        url(r'^', include('mediasync.urls)),
+        ...
+    )
+
 Backends
 ========
 
@@ -433,20 +447,6 @@ your `~/bin` path::
     'PROCESSORS': ('mediasync.processors.yuicompressor.css_minifier',
                    'mediasync.processors.yuicompressor.js_minifier'),
     'YUI_COMPRESSOR_PATH': '~/bin/yuicompressor.jar',
-
-urls.py
-=======
-
-Add a reference to mediasync.urls in your main urls.py file.
-
-::
-
-    urlpatterns = ('',
-        ...
-        url(r'^', include('mediasync.urls)),
-        ...
-    )
-
 
 --------
 Features
