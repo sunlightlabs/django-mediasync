@@ -9,7 +9,7 @@ import re
 import time
 import unittest
 
-from mediasync import backends
+from mediasync import backends, JS_MIMETYPES
 from mediasync.backends import BaseClient
 from mediasync.conf import msettings
 from mediasync.signals import pre_sync, post_sync
@@ -307,6 +307,36 @@ class ProcessorTestCase(unittest.TestCase):
     def testCustomProcessor(self):
         procd = self.client.process('asdf', 'text/plain', 'asdf.txt')
         self.assertEqual(procd, "ASDF")
+
+class ClosureCompilerTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        msettings['SERVE_REMOTE'] = True
+        msettings['BACKEND'] = 'mediasync.tests.tests'
+        msettings['PROCESSORS'] = (
+            'mediasync.processors.closurecompiler.compile',
+        )
+        self.client = backends.client()
+    
+    def testCompiler(self):
+        
+        content = """var foo = function() {
+            alert(1);
+        };"""
+        
+        for ct in JS_MIMETYPES:
+            procd = self.client.process(content, ct, 'test.js')
+            self.assertEqual(procd, 'var foo=function(){alert(1)};\n')
+    
+    def testNotJavascript(self):
+        
+        content = """html {
+            border: 1px solid #000000;
+            font-family: "Helvetica", "Arial", sans-serif;
+        }"""
+        
+        procd = self.client.process(content, 'text/css', 'test.css')
+        self.assertEqual(procd, content)
 
 class SignalTestCase(unittest.TestCase):
     

@@ -366,8 +366,7 @@ File Processors
 File processors allow you to modify the content of a file as it is being
 synced or served statically. 
 
-Mediasync ships with two processor modules, each of which defines two
-processors for minifying both CSS and Javascript files:
+Mediasync ships with three processor modules:
 
 1. ``slim`` is a minifier written in Python and requires the
    `slimmer` Python package. The Python package can be found here:
@@ -378,6 +377,8 @@ processors for minifying both CSS and Javascript files:
    This processor also requires an additional setting, as defined below.
    `yuicompressor` is new and should be considered experimental until 
    the mediasync 2.1 release.
+
+3. ``closurecompiler`` is a javascript compiler provided by Google.
 
 Custom processors can be specified using the *PROCESSORS* entry in the
 mediasync settings dict. *PROCESSORS* should be a list of processor entries.
@@ -411,10 +412,19 @@ if you plan on using them::
 		...
 	),
 
-Mediasync will attempt to use `slimmer` by default if you leave it out of
-your settings.  If it is on your Python path it will get used.
+mediasync will attempt to use `slimmer` by default if you have the package
+installed and do not use the PROCESSORS setting.
 
-**EXPERIMENTAL**
+Google Closure Compiler
+-----------------------
+
+Google's JavaScript Closure Compiler provides an API that allows files to be
+compressed without installing anything locally. To use the service::
+
+    'PROCESSORS': ('mediasync.processors.closurecompiler.compile',)
+
+YUI Compressor
+--------------
 
 To configure YUI Compressor you need to define a `PROCESSORS` and
 `YUI_COMPRESSOR_PATH` as follows, assuming you placed the ".jar" file in
@@ -630,6 +640,7 @@ Change Log
 * added pre_sync and post_sync signals
 * provide basic receiver for calling collectstatic before syncing
 * show media directory listing when serving locally in debug mode
+* add processor for Google's Closure Compiler API for JavaScript
 
 2.1.0
 =====
