@@ -666,6 +666,7 @@ Change Log
 
 * added pre_sync and post_sync signals
 * provide basic receiver for calling collectstatic before syncing
+* provide receiver for compiling SASS before syncing
 * show media directory listing when serving locally in debug mode
 * add processor for Google's Closure Compiler API for JavaScript
 
