@@ -349,7 +349,7 @@ class SignalTestCase(unittest.TestCase):
     
     def tearDown(self):
         root = msettings['STATIC_ROOT']
-        for filename in glob.glob(os.path.join(root, "*/*.scss")):
+        for filename in glob.glob(os.path.join(root, "*/*.s[ac]ss")):
             path = filename[:-4] + "css"
             if os.path.exists(path):
                 os.unlink(path)
@@ -382,7 +382,7 @@ class SignalTestCase(unittest.TestCase):
         
         root = msettings['STATIC_ROOT']
         
-        for sass_path in glob.glob(os.path.join(root, "*/*.scss")):
+        for sass_path in glob.glob(os.path.join(root, "*/*.s[ac]ss")):
             css_path = sass_path[:-4] + "css"
             self.assertTrue(os.path.exists(css_path))
             

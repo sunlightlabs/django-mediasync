@@ -23,7 +23,7 @@ def sass_receiver(sender, **kwargs):
     
     for filename in listdir_recursive(root):
         
-        if filename.lower().endswith('scss'):
+        if filename.endswith('.sass') or filename.endswith('.scss'):
             
             sass_path = os.path.join(root, filename)
             css_path = sass_path[:-4] + "css"
