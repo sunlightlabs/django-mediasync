@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.dispatch import receiver
 from hashlib import md5
+import glob
 import httplib
 import itertools
 import os
@@ -9,10 +10,10 @@ import re
 import time
 import unittest
 
-from mediasync import backends, JS_MIMETYPES
+from mediasync import backends, JS_MIMETYPES, listdir_recursive
 from mediasync.backends import BaseClient
 from mediasync.conf import msettings
-from mediasync.signals import pre_sync, post_sync
+from mediasync.signals import pre_sync, post_sync, sass_receiver
 import mediasync
 import mimetypes
 
@@ -103,6 +104,7 @@ class MockClientTestCase(unittest.TestCase):
         allowed_files = [
             'css/1.css',
             'css/2.css',
+            'css/3.scss',
             'img/black.png',
             'js/1.js',
             'js/2.js',
@@ -116,6 +118,7 @@ class MockClientTestCase(unittest.TestCase):
         to_sync = {
             'css/1.css': 'text/css',
             'css/2.css': 'text/css',
+            'css/3.scss': msettings['DEFAULT_MIMETYPE'],
             'css/joined.css': 'text/css',
             'img/black.png': 'image/png',
             'js/1.js': 'application/javascript',
@@ -219,7 +222,7 @@ class S3ClientTestCase(unittest.TestCase):
             response.read()
             
             # verify valid content type
-            content_type = mimetypes.guess_type(path)[0] or 'application/octet-stream'
+            content_type = mimetypes.guess_type(path)[0] or msettings['DEFAULT_MIMETYPE']
             self.assertEqual(response.getheader("Content-Type", None), content_type)
             
             # check for valid expires headers
@@ -344,6 +347,13 @@ class SignalTestCase(unittest.TestCase):
         msettings['BACKEND'] = 'mediasync.tests.tests'
         self.client = backends.client()
     
+    def tearDown(self):
+        root = msettings['STATIC_ROOT']
+        for filename in glob.glob(os.path.join(root, "*/*.scss")):
+            path = filename[:-4] + "css"
+            if os.path.exists(path):
+                os.unlink(path)
+    
     def testSyncSignals(self):
         
         self.client.called_presync = False
@@ -363,5 +373,17 @@ class SignalTestCase(unittest.TestCase):
         
         self.assertTrue(self.client.called_presync)
         self.assertTrue(self.client.called_postsync)
+    
+    def testSassReceiver(self):
+        
+        pre_sync.connect(sass_receiver)
+        
+        mediasync.sync(self.client, force=True, verbose=False)
+        
+        root = msettings['STATIC_ROOT']
+        
+        for sass_path in glob.glob(os.path.join(root, "*/*.scss")):
+            css_path = sass_path[:-4] + "css"
+            self.assertTrue(os.path.exists(css_path))
             
         

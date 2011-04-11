@@ -130,7 +130,7 @@ def sync(client=None, force=False, verbose=True):
             continue
         filedata, dirname = filedata
 
-        content_type = mimetypes.guess_type(joinfile)[0] or 'application/octet-stream'
+        content_type = mimetypes.guess_type(joinfile)[0] or msettings['DEFAULT_MIMETYPE']
 
         remote_path = joinfile
         if dirname:
@@ -156,7 +156,7 @@ def sync(client=None, force=False, verbose=True):
                 filepath = os.path.join(dirpath, filename)
                 remote_path = "%s/%s" % (dirname, filename)
 
-                content_type = mimetypes.guess_type(filepath)[0] or 'application/octet-stream'
+                content_type = mimetypes.guess_type(filepath)[0] or msettings['DEFAULT_MIMETYPE']
 
                 if not is_syncable_file(os.path.basename(filename)) or not os.path.isfile(filepath):
                     continue # hidden file or directory, do not upload

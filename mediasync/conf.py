@@ -2,12 +2,13 @@ from django.conf import settings
 from mediasync.processors import slim
 
 _settings = {
-    'CSS_PATH': "",
+    'CSS_PATH': '',
+    'DEFAULT_MIMETYPE': 'application/octet-stream',
     'DOCTYPE': 'html5',
     'EMULATE_COMBO': False,
     'EXPIRATION_DAYS': 365,
     'JOINED': {},
-    'JS_PATH': "",
+    'JS_PATH': '',
     'STATIC_ROOT': getattr(settings, 'STATIC_ROOT', None) or
                    getattr(settings, 'MEDIA_ROOT', None),
     'STATIC_URL': getattr(settings, 'STATIC_URL', None) or

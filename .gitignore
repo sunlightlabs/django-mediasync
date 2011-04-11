@@ -1,5 +1,6 @@
 *.pyc
 .project
 .pydevproject
+.sass-cache/
 build
 mediasync_example
