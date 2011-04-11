@@ -615,12 +615,39 @@ having to worry about its state. The signals allow you to do common tasks such
 as calling Django 1.3's collectstatic command, process SASS stylesheets, or
 clean up files generated during a pre_sync process.
 
+collectstatic receiver
+----------------------
+
 A receiver for calling the collectstatic management command is provided::
 
     from mediasync.signals import pre_sync, collectstatic_receiver
     
     # run collectstatic before syncing media
     pre_sync.connect(collectstatic_receiver)
+
+SASS receiver
+-------------
+
+A receiver for compiling SASS into CSS is provided::
+
+    from mediasync.signals import pre_sync, sass_receiver
+    
+    # compile SASS files before syncing media
+    pre_sync.connect(sass_receiver)
+
+Any file in static root that has the *sass* or *scss* file extension will be
+compiled into CSS. The compiled CSS file will be placed in the same directory
+and the original extension will be replaced with *css*. If a file exists with
+the same *css* extension, it will be overwritten.
+
+By default mediasync uses the *sass* command with no options. If you would
+like to specify your own command, specify *SASS_COMMAND* in settings::
+
+    MEDIASYNC = {
+        ...
+        'SASS_COMMAND': 'sass -scss -l',
+        ...
+    }
 
 -----------------
 Running MEDIASYNC
