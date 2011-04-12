@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.dispatch import receiver
+from django.template import Context, Template
 from hashlib import md5
 import glob
 import httplib
@@ -385,5 +386,75 @@ class SignalTestCase(unittest.TestCase):
         for sass_path in glob.glob(os.path.join(root, "*/*.s[ac]ss")):
             css_path = sass_path[:-4] + "css"
             self.assertTrue(os.path.exists(css_path))
-            
+
+class TemplateTagTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        msettings['BACKEND'] = 'mediasync.tests.tests'
+        msettings['DOCTYPE'] = 'html5'
+        self.client = backends.client()
+    
+    def testMediaURLTag(self):
+        
+        pathvar = 'images/logo.png'
+        c = Context({'pathvar': pathvar})
+        
+        # base media url
+        t = Template('{% load media %}{% media_url %}')
+        self.assertEqual(t.render(c), "http://localhost")
+        
+        # media url with string argument
+        t = Template('{%% load media %%}{%% media_url "%s" %%}' % pathvar)
+        self.assertEqual(t.render(c), "http://localhost/images/logo.png")
+        
+        # media url with variable argument
+        t = Template('{% load media %}{% media_url pathvar %}')
+        self.assertEqual(t.render(c), "http://localhost/images/logo.png")
+    
+    def testCSSTag(self):
+        
+        pathvar = 'styles/reset.css'
+        c = Context({'pathvar': pathvar})
+        
+        # css tag with string argument
+        t = Template('{%% load media %%}{%% css "%s" %%}' % pathvar)
+        self.assertEqual(
+            t.render(c),
+            '<link rel="stylesheet" href="http://localhost/%s" media="screen, projection">' % pathvar)
+
+        # css tag with string argument and explicit media type
+        t = Template('{%% load media %%}{%% css "%s" "tv" %%}' % pathvar)
+        self.assertEqual(
+            t.render(c),
+            '<link rel="stylesheet" href="http://localhost/%s" media="tv">' % pathvar)
+        
+        # css tag with variable argument
+        t = Template('{% load media %}{% css pathvar %}')
+        self.assertEqual(
+            t.render(c),
+            '<link rel="stylesheet" href="http://localhost/%s" media="screen, projection">' % pathvar)
+
+        # css tag with variable argument and explicit media type
+        t = Template('{% load media %}{% css pathvar "tv" %}')
+        self.assertEqual(
+            t.render(c),
+            '<link rel="stylesheet" href="http://localhost/%s" media="tv">' % pathvar)
+    
+    def testJSTag(self):
+
+        pathvar = 'scripts/jquery.js'
+        c = Context({'pathvar': pathvar})
+        
+        # js tag with string argument
+        t = Template('{%% load media %%}{%% js "%s" %%}' % pathvar)
+        self.assertEqual(
+            t.render(c),
+            '<script src="http://localhost/%s"></script>' % pathvar)
+        
+        # js tag with variable argument
+        t = Template('{% load media %}{% js pathvar %}')
+        self.assertEqual(
+            t.render(c),
+            '<script src="http://localhost/%s"></script>' % pathvar)
+
         

@@ -11,4 +11,4 @@ MEDIASYNC = {
     'BACKEND': 'mediasync.backends.dummy',
 }
 
-INSTALLED_APPS = ('mediasync.tests',)
+INSTALLED_APPS = ('mediasync','mediasync.tests',)

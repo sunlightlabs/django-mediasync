@@ -232,6 +232,8 @@ class CssTagNode(BaseTagNode):
         """
         if msettings['DOCTYPE'] == 'xhtml':
             markup = """<link rel="stylesheet" href="%s" type="text/css" media="%s" />"""
+        elif msettings['DOCTYPE'] == 'html5':
+            markup = """<link rel="stylesheet" href="%s" media="%s">"""
         else:
             markup = """<link rel="stylesheet" href="%s" type="text/css" media="%s">"""
         return markup % (self.mkpath(url, path, filename, gzip=self.supports_gzip(context)), media)
