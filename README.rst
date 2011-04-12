@@ -178,7 +178,7 @@ html5
 
 ::
 
-    <link rel="stylesheet" href="..." type="text/css" media="...">
+    <link rel="stylesheet" href="..." media="...">
     <script src="..."></script>
 
 xhtml
@@ -469,6 +469,11 @@ These tags can by accessed by loading the media template tag collection.
 
 	{% load media %}
 
+Any tag that has a path argument can use either a string or a variable::
+
+    {% media_url "images/avatar.png" }
+    {% media_url user.profile.avatar_path %}
+
 If you'd like to make the mediasync tags global, you can add the following to
 your master urls.py file::
 
@@ -669,6 +674,7 @@ Change Log
 * provide receiver for compiling SASS before syncing
 * show media directory listing when serving locally in debug mode
 * add processor for Google's Closure Compiler API for JavaScript
+* template tags can now take a variable as the path argument
 
 2.1.0
 =====
