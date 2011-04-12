@@ -84,6 +84,13 @@ class BaseTagNode(template.Node):
             url = "%s?%s" % (url, cb_val)
 
         return msettings['URL_PROCESSOR'](url)
+    
+    def resolve_path(self, context):
+        if self.path:
+            try:
+                self.path = template.Variable(self.path).resolve(context)
+            except template.VariableDoesNotExist:
+                pass # keep self.path as is
 
 def get_path_from_tokens(token):
     """
@@ -94,7 +101,7 @@ def get_path_from_tokens(token):
 
     if len(tokens) > 1:
         # At least one argument. Only interested in the path, though.
-        return tokens[1][1:-1]
+        return tokens[1].strip("\"'")
     else:
         # No path provided in the tag call.
         return None
@@ -129,6 +136,7 @@ class MediaUrlTagNode(BaseTagNode):
     documentation and examples.
     """
     def render(self, context):
+        self.resolve_path(context)
         media_url = self.get_media_url(context)
 
         if not self.path:
@@ -198,6 +206,7 @@ class CssTagNode(BaseTagNode):
         self.media_type = kwargs.get('media_type', "screen, projection")
 
     def render(self, context):
+        self.resolve_path(context)
         media_url = self.get_media_url(context)
         css_path = msettings['CSS_PATH']
         joined = msettings['JOINED']
@@ -249,6 +258,7 @@ class JsTagNode(BaseTagNode):
     documentation and examples.
     """
     def render(self, context):
+        self.resolve_path(context)
         media_url = self.get_media_url(context)
         js_path = msettings['JS_PATH']
         joined = msettings['JOINED']
