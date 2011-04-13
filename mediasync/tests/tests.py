@@ -456,5 +456,14 @@ class TemplateTagTestCase(unittest.TestCase):
         self.assertEqual(
             t.render(c),
             '<script src="http://localhost/%s"></script>' % pathvar)
-
+    
+    def testMultipleTags(self):
+        
+        paths = ('scripts/1.js','scripts/2.js')
+        c = Context({'paths': paths})
+        
+        t = Template('{% load media %}{% for path in paths %}{% media_url path %}{% endfor %}')
+        self.assertEqual(
+            t.render(c),
+            'http://localhost/scripts/1.jshttp://localhost/scripts/2.js')
         

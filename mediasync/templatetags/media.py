@@ -88,9 +88,10 @@ class BaseTagNode(template.Node):
     def resolve_path(self, context):
         if self.path:
             try:
-                self.path = template.Variable(self.path).resolve(context)
+                path = template.Variable(self.path).resolve(context)
             except template.VariableDoesNotExist:
-                pass # keep self.path as is
+                path = self.path
+            return path
 
 def get_path_from_tokens(token):
     """
@@ -136,15 +137,15 @@ class MediaUrlTagNode(BaseTagNode):
     documentation and examples.
     """
     def render(self, context):
-        self.resolve_path(context)
+        path = self.resolve_path(context)
         media_url = self.get_media_url(context)
 
-        if not self.path:
+        if not path:
             # No path provided, just return the base media URL.
             return media_url
         else:
             # File/path provided, return the assembled URL.
-            return self.mkpath(media_url, self.path, gzip=self.supports_gzip(context))
+            return self.mkpath(media_url, path, gzip=self.supports_gzip(context))
 
 """
 # CSS related tags
@@ -206,24 +207,24 @@ class CssTagNode(BaseTagNode):
         self.media_type = kwargs.get('media_type', "screen, projection")
 
     def render(self, context):
-        self.resolve_path(context)
+        path = self.resolve_path(context)
         media_url = self.get_media_url(context)
         css_path = msettings['CSS_PATH']
         joined = msettings['JOINED']
         
-        if msettings['SERVE_REMOTE'] and self.path in joined:
+        if msettings['SERVE_REMOTE'] and path in joined:
             # Serving from S3/Cloud Files.
-            return self.linktag(media_url, css_path, self.path, self.media_type, context)
+            return self.linktag(media_url, css_path, path, self.media_type, context)
         elif not msettings['SERVE_REMOTE'] and msettings['EMULATE_COMBO']:
             # Don't split the combo file into its component files. Emulate
             # the combo behavior, but generate/serve it locally. Useful for
             # testing combo CSS before deploying.
-            return self.linktag(media_url, css_path, self.path, self.media_type, context)
+            return self.linktag(media_url, css_path, path, self.media_type, context)
         else:
             # If this is a combo file seen in the JOINED key on the
             # MEDIASYNC dict, break it apart into its component files and
             # write separate <link> tags for each.
-            filenames = joined.get(self.path, (self.path,))
+            filenames = joined.get(path, (path,))
             return ' '.join((self.linktag(media_url, css_path, fn, self.media_type, context) for fn in filenames))
 
     def linktag(self, url, path, filename, media, context):
@@ -260,24 +261,24 @@ class JsTagNode(BaseTagNode):
     documentation and examples.
     """
     def render(self, context):
-        self.resolve_path(context)
+        path = self.resolve_path(context)
         media_url = self.get_media_url(context)
         js_path = msettings['JS_PATH']
         joined = msettings['JOINED']
 
-        if msettings['SERVE_REMOTE'] and self.path in joined:
+        if msettings['SERVE_REMOTE'] and path in joined:
             # Serving from S3/Cloud Files.
-            return self.scripttag(media_url, js_path, self.path, context)
+            return self.scripttag(media_url, js_path, path, context)
         elif not msettings['SERVE_REMOTE'] and msettings['EMULATE_COMBO']:
             # Don't split the combo file into its component files. Emulate
             # the combo behavior, but generate/serve it locally. Useful for
             # testing combo JS before deploying.
-            return self.scripttag(media_url, js_path, self.path, context)
+            return self.scripttag(media_url, js_path, path, context)
         else:
             # If this is a combo file seen in the JOINED key on the
             # MEDIASYNC dict, break it apart into its component files and
             # write separate <link> tags for each.
-            filenames = joined.get(self.path, (self.path,))
+            filenames = joined.get(path, (path,))
             return ' '.join((self.scripttag(media_url, js_path, fn, context) for fn in filenames))
 
     def scripttag(self, url, path, filename, context):
