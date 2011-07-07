@@ -1,4 +1,4 @@
-from mediasync import __version__
+from mediasync.core import __version__
 from setuptools import setup, find_packages
 import os
 
