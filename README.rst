@@ -378,21 +378,44 @@ File Processors
 ===============
 
 File processors allow you to modify the content of a file as it is being
-synced or served statically. 
+synced or served statically. Three processor modules are included
+with mediasync.
 
-Mediasync ships with three processor modules:
+slimmer
+-------
 
-1. ``slim`` is a minifier written in Python and requires the
-   `slimmer` Python package. The Python package can be found here:
-   http://pypi.python.org/pypi/slimmer/
+``slim`` is a minifier written in Python and requires the `slimmer` Python
+package. The Python package can be found here: http://pypi.python.org/pypi/slimmer/
 
-2. ``yuicompressor`` is a minifier written in Java and can be downloaded
-   from YUI's download page: http://developer.yahoo.com/yui/compressor/.
-   This processor also requires an additional setting, as defined below.
-   `yuicompressor` is new and should be considered experimental until 
-   the mediasync 2.1 release.
+::
+    
+    'PROCESSORS': ('mediasync.processors.slim.css_minifier',
+                   'mediasync.processors.slim.js_minifier'),
 
-3. ``closurecompiler`` is a javascript compiler provided by Google.
+
+YUI Compressor
+--------------
+
+``yuicompressor`` is a minifier written in Java and can be downloaded
+from YUI's download page: http://developer.yahoo.com/yui/compressor/. To
+configure YUI Compressor you need to define a `PROCESSORS` and
+`YUI_COMPRESSOR_PATH` as follows, assuming you placed the ".jar" file in
+your `~/bin` path::
+
+    'PROCESSORS': ('mediasync.processors.yuicompressor.css_minifier',
+                   'mediasync.processors.yuicompressor.js_minifier'),
+    'YUI_COMPRESSOR_PATH': '~/bin/yuicompressor.jar',
+
+Google Closure Compiler
+-----------------------
+
+Google's JavaScript Closure Compiler provides an API that allows files to be
+compressed without installing anything locally. To use the service::
+
+    'PROCESSORS': ('mediasync.processors.closurecompiler.compile',)
+
+Custom Processors
+-----------------
 
 Custom processors can be specified using the *PROCESSORS* entry in the
 mediasync settings dict. *PROCESSORS* should be a list of processor entries.
@@ -417,46 +440,16 @@ remote_path
 is_active
 	True if the processor should... process
 
-If the *PROCESSORS* setting is used, you will need to include the defaults
-if you plan on using them::
-
-	'PROCESSORS': (
-	    'mediasync.processors.slim.css_minifier',
-	    'mediasync.processors.slim.js_minifier',
-		...
-	),
-
-mediasync will attempt to use `slimmer` by default if you have the package
-installed and do not use the PROCESSORS setting.
-
-Google Closure Compiler
------------------------
-
-Google's JavaScript Closure Compiler provides an API that allows files to be
-compressed without installing anything locally. To use the service::
-
-    'PROCESSORS': ('mediasync.processors.closurecompiler.compile',)
-
-YUI Compressor
---------------
-
-To configure YUI Compressor you need to define a `PROCESSORS` and
-`YUI_COMPRESSOR_PATH` as follows, assuming you placed the ".jar" file in
-your `~/bin` path::
-
-    'PROCESSORS': ('mediasync.processors.yuicompressor.css_minifier',
-                   'mediasync.processors.yuicompressor.js_minifier'),
-    'YUI_COMPRESSOR_PATH': '~/bin/yuicompressor.jar',
-
 --------
 Features
 --------
 
-Ignored Directories
-===================
+Ignored Files and Directories
+=============================
 
 Any directory in *STATIC_ROOT* that is hidden or starts with an underscore 
-will be ignored during syncing.
+will be ignored during syncing. Any file that is hidden or starts with an
+underscore will also be ignored.
 
 
 Template Tags
@@ -671,6 +664,8 @@ Change Log
 
 * cleanup of core mediasync module
 * addition of mediasync.utils for programmatic, single file uploads
+* files at root static directory are now synced instead of just directories
+* CSS and JS slimmers are no longer included by default
 
 Thanks to Kenneth Reitz for his contribution to this release.
 
