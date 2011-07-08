@@ -1,7 +1,7 @@
 from django import template
 from mediasync import backends
 from mediasync.conf import msettings
-import mediasync
+import mediasync.core
 import mimetypes
 
 # Instance of the backend you configured in settings.py.
@@ -28,7 +28,7 @@ class BaseTagNode(template.Node):
         TEMPLATE_CONTEXT_PROCESSORS in settings.py.
         """
         return 'request' in context and context['request'].is_secure()
-    
+
     def supports_gzip(self, context):
         """
         Looks at the RequestContext object and determines if the client
@@ -46,7 +46,7 @@ class BaseTagNode(template.Node):
         Checks to see whether to use the normal or the secure media source,
         depending on whether the current page view is being sent over SSL.
         The USE_SSL setting can be used to force HTTPS (True) or HTTP (False).
-        
+
         NOTE: Not all backends implement SSL media. In this case, they'll just
         return an unencrypted URL.
         """
@@ -57,7 +57,7 @@ class BaseTagNode(template.Node):
     def mkpath(self, url, path, filename=None, gzip=False):
         """
         Assembles various components to form a complete resource URL.
-        
+
         args:
           url: (str) A base media URL.
           path: (str) The path on the host (specified in 'url') leading up
@@ -70,9 +70,9 @@ class BaseTagNode(template.Node):
 
         if filename:
             url = "%s/%s" % (url, filename.lstrip('/'))
-        
+
         content_type = mimetypes.guess_type(url)[0]
-        if gzip and content_type in mediasync.TYPES_TO_COMPRESS:
+        if gzip and content_type in mediasync.core.TYPES_TO_COMPRESS:
             url = "%s.gz" % url
 
         cb = msettings['CACHE_BUSTER']
@@ -84,7 +84,7 @@ class BaseTagNode(template.Node):
             url = "%s?%s" % (url, cb_val)
 
         return msettings['URL_PROCESSOR'](url)
-    
+
     def resolve_path(self, context):
         if self.path:
             try:
@@ -109,21 +109,21 @@ def get_path_from_tokens(token):
 
 def media_url_tag(parser, token):
     """
-    If msettings['SERVE_REMOTE'] == False, returns your STATIC_URL. 
-    When msettings['SERVE_REMOTE'] == True, returns your storage 
-    backend's remote URL (IE: S3 URL). 
-    
+    If msettings['SERVE_REMOTE'] == False, returns your STATIC_URL.
+    When msettings['SERVE_REMOTE'] == True, returns your storage
+    backend's remote URL (IE: S3 URL).
+
     If an argument is provided with the tag, it will be appended on the end
     of your media URL.
-    
+
     *NOTE:* This tag returns a URL, not any kind of HTML tag.
-    
-    Usage:: 
-    
+
+    Usage::
+
         {% media_url ["path/and/file.ext"] %}
-    
+
     Examples::
-    
+
         {% media_url %}
         {% media_url "images/bunny.gif" %}
         {% media_url %}/themes/{{ theme_variable }}/style.css
@@ -153,9 +153,9 @@ class MediaUrlTagNode(BaseTagNode):
 
 def css_tag(parser, token):
     """
-    Renders a tag to include the stylesheet. It takes an optional second 
+    Renders a tag to include the stylesheet. It takes an optional second
     parameter for the media attribute; the default media is "screen, projector".
-    
+
     Usage::
 
         {% css "<somefile>.css" ["<projection type(s)>"] %}
@@ -181,13 +181,13 @@ register.tag('css', css_tag)
 def css_print_tag(parser, token):
     """
     Shortcut to render CSS as a print stylesheet.
-    
+
     Usage::
-    
+
         {% css_print "myfile.css" %}
-        
+
     Which is equivalent to
-    
+
         {% css "myfile.css" "print" %}
     """
     path = get_path_from_tokens(token)
@@ -211,7 +211,7 @@ class CssTagNode(BaseTagNode):
         media_url = self.get_media_url(context)
         css_path = msettings['CSS_PATH']
         joined = msettings['JOINED']
-        
+
         if msettings['SERVE_REMOTE'] and path in joined:
             # Serving from S3/Cloud Files.
             return self.linktag(media_url, css_path, path, self.media_type, context)
@@ -246,11 +246,11 @@ class CssTagNode(BaseTagNode):
 def js_tag(parser, token):
     """
     Renders a tag to include a JavaScript file.
-    
+
     Usage::
-    
+
         {% js "somefile.js" %}
-        
+
     """
     return JsTagNode(get_path_from_tokens(token))
 register.tag('js', js_tag)
