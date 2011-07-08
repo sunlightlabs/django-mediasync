@@ -666,7 +666,7 @@ Running MEDIASYNC
 Change Log
 ----------
 
-2.2.0 (in development)
+2.2.0
 ======================
 
 * added pre_sync and post_sync signals
