@@ -13,7 +13,7 @@ _settings = {
                    getattr(settings, 'MEDIA_ROOT', None),
     'STATIC_URL': getattr(settings, 'STATIC_URL', None) or
                   getattr(settings, 'MEDIA_URL', None),
-    'PROCESSORS': (slim.css_minifier, slim.js_minifier),
+    'PROCESSORS': [],
     'SERVE_REMOTE': not settings.DEBUG,
     'URL_PROCESSOR': lambda x: x,
 }
