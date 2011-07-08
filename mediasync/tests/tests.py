@@ -182,7 +182,7 @@ class S3ClientTestCase(unittest.TestCase):
     def testSync(self):
         
         # calculate cache control
-        cc = "max-age=%i" % (self.client.expiration_days * 24 * 3600)
+        cc = "max-age=%i, public" % (self.client.expiration_days * 24 * 3600)
         
         # do a sync then reopen client
         mediasync.sync(self.client, force=True, verbose=False)
