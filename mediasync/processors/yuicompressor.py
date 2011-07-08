@@ -1,5 +1,5 @@
 from django.conf import settings
-from mediasync import JS_MIMETYPES
+from mediasync import CSS_MIMETYPES, JS_MIMETYPES
 import os
 from subprocess import Popen, PIPE
 
@@ -12,7 +12,7 @@ def _yui_path(settings):
     return path
 
 def css_minifier(filedata, content_type, remote_path, is_active):
-    is_css = (content_type in JS_MIMETYPES or remote_path.lower().endswith('.css'))
+    is_css = (content_type in CSS_MIMETYPES or remote_path.lower().endswith('.css'))
     yui_path = _yui_path(settings)
     if is_css and yui_path and is_active:
         proc = Popen(['java', '-jar', yui_path, '--type', 'css'], stdout=PIPE,
