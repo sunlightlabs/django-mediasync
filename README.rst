@@ -666,8 +666,16 @@ Running MEDIASYNC
 Change Log
 ----------
 
+3.0.0dev
+========
+
+* cleanup of core mediasync module
+* addition of mediasync.utils for programmatic, single file uploads
+
+Thanks to Kenneth Reitz for his contribution to this release.
+
 2.2.0
-======================
+=====
 
 * added pre_sync and post_sync signals
 * provide basic receiver for calling collectstatic before syncing
