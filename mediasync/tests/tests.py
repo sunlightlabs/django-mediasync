@@ -11,7 +11,7 @@ import re
 import time
 import unittest
 
-from mediasync import backends, JS_MIMETYPES, listdir_recursive
+from mediasync import backends, JS_MIMETYPES, listdir_recursive, is_syncable_file
 from mediasync.backends import BaseClient
 from mediasync.conf import msettings
 from mediasync.signals import pre_sync, post_sync, sass_receiver
@@ -103,6 +103,8 @@ class MockClientTestCase(unittest.TestCase):
     
     def testDirectoryListing(self):
         allowed_files = [
+            '_secret.txt',
+            'robots.txt',
             'css/1.css',
             'css/2.css',
             'css/3.scss',
@@ -117,6 +119,7 @@ class MockClientTestCase(unittest.TestCase):
     def testSync(self):
         
         to_sync = {
+            'robots.txt': 'text/plain',
             'css/1.css': 'text/css',
             'css/2.css': 'text/css',
             'css/3.scss': msettings['DEFAULT_MIMETYPE'],
@@ -200,57 +203,68 @@ class S3ClientTestCase(unittest.TestCase):
         
         for path in itertools.chain(static_paths, joined_paths):
             
+            filename = path.split('/')[-1]
             key = bucket.get_key(path)
             
-            if path in msettings['JOINED']:
-                args = [PWD, 'media', '_test', path.split('/')[1]]
+            if not is_syncable_file(filename):
+                
+                # file isn't syncable so it shouldn't be on S3
+                self.assertIsNone(key)
+                
             else:
-                args = [PWD, 'media'] + path.split('/')
-            local_content = readfile(os.path.join(*args))
+                
+                # file is syncable so make sure it's on S3
+                # and has correct permissions and attributes
+                
+                if path in msettings['JOINED']:
+                    args = [PWD, 'media', '_test', path.split('/')[1]]
+                else:
+                    args = [PWD, 'media'] + path.split('/')
+                local_content = readfile(os.path.join(*args))
 
-            # compare file content
-            self.assertEqual(key.read(), local_content)
+                # compare file content
+                self.assertEqual(key.read(), local_content)
             
-            # verify checksum
-            key_meta = key.get_metadata('mediasync-checksum') or ''
-            s3_checksum = key_meta.replace(' ', '+')
-            (hexdigest, b64digest) = mediasync.checksum(local_content)
-            self.assertEqual(s3_checksum, b64digest)
-            
-            # do a HEAD request on the file
-            http_conn.request('HEAD', "/%s/%s" % (self.bucket_name, path))
-            response = http_conn.getresponse()
-            response.read()
-            
-            # verify valid content type
-            content_type = mimetypes.guess_type(path)[0] or msettings['DEFAULT_MIMETYPE']
-            self.assertEqual(response.getheader("Content-Type", None), content_type)
-            
-            # check for valid expires headers
-            expires = response.getheader("Expires", None)
-            self.assertRegexpMatches(expires, EXPIRES_RE)
-            
-            # check for valid cache control header
-            cc_header = response.getheader("Cache-Control", None)
-            self.assertEqual(cc_header, cc)
-            
-            # done with the file, delete it from S3
-            key.delete()
-            
-            if content_type in mediasync.TYPES_TO_COMPRESS:
-                
-                key = bucket.get_key("%s.gz" % path)
-                
-                # do a HEAD request on the file
-                http_conn.request('HEAD', "/%s/%s.gz" % (self.bucket_name, path))
-                response = http_conn.getresponse()
-                response.read()
-                
+                # verify checksum
                 key_meta = key.get_metadata('mediasync-checksum') or ''
                 s3_checksum = key_meta.replace(' ', '+')
+                (hexdigest, b64digest) = mediasync.checksum(local_content)
                 self.assertEqual(s3_checksum, b64digest)
-                
+            
+                # do a HEAD request on the file
+                http_conn.request('HEAD', "/%s/%s" % (self.bucket_name, path))
+                response = http_conn.getresponse()
+                response.read()
+            
+                # verify valid content type
+                content_type = mimetypes.guess_type(path)[0] or msettings['DEFAULT_MIMETYPE']
+                self.assertEqual(response.getheader("Content-Type", None), content_type)
+            
+                # check for valid expires headers
+                expires = response.getheader("Expires", None)
+                self.assertRegexpMatches(expires, EXPIRES_RE)
+            
+                # check for valid cache control header
+                cc_header = response.getheader("Cache-Control", None)
+                self.assertEqual(cc_header, cc)
+            
+                # done with the file, delete it from S3
                 key.delete()
+            
+                if content_type in mediasync.TYPES_TO_COMPRESS:
+                
+                    key = bucket.get_key("%s.gz" % path)
+                
+                    # do a HEAD request on the file
+                    http_conn.request('HEAD', "/%s/%s.gz" % (self.bucket_name, path))
+                    response = http_conn.getresponse()
+                    response.read()
+                
+                    key_meta = key.get_metadata('mediasync-checksum') or ''
+                    s3_checksum = key_meta.replace(' ', '+')
+                    self.assertEqual(s3_checksum, b64digest)
+                
+                    key.delete()
         
         http_conn.close()
         

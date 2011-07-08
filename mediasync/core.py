@@ -143,29 +143,22 @@ def sync(client=None, force=False, verbose=True):
     #
     # sync static media
     #
+    
+    for path in listdir_recursive(client.media_root):
+        
+        filepath = os.path.abspath(os.path.join(client.media_root, path))
+        filename = os.path.basename(filepath)
+        
+        content_type = mimetypes.guess_type(filename)[0] or msettings['DEFAULT_MIMETYPE']
+        
+        if not is_syncable_file(filename) or not os.path.isfile(filepath):
+            continue # hidden file or directory, do not upload
+        
+        filedata = open(filepath, 'rb').read()
 
-    for dirname in os.listdir(client.media_root):
-
-        dirpath = os.path.abspath(os.path.join(client.media_root, dirname))
-
-        if os.path.isdir(dirpath):
-
-            for filename in listdir_recursive(dirpath):
-
-                # calculate local and remote paths
-                filepath = os.path.join(dirpath, filename)
-                remote_path = "%s/%s" % (dirname, filename)
-
-                content_type = mimetypes.guess_type(filepath)[0] or msettings['DEFAULT_MIMETYPE']
-
-                if not is_syncable_file(os.path.basename(filename)) or not os.path.isfile(filepath):
-                    continue # hidden file or directory, do not upload
-
-                filedata = open(filepath, 'rb').read()
-
-                if client.process_and_put(filedata, content_type, remote_path, force=force):
-                    if verbose:
-                        print "[%s] %s" % (content_type, remote_path)
+        if client.process_and_put(filedata, content_type, path, force=force):
+            if verbose:
+                print "[%s] %s" % (content_type, path)
 
     # send post-sync signal while client is still open
     post_sync.send(sender=client)
