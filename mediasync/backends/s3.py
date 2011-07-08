@@ -93,8 +93,8 @@ class Client(BaseClient):
 
                 key = Key(self._bucket, "%s.gz" % remote_path)
 
-                filedata = mediasync.compress(filedata)
-                (hexdigest, b64digest) = mediasync.checksum(filedata) # update checksum with compressed data
+                filedata = mediasync.core.compress(filedata)
+                (hexdigest, b64digest) = mediasync.core.checksum(filedata) # update checksum with compressed data
                 headers["Content-Disposition"] = 'inline; filename="%sgz"' % remote_path.split('/')[-1]
                 headers["Content-Encoding"] = 'gzip'
 
