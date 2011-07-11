@@ -98,7 +98,7 @@ def combine_files(joinfile, sourcefiles, client):
     buffer.close()
     return (filedata, dirname)
 
-def sync(client=None, force=False, verbose=True):
+def sync(client=None, force=False):
     """ Let's face it... pushing this stuff to S3 is messy.
         A lot of different things need to be calculated for each file
         and they have to be in a certain order as some variables rely
@@ -137,7 +137,7 @@ def sync(client=None, force=False, verbose=True):
             remote_path = "%s/%s" % (dirname, remote_path)
 
         if client.process_and_put(filedata, content_type, remote_path, force=force):
-            if verbose:
+            if msettings['VERBOSE']:
                 print "[%s] %s" % (content_type, remote_path)
 
     #
@@ -157,7 +157,7 @@ def sync(client=None, force=False, verbose=True):
         filedata = open(filepath, 'rb').read()
 
         if client.process_and_put(filedata, content_type, path, force=force):
-            if verbose:
+            if msettings['VERBOSE']:
                 print "[%s] %s" % (content_type, path)
 
     # send post-sync signal while client is still open

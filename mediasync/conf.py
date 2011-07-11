@@ -16,6 +16,7 @@ _settings = {
     'PROCESSORS': [],
     'SERVE_REMOTE': not settings.DEBUG,
     'URL_PROCESSOR': lambda x: x,
+    'VERBOSE': False,
 }
 
 class Settings(object):

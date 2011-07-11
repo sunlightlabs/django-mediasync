@@ -12,11 +12,13 @@ class Command(BaseCommand):
     
     option_list = BaseCommand.option_list + (
         make_option("-F", "--force", dest="force", help="force files to sync", action="store_true"),
+        make_option("-q", "--quiet", dest="verbose", help="disable output", action="store_false", default=True),
     )
     
     def handle(self, *args, **options):
         
         msettings['SERVE_REMOTE'] = True
+        msettings['VERBOSE'] = options.get('verbose')
         
         force = options.get('force') or False
         

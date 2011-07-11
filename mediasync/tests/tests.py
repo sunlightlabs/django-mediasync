@@ -148,11 +148,11 @@ class MockClientTestCase(unittest.TestCase):
         
         # normal sync
         self.client.put_callback = generate_callback(is_forced=False)
-        mediasync.sync(self.client, force=False, verbose=False)
+        mediasync.sync(self.client, force=False)
         
         # forced sync
         self.client.put_callback = generate_callback(is_forced=True)
-        mediasync.sync(self.client, force=True, verbose=False)
+        mediasync.sync(self.client, force=True)
         
 class S3ClientTestCase(unittest.TestCase):
 
@@ -188,7 +188,7 @@ class S3ClientTestCase(unittest.TestCase):
         cc = "max-age=%i, public" % (self.client.expiration_days * 24 * 3600)
         
         # do a sync then reopen client
-        mediasync.sync(self.client, force=True, verbose=False)
+        mediasync.sync(self.client, force=True)
         self.client.open()
         conn = self.client.get_connection()
         
@@ -384,7 +384,7 @@ class SignalTestCase(unittest.TestCase):
             self.assertEqual(self.client, sender)
             sender.called_postsync = True
             
-        mediasync.sync(self.client, force=True, verbose=False)
+        mediasync.sync(self.client, force=True)
         
         self.assertTrue(self.client.called_presync)
         self.assertTrue(self.client.called_postsync)
@@ -393,7 +393,7 @@ class SignalTestCase(unittest.TestCase):
         
         pre_sync.connect(sass_receiver)
         
-        mediasync.sync(self.client, force=True, verbose=False)
+        mediasync.sync(self.client, force=True)
         
         root = msettings['STATIC_ROOT']
         
