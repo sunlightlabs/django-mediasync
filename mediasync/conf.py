@@ -9,12 +9,12 @@ _settings = {
     'EXPIRATION_DAYS': 365,
     'JOINED': {},
     'JS_PATH': '',
+    'PROCESSORS': [],
+    'SERVE_REMOTE': not settings.DEBUG,
     'STATIC_ROOT': getattr(settings, 'STATIC_ROOT', None) or
                    getattr(settings, 'MEDIA_ROOT', None),
     'STATIC_URL': getattr(settings, 'STATIC_URL', None) or
                   getattr(settings, 'MEDIA_URL', None),
-    'PROCESSORS': [],
-    'SERVE_REMOTE': not settings.DEBUG,
     'URL_PROCESSOR': lambda x: x,
     'VERBOSE': False,
 }
