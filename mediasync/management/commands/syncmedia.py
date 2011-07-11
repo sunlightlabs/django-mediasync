@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from optparse import make_option
 from mediasync.conf import msettings
 import mediasync
+import time
 
 class Command(BaseCommand):
     
@@ -23,6 +24,13 @@ class Command(BaseCommand):
         force = options.get('force') or False
         
         try:
+            
+            start_time = time.time()
             mediasync.sync(force=force)
+            end_time = time.time()
+            
+            secs = (end_time - start_time)
+            print 'sync finished in %0.3f seconds' % secs
+            
         except ValueError, ve:
             raise CommandError('%s\nUsage is mediasync %s' % (ve.message, self.args))

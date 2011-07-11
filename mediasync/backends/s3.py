@@ -12,6 +12,8 @@ class Client(BaseClient):
     def __init__(self, *args, **kwargs):
         super(Client, self).__init__(*args, **kwargs)
 
+        self._create_bucket = kwargs.get('create_bucket', True)
+
         self.aws_bucket = msettings['AWS_BUCKET']
         self.aws_prefix = msettings.get('AWS_PREFIX', '').strip('/')
         self.aws_bucket_cname =  msettings.get('AWS_BUCKET_CNAME', False)
@@ -34,7 +36,10 @@ class Client(BaseClient):
         except AttributeError:
             raise ImproperlyConfigured("S3 keys not set and no boto config found.")
 
-        self._bucket = self._conn.create_bucket(self.aws_bucket)
+        if self._create_bucket:
+            self._bucket = self._conn.create_bucket(self.aws_bucket)
+        else:
+            self._bucket = self._conn.get_bucket(self.aws_bucket, validate=False)
 
     def close(self):
         self._bucket = None

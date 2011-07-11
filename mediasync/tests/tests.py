@@ -279,6 +279,27 @@ class S3ClientTestCase(unittest.TestCase):
         del msettings['AWS_BUCKET']
         self.assertRaises(AssertionError, backends.client)
 
+class S3AsyncClientTestCase(S3ClientTestCase):
+
+    def setUp(self):
+
+        bucket_hash = md5("%i-%s" % (int(time.time()), os.environ['USER'])).hexdigest()
+        self.bucket_name = 'mediasync_test_' + bucket_hash
+
+        msettings['BACKEND'] = 'mediasync.backends.s3async'
+        msettings['AWS_ASYNC_WORKERS'] = 8
+        msettings['AWS_BUCKET'] = self.bucket_name
+        msettings['AWS_KEY'] = os.environ['AWS_KEY'] or None
+        msettings['AWS_SECRET'] = os.environ['AWS_SECRET'] or None
+        msettings['PROCESSORS'] = []
+        msettings['SERVE_REMOTE'] = True
+        msettings['JOINED'] = {
+            'css/joined.css': ('css/1.css', 'css/2.css'),
+            'js/joined.js': ('js/1.js', 'js/2.js'),
+        }
+
+        self.client = backends.client()
+
 class ProcessorTestCase(unittest.TestCase):
 
     def setUp(self):
