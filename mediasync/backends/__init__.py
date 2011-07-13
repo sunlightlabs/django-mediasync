@@ -2,6 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.importlib import import_module
 from mediasync.conf import msettings
 from urlparse import urlparse
+import exceptions
 
 def client():
     backend_name = msettings['BACKEND']
