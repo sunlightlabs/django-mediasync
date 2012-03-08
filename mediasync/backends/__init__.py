@@ -2,7 +2,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.importlib import import_module
 from mediasync.conf import msettings
 from urlparse import urlparse
-import exceptions
 
 def client():
     backend_name = msettings['BACKEND']
@@ -36,7 +35,7 @@ class BaseClient(object):
                 try:
                     dot = proc.rindex('.')
                 except ValueError:
-                    raise exceptions.ImproperlyConfigured, '%s isn\'t a processor module' % (proc,)
+                    raise ImproperlyConfigured, '%s isn\'t a processor module' % (proc,)
                 module, attr = proc[:dot], proc[dot+1:]
                 module = import_module(module)
                 proc = getattr(module, attr, None)
