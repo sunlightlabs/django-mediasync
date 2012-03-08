@@ -23,4 +23,7 @@ def compile(filedata, content_type, remote_path, is_active):
         data = response.read()
         conn.close
         
+        if data.startswith('Error'):
+            data = filedata
+        
         return data

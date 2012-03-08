@@ -2,6 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.importlib import import_module
 from mediasync.conf import msettings
 from urlparse import urlparse
+import exceptions
 
 def client():
     backend_name = msettings['BACKEND']
@@ -45,14 +46,14 @@ class BaseClient(object):
 
             if callable(proc):
                 self.processors.append(proc)
-    
+
     def supports_gzip(self):
         return False
 
     def get_local_media_url(self):
         """
         Checks msettings['STATIC_URL'], then settings.STATIC_URL.
-        
+
         Broken out to allow overriding if need be.
         """
         url = msettings['STATIC_URL']
@@ -61,24 +62,24 @@ class BaseClient(object):
     def get_media_root(self):
         """
         Checks msettings['STATIC_ROOT'], then settings.STATIC_ROOT.
-        
+
         Broken out to allow overriding if need be.
         """
         return msettings['STATIC_ROOT']
 
-    def media_url(self, with_ssl=False):
+    def media_url(self, with_ssl=False, **kwargs):
         """
         Used to return a base media URL. Depending on whether we're serving
         media remotely or locally, this either hands the decision off to the
         backend, or just uses the value in settings.STATIC_URL.
-        
+
         args:
           with_ssl: (bool) If True, return an HTTPS url (depending on how
                            the backend handles it).
         """
         if self.serve_remote:
             # Hand this off to whichever backend is being used.
-            url = self.remote_media_url(with_ssl)
+            url = self.remote_media_url(with_ssl, **kwargs)
         else:
             # Serving locally, just use the value in settings.py.
             url = self.local_media_url
