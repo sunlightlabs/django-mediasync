@@ -29,4 +29,7 @@ def sass_receiver(sender, **kwargs):
             css_path = sass_path[:-4] + "css"
 
             cmd = "%s %s %s" % (sass_cmd, sass_path, css_path)
-            subprocess.call(cmd.split(' '))
+            try:
+                subprocess.call(cmd.split(' '))
+            except OSError:
+                raise SyncException("Unable to invoke Sass. Verify that SASS_COMMAND setting is correct.")
