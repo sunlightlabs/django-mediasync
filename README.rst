@@ -3,14 +3,14 @@
 django-mediasync
 ================
 
-One of the more significant development roadblocks we have relates to local vs. 
-deployed media. Ideally all media (graphics, css, scripts) development would 
-occur locally and not use production media. Then, when ready to deploy, the 
-media should be pushed to production. That way there can be significant changes 
+One of the more significant development roadblocks we have relates to local vs.
+deployed media. Ideally all media (graphics, css, scripts) development would
+occur locally and not use production media. Then, when ready to deploy, the
+media should be pushed to production. That way there can be significant changes
 to media without disturbing the production web site.
 
-The goal of mediasync is to develop locally and then flip a switch in production 
-that makes all the media URLs point to remote media URLs instead of the local 
+The goal of mediasync is to develop locally and then flip a switch in production
+that makes all the media URLs point to remote media URLs instead of the local
 media directory.
 
 All code is under a BSD-style license, see LICENSE for details.
@@ -37,18 +37,12 @@ Upgrading from mediasync 1.x
 	* sync both compressed and original versions of files
 #. add "django.core.context_processors.request" to TEMPLATE_CONTEXT_PROCESSORS
 
--------------------------------------
-_`An important note about Django 1.3`
--------------------------------------
+-----------------------------------------------------
+_`An important note about Django 1.3 and staticfiles`
+-----------------------------------------------------
 
-When DEBUG = True and the project is run with *manage.py runserver*, Django 1.3
-automatically adds django.views.static.serve to urlpatterns. While this feature
-makes local development easier for most people, it screws everything up if
-you've added mediasync.urls to urlpatterns. As of now, the only way I can find
-to disable the automatic addition of django.views.static.serve is to use a full
-URL for STATIC_URL instead of just a path::
-
-    STATIC_URL = "http://localhost:8000/static/"
+mediasync does not play nicely with staticfiles. It is best to remove
+staticfiles from *INSTALLED_APPS* when using mediasync.
 
 -------------
 Configuration
@@ -69,14 +63,14 @@ Make sure your *STATIC_ROOT* setting is the correct path to your media::
 
     STATIC_ROOT = '/path/to/media'
 
-When media is being served locally (instead of from S3 or Cloud Files), 
-mediasync serves media through a Django view. Set your *STATIC_URL* to what 
-you'd like that local media URL to be. This can be whatever you'd like, as long 
+When media is being served locally (instead of from S3 or Cloud Files),
+mediasync serves media through a Django view. Set your *STATIC_URL* to what
+you'd like that local media URL to be. This can be whatever you'd like, as long
 as you're using the {% media_url %} tag (more details on this later)::
 
 	STATIC_URL = 'http://localhost:8000/devmedia/'
 
-*STATIC_URL* is the URL that will be used in debug mode. Otherwise, 
+*STATIC_URL* is the URL that will be used in debug mode. Otherwise,
 the *STATIC_URL* will be loaded from the backend settings. Please see
 `An important note about Django 1.3`_.
 
@@ -86,8 +80,8 @@ The following settings dict must also be added::
         'BACKEND': 'path.to.backend',
     }
 
-If you want to use a different media URL than that specified 
-in *settings.STATIC_URL*, you can add *STATIC_URL* to the *MEDIASYNC* 
+If you want to use a different media URL than that specified
+in *settings.STATIC_URL*, you can add *STATIC_URL* to the *MEDIASYNC*
 settings dict::
 
     MEDIASYNC = {
@@ -104,14 +98,14 @@ Same goes for *STATIC_ROOT*::
         ...
     }
 
-mediasync supports pluggable backends. Please see below for information on 
+mediasync supports pluggable backends. Please see below for information on
 the provided backends as well as directions on implementing your own.
 
 Media expiration
 ----------------
 
-If the client supports media expiration, all files are set to expire 365 days 
-after the file was synced. You may override this value by adding 
+If the client supports media expiration, all files are set to expire 365 days
+after the file was synced. You may override this value by adding
 *EXPIRATION_DAYS* to the MEDIASYNC settings dict.
 
 ::
@@ -122,8 +116,11 @@ after the file was synced. You may override this value by adding
 Serving media remote (S3/Cloud Files) or locally
 ------------------------------------------------
 
-The media URL is selected based on the *SERVE_REMOTE* attribute in the
-*MEDIASYNC* dict in settings.py. When *True*, media will be served locally 
+By default, media will be served locally when *DEBUG* is True, from the remote
+when *DEBUG* is False.
+
+The media URL that is selected can be forced with the *SERVE_REMOTE* attribute in the
+*MEDIASYNC* dict in settings.py. When *True*, media will be served locally
 instead of from S3.
 
 ::
@@ -131,14 +128,14 @@ instead of from S3.
     # This would force mediasync to serve all media through the value
     # specified in settings.STATIC_URL.
     MEDIASYNC['SERVE_REMOTE'] = False
-    
+
     # This would serve all media through S3/Cloud Files.
     MEDIASYNC['SERVE_REMOTE'] = True
-    
+
     # This would serve media locally while in DEBUG mode, and remotely when
     # in production (DEBUG == False).
     MEDIASYNC['SERVE_REMOTE'] = not DEBUG
-    
+
 When serving files locally, you can emulate the CSS/JS combo/minifying
 behavior we get from using media processors by specifying the following.
 
@@ -154,8 +151,8 @@ and is best used to check things over before rolling out to production.
 DOCTYPE
 -------
 
-link and script tags are written using XHTML syntax. The rendering can be 
-overridden by using the *DOCTYPE* setting. Allowed values are *'html4'*, 
+link and script tags are written using XHTML syntax. The rendering can be
+overridden by using the *DOCTYPE* setting. Allowed values are *'html4'*,
 *'html5'*, or *'xhtml'*. The default in mediasync 2.0 is html5, just as
 the DOCTYPE on your site should be.
 
@@ -210,11 +207,11 @@ URL detection.
 ::
 
     # Force HTTPS.
-    MEDIASYNC['USE_SSL'] = True 
+    MEDIASYNC['USE_SSL'] = True
 
 or
 
-:: 
+::
 
     # Force HTTP.
     MEDIASYNC['USE_SSL'] = False
@@ -239,7 +236,7 @@ your main urls.py file.
 Backends
 ========
 
-mediasync now supports pluggable backends. A backend is a Python module that 
+mediasync now supports pluggable backends. A backend is a Python module that
 contains a Client class that implements a mediasync-provided BaseClient class.
 
 S3
@@ -264,12 +261,12 @@ Optionally you may specify a path prefix::
 
 	MEDIASYNC['AWS_PREFIX'] = "key_prefix"
 
-Assuming a correct DNS CNAME entry, setting *AWS_BUCKET* to 
-*assets.sunlightlabs.com* and *AWS_PREFIX* to *myproject/media* would 
+Assuming a correct DNS CNAME entry, setting *AWS_BUCKET* to
+*assets.sunlightlabs.com* and *AWS_PREFIX* to *myproject/media* would
 sync the media directory to http://assets.sunlightlabs.com/myproject/media/.
 
-Amazon allows users to create DNS CNAME entries to map custom domain names 
-to an AWS bucket. MEDIASYNC can be configured to use the bucket as the media 
+Amazon allows users to create DNS CNAME entries to map custom domain names
+to an AWS bucket. MEDIASYNC can be configured to use the bucket as the media
 URL by setting *AWS_BUCKET_CNAME* to *True*.
 
 ::
@@ -284,21 +281,21 @@ disabled::
 Tips
 ~~~~
 
-Since files are given a far future expires header, one needs a way to do 
-"cache busting" when you want the browser to fetch new files before the expire 
-date arrives.  One of the best and easiest ways to accomplish this is to alter 
-the path to the media files with some sort of version string using the key 
+Since files are given a far future expires header, one needs a way to do
+"cache busting" when you want the browser to fetch new files before the expire
+date arrives.  One of the best and easiest ways to accomplish this is to alter
+the path to the media files with some sort of version string using the key
 prefix setting::
 
     MEDIASYNC['AWS_PREFIX'] = "myproject/media/v20001201"
 
-Given that and the above DNS CNAME example, the media directory URL would end 
-up being http://assets.sunlightlabs.com/myproject/media/v20001201/.  Whenever 
-you need to update the media files, simply update the key prefix with a new 
+Given that and the above DNS CNAME example, the media directory URL would end
+up being http://assets.sunlightlabs.com/myproject/media/v20001201/.  Whenever
+you need to update the media files, simply update the key prefix with a new
 versioned string.
 
-A *CACHE_BUSTER* settings can be added to the main *MEDIASYNC* settings 
-dict to add a query string parameter to all media URLs. The cache buster can 
+A *CACHE_BUSTER* settings can be added to the main *MEDIASYNC* settings
+dict to add a query string parameter to all media URLs. The cache buster can
 either be a value or a callable which is passed the media URL as a parameter.
 
 ::
@@ -308,12 +305,12 @@ either be a value or a callable which is passed the media URL as a parameter.
 The above setting will generate a media path similar to::
 
 	http://yourhost.com/url/to/media/image.png?1234567890
-	
+
 An important thing to note is that if you're running your Django site in a
-multi-threaded or multi-node setup, you'll want to be careful about using a 
-time-based cache buster value. Each worker/thread will probably have a slightly 
+multi-threaded or multi-node setup, you'll want to be careful about using a
+time-based cache buster value. Each worker/thread will probably have a slightly
 different value for datetime.now(), which means your users will find themselves
-having cache misses randomly from page to page. 
+having cache misses randomly from page to page.
 
 Rackspace Cloud Files
 ---------------------
@@ -347,14 +344,14 @@ The Cloud Files backend lacks support for the following features:
 Custom backends
 ---------------
 
-You can create a custom backend by creating a Python module containing a Client 
-class. This class must inherit from mediasync.backends.BaseClient. Additionally, 
+You can create a custom backend by creating a Python module containing a Client
+class. This class must inherit from mediasync.backends.BaseClient. Additionally,
 you must implement two methods::
 
 	def remote_media_url(self, with_ssl):
 	    ...
 
-*remote_media_url* returns the full base URL for remote media. This can be 
+*remote_media_url* returns the full base URL for remote media. This can be
 either a static URL or one generated from mediasync settings::
 
 	def put(self, filedata, content_type, remote_path, force=False):
@@ -364,7 +361,7 @@ put is responsible for pushing a file to the backend storage.
 
 * filedata - the contents of the file
 * content_type - the mime type of the file
-* remote_path - the remote path (relative from remote_media_url) to which 
+* remote_path - the remote path (relative from remote_media_url) to which
   the file should be written
 * force - if True, write file to remote storage even if it already exists
 
@@ -388,7 +385,7 @@ slimmer
 package. The Python package can be found here: http://pypi.python.org/pypi/slimmer/
 
 ::
-    
+
     'PROCESSORS': ('mediasync.processors.slim.css_minifier',
                    'mediasync.processors.slim.js_minifier'),
 
@@ -447,7 +444,7 @@ Features
 Ignored Files and Directories
 =============================
 
-Any directory in *STATIC_ROOT* that is hidden or starts with an underscore 
+Any directory in *STATIC_ROOT* that is hidden or starts with an underscore
 will be ignored during syncing. Any file that is hidden or starts with an
 underscore will also be ignored.
 
@@ -455,7 +452,7 @@ underscore will also be ignored.
 Template Tags
 =============
 
-When referring to media in HTML templates you can use custom template tags. 
+When referring to media in HTML templates you can use custom template tags.
 These tags can by accessed by loading the media template tag collection.
 
 ::
@@ -498,7 +495,7 @@ allows mediasync to add the CACHE_BUSTER to the URL if one is specified.
 If *CACHE_BUSTER* is set to 12345, the above example will render as::
 
 	<img src="http://assets.example.com/path/to/media/images/stuff.png?12345">
-	
+
 *NOTE*: Don't use this tag to serve CSS or JS files. Use the js and css tags
 that were specifically designed for the purpose.
 
@@ -516,13 +513,13 @@ Renders a script tag with the correct include.
 css
 ---
 
-Renders a <link> tag to include the stylesheet. It takes an optional second 
+Renders a <link> tag to include the stylesheet. It takes an optional second
 parameter for the media attribute; the default media is "screen, projector".
 
 ::
 
-	{% css "myfile.css" %}  
-	{% css "myfile.css" "screen" %}  
+	{% css "myfile.css" %}
+	{% css "myfile.css" "screen" %}
 
 
 css_print
@@ -543,8 +540,8 @@ which is equivalent to
 Writing Style Sheets
 ====================
 
-Users are encouraged to write stylesheets using relative URLS. The media 
-directory is synced with S3 as is, so relative local paths will still work 
+Users are encouraged to write stylesheets using relative URLS. The media
+directory is synced with S3 as is, so relative local paths will still work
 when pushed remotely.
 
 ::
@@ -555,13 +552,13 @@ when pushed remotely.
 Joined files
 ============
 
-When serving media in production, it is beneficial to combine JavaScript and 
-CSS into single files. This reduces the number of connections the browser needs 
-to make to the web server. Fewer connections can dramatically decrease page 
+When serving media in production, it is beneficial to combine JavaScript and
+CSS into single files. This reduces the number of connections the browser needs
+to make to the web server. Fewer connections can dramatically decrease page
 load times and reduce the server-side load.
 
 Joined files are specified in the *MEDIASYNC* dict using *JOINED*. This is
-a dict that maps individual media to an alias for the joined files. 
+a dict that maps individual media to an alias for the joined files.
 
 ::
 
@@ -570,16 +567,16 @@ a dict that maps individual media to an alias for the joined files.
         'scripts/joined.js': ['scripts/jquery.js','scripts/processing.js'],
     },
 
-Files listed in *JOINED* will be combined and pushed to S3 with the name of 
-the alias. The individual CSS files will also be pushed to S3. Aliases must end 
+Files listed in *JOINED* will be combined and pushed to S3 with the name of
+the alias. The individual CSS files will also be pushed to S3. Aliases must end
 in either .css or .js in order for the content-type to be set appropriately.
 
-The existing template tags may be used to refer to the joined media. Simply use 
+The existing template tags may be used to refer to the joined media. Simply use
 the joined alias as the argument::
 
 	{% css_print "joined.css" %}
 
-When served locally, template tags will render an HTML tag for each of the files 
+When served locally, template tags will render an HTML tag for each of the files
 that make up the joined file::
 
 	<link rel="stylesheet" href="/media/styles/reset.css" type="text/css" media="screen, projection" />
@@ -610,16 +607,18 @@ process. *pre_sync* is sent after the client is opened, but before the first
 file is synced. *post_sync* is sent after the last file is synced, but before
 the client is closed. This allows you to call commands on the client without
 having to worry about its state. The signals allow you to do common tasks such
-as calling Django 1.3's collectstatic command, process SASS stylesheets, or
+as calling Django 1.3's collectstatic command, process Sass stylesheets, or
 clean up files generated during a pre_sync process.
 
 collectstatic receiver
 ----------------------
 
-A receiver for calling the collectstatic management command is provided::
+I know I said to not use staticfiles, but if you can figure out how to make it
+work then more power to you. A receiver for calling the collectstatic management
+command is provided::
 
     from mediasync.signals import pre_sync, collectstatic_receiver
-    
+
     # run collectstatic before syncing media
     pre_sync.connect(collectstatic_receiver)
 
@@ -629,7 +628,7 @@ SASS receiver
 A receiver for compiling SASS into CSS is provided::
 
     from mediasync.signals import pre_sync, sass_receiver
-    
+
     # compile SASS files before syncing media
     pre_sync.connect(sass_receiver)
 
@@ -666,6 +665,8 @@ Change Log
 * addition of mediasync.utils for programmatic, single file uploads
 * files at root static directory are now synced instead of just directories
 * CSS and JS slimmers are no longer included by default
+* pre_sync and post_sync signals along with Sass and collectstatic receivers
+* add experimental s3async backend
 
 Thanks to Kenneth Reitz for his contribution to this release.
 
