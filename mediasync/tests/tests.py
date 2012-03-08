@@ -11,7 +11,7 @@ import re
 import time
 import unittest
 
-from mediasync import backends, JS_MIMETYPES, listdir_recursive, is_syncable_file
+from mediasync import backends, JS_MIMETYPES, is_syncable_file
 from mediasync.backends import BaseClient
 from mediasync.conf import msettings
 from mediasync.core import SyncException
