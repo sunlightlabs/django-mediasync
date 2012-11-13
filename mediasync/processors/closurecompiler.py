@@ -4,12 +4,13 @@ import httplib
 
 HEADERS = {"content-type": "application/x-www-form-urlencoded"}
 
+
 def compile(filedata, content_type, remote_path, is_active):
-    
+
     is_js = (content_type in JS_MIMETYPES or remote_path.lower().endswith('.js'))
-    
-    if is_js:
-        
+
+    if is_active and is_js:
+
         params = urlencode({
             'js_code': filedata,
             'compilation_level': 'SIMPLE_OPTIMIZATIONS',
@@ -22,8 +23,8 @@ def compile(filedata, content_type, remote_path, is_active):
         response = conn.getresponse()
         data = response.read()
         conn.close
-        
+
         if data.startswith('Error'):
             data = filedata
-        
+
         return data
