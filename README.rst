@@ -123,7 +123,7 @@ Serving media remote (S3/Cloud Files) or locally
 ------------------------------------------------
 
 The media URL is selected based on the *SERVE_REMOTE* attribute in the
-*MEDIASYNC* dict in settings.py. When *True*, media will be served locally 
+*MEDIASYNC* dict in settings.py. When *False*, media will be served locally 
 instead of from S3.
 
 ::
