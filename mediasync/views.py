@@ -6,8 +6,8 @@ these are shimmed in.
 The static_serve() function is where the party starts.
 """
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.views.static import serve
-from django.views.generic.simple import redirect_to
 from mediasync import combine_files
 from mediasync.conf import msettings
 
@@ -93,7 +93,7 @@ def static_serve(request, path, client):
     if msettings['SERVE_REMOTE']:
         # We're serving from S3, redirect there.
         url = client.remote_media_url().strip('/') + '/%(path)s'
-        return redirect_to(request, url, path=path)
+        return redirect(url, permanent=True)
 
     if not msettings['SERVE_REMOTE'] and msettings['EMULATE_COMBO']:
         # Combo emulation is on and we're serving media locally. Try to see if
