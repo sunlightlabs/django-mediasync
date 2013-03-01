@@ -108,5 +108,9 @@ def static_serve(request, path, client):
     # Django static serve view.
     
     resp = serve(request, path, document_root=client.media_root, show_indexes=True)
-    resp.content = client.process(resp.content, resp['Content-Type'], path)
+    try:
+        resp.content = client.process(resp.content, resp['Content-Type'], path)
+    except KeyError:
+        # HTTPNotModifiedResponse lacks the "Content-Type" key.
+        pass
     return resp
