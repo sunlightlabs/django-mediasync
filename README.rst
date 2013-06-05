@@ -607,7 +607,13 @@ and direct the user to the appropriate file based on the ACCEPT_ENCODING HTTP
 header. Assuming a file styles/layout.css, the following would be synced to S3::
 
 	styles/layout.css
-	styles/layout.css.gz
+	styles/layout.css.gzt
+
+Note the altered use of the .gz extension. Some versions of the Safari browser
+on OSX ignore the Content-Type header for files ending in .gz and treat them
+instead as files to download. This altered extension allows Safari to deflate
+and utilize the files correctly without affecting functionality in any other
+tested browsers.
 
 Signals
 =======

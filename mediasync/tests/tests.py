@@ -239,10 +239,10 @@ class S3ClientTestCase(unittest.TestCase):
             
             if content_type in mediasync.TYPES_TO_COMPRESS:
                 
-                key = bucket.get_key("%s.gz" % path)
+                key = bucket.get_key("%s.gzt" % path)
                 
                 # do a HEAD request on the file
-                http_conn.request('HEAD', "/%s/%s.gz" % (self.bucket_name, path))
+                http_conn.request('HEAD', "/%s/%s.gzt" % (self.bucket_name, path))
                 response = http_conn.getresponse()
                 response.read()
                 

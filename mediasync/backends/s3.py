@@ -90,12 +90,12 @@ class Client(BaseClient):
             # check to see if file should be gzipped based on content_type
             # also check to see if filesize is greater than 1kb
             if content_type in TYPES_TO_COMPRESS:
-                
-                key = Key(self._bucket, "%s.gz" % remote_path)
+                # Use a .gzt extension to avoid issues with Safari on OSX
+                key = Key(self._bucket, "%s.gzt" % remote_path)
                 
                 filedata = mediasync.compress(filedata)
                 (hexdigest, b64digest) = mediasync.checksum(filedata) # update checksum with compressed data
-                headers["Content-Disposition"] = 'inline; filename="%sgz"' % remote_path.split('/')[-1]
+                headers["Content-Disposition"] = 'inline; filename="%sgzt"' % remote_path.split('/')[-1]
                 headers["Content-Encoding"] = 'gzip'
                 
                 key.set_metadata('mediasync-checksum', raw_b64digest)
