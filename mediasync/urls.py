@@ -2,7 +2,7 @@
 Mediasync can serve media locally when MEDIASYNC['SERVE_REMOTE'] == False.
 The following urlpatterns are shimmed in, in that case.
 """
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 from mediasync import backends
 
 client = backends.client()
