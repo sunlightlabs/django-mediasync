@@ -1,4 +1,3 @@
-
 ================
 django-mediasync
 ================
@@ -473,12 +472,6 @@ Any tag that has a path argument can use either a string or a variable::
 
     {% media_url "images/avatar.png" }
     {% media_url user.profile.avatar_path %}
-
-If you'd like to make the mediasync tags global, you can add the following to
-your master urls.py file::
-
-    from django.template import add_to_builtins
-    add_to_builtins('mediasync.templatetags.media')
 
 Some backends (S3) support https URLs when the requesting page is secure.
 In order for the https to be detected, the request must be placed in the
